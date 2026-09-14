@@ -36,6 +36,8 @@ uv pip install --python .venv/bin/python -r requirements.txt
 | `experiments/screening.py` | Stage 0: writes `results/screening*.csv` and `figures/screening.png` |
 | `notebooks/eda.ipynb` | Stage 1 EDA; decisions in section 17 |
 | `notebooks/clustering.ipynb` | Stage 3: parameter choice and comparison for all four methods |
+| `experiments/scalability.py` | Stage 4: runtime against number of sales, up to all sales; writes `results/scalability.csv` (about 5 minutes) |
+| `notebooks/ablation.ipynb` | Stage 4: largest-cluster cap, success and failure cases, feature ablation, subsample stability, scalability, cross-dataset table (run `experiments.scalability` first) |
 | `tests/` | `pytest` tests for every module |
 
 `data/`, `results/` and `figures/` are not committed.

@@ -47,14 +47,19 @@ def knee_distance(sorted_distances):
     return float(y[np.argmax(x - (y - y[0]) / span)])
 
 
-def best_density_setting(grid, max_noise=0.5):
+def best_density_setting(grid, max_noise=0.5, max_largest=None):
     """Grid row with the highest silhouette among real-data settings with at least 2 clusters and at most
     `max_noise` of points as noise. Returns None when no setting qualifies.
 
     The noise cap matters because silhouette ignores noise: without it, the best-scoring setting is
     one that discards most of the data (../AGENTS.md, lessons).
+
+    `max_largest` optionally caps `largest_cluster_share`. Without it, silhouette can favour one giant
+    cluster plus a tiny distant one (notebooks/clustering.ipynb, section 6).
     """
     candidates = grid[(grid["n_clusters"] >= 2) & (grid["noise_fraction"] <= max_noise)]
+    if max_largest is not None:
+        candidates = candidates[candidates["largest_cluster_share"] <= max_largest]
     if "data" in candidates.columns:
         candidates = candidates[candidates["data"] == "real"]
     return None if candidates.empty else candidates.sort_values("silhouette", ascending=False).iloc[0]

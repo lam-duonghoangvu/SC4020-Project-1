@@ -135,6 +135,19 @@ def test_best_density_setting_caps_noise_and_ignores_other_data():
     assert best_density_setting(grid)["setting"] == "valid, best"
 
 
+def test_best_density_setting_can_cap_the_largest_cluster():
+    grid = pd.DataFrame(
+        [
+            {"setting": "giant plus tiny", "n_clusters": 2, "noise_fraction": 0.0, "largest_cluster_share": 0.99, "silhouette": 0.6},
+            {"setting": "balanced", "n_clusters": 4, "noise_fraction": 0.1, "largest_cluster_share": 0.4, "silhouette": 0.3},
+        ]
+    )
+
+    assert best_density_setting(grid)["setting"] == "giant plus tiny"
+    assert best_density_setting(grid, max_largest=0.5)["setting"] == "balanced"
+    assert best_density_setting(grid, max_largest=0.3) is None
+
+
 def test_best_density_setting_without_data_column_and_with_no_valid_row():
     grid = pd.DataFrame({"n_clusters": [1, 3], "noise_fraction": [0.0, 0.9], "silhouette": [np.nan, 0.8]})
 
