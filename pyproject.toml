@@ -1,0 +1,24 @@
+[project]
+name = "sc4020"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "lam.duonghoangvu", email = "lamthedev@proton.me" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.2",
+    "pandas>=3.0.5",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.16.2",
+    "seaborn>=0.13.2",
+]
+
+[project.scripts]
+sc4020 = "sc4020:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
