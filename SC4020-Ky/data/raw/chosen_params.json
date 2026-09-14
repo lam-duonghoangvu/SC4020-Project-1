@@ -1,0 +1,58 @@
+{
+  "best_k": {
+    "Earthquakes": {
+      "elbow": 8,
+      "silhouette": 2,
+      "selected": 3
+    },
+    "UberNYC": {
+      "elbow": 7,
+      "silhouette": 2,
+      "selected": 6
+    },
+    "Ecoli": {
+      "elbow": 7,
+      "silhouette": 5,
+      "selected": 7
+    }
+  },
+  "dbscan": {
+    "Earthquakes": {
+      "eps": 123.27849470598646,
+      "min_samples": 32
+    },
+    "UberNYC": {
+      "eps": 2.069887193577065,
+      "min_samples": 8
+    },
+    "Ecoli": {
+      "eps": 0.9652759723805757,
+      "min_samples": 8
+    }
+  },
+  "hdbscan": {
+    "Earthquakes": {
+      "min_cluster_size": 250
+    },
+    "UberNYC": {
+      "min_cluster_size": 100
+    },
+    "Ecoli": {
+      "min_cluster_size": 12
+    }
+  },
+  "kdist": {
+    "Earthquakes": {
+      "knee": 273.9522104577477,
+      "min_samples": 8
+    },
+    "UberNYC": {
+      "knee": 0.6899623978590217,
+      "min_samples": 8
+    },
+    "Ecoli": {
+      "knee": 1.6087932873009596,
+      "min_samples": 5
+    }
+  }
+}

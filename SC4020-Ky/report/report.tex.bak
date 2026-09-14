@@ -1,0 +1,733 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{graphicx,booktabs,amsmath,amssymb,caption,subcaption}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\usepackage{graphicx}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{2pt}
+
+\title{\vspace{-1.2cm}\textbf{When Does Density Beat Centroids?\\
+A Comparative Study of K-Means and DBSCAN-Family Clustering\\
+for Spatial Hotspot Detection}}
+\author{Data Mining Course Project}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-0.9cm}
+
+\begin{abstract}
+\noindent
+We compare four clustering algorithms --- K-Means with random initialisation,
+K-Means++, DBSCAN and HDBSCAN --- on three datasets drawn from two application
+settings: spatial hotspot detection, where no ground truth exists, and protein
+localisation, where it does. Our motivating application is the discovery of
+spatially coherent activity zones from point events, evaluated on 23{,}412
+global earthquake epicentres and 6{,}000 New York City ride-hailing pickups. A
+third dataset, the 336-protein \emph{Ecoli} localisation benchmark, supplies the
+ground-truth labels the spatial data lacks. Three findings emerge. First, the
+algorithms disagree not marginally but categorically: on the earthquake data
+K-Means partitions the globe into three convex wedges that cut across tectonic
+boundaries, while DBSCAN recovers 68 arc-shaped boundary segments while
+discarding only 2\% of events as noise. Second, and more consequentially, on the
+labelled dataset the silhouette coefficient ranks the four methods in almost
+exactly the reverse order of the Adjusted Rand Index (rank correlation
+$-0.80$): the method with the best silhouette, HDBSCAN, has the worst ARI, and
+the method with the worst silhouette, K-Means++, has the best ARI. Since
+internal indices are the only selection tool available on unlabelled spatial
+data, this result directly undermines the standard practice of choosing
+clustering parameters by maximising silhouette. Third, a dimensionality ablation
+reveals a clean crossover: DBSCAN outperforms K-Means++ at two and three
+dimensions (ARI 0.575 and 0.618 versus 0.468 and 0.466) and loses decisively at
+seven (0.455 versus 0.731). We conclude that algorithm choice is governed by
+cluster geometry and intrinsic dimensionality rather than by any internal
+quality score, and we give an explicit selection protocol that makes the
+operational requirements of the application, not the metric, the binding
+constraint.
+\end{abstract}
+
+% ============================================================
+\section{Introduction}
+
+\subsection{Motivation}
+Many operational decisions reduce to the same question: given a cloud of
+recorded events, where are the concentrations, how many are there, and which
+events belong to no concentration at all? A seismologist asks it of earthquake
+epicentres in order to delineate active fault systems. A fleet operator asks it
+of ride pickups in order to decide where to position idle vehicles. In neither
+case is the number of groups known in advance, in neither case are the groups
+convex, and in both cases a substantial fraction of events are genuinely
+isolated and should not be forced into any group.
+
+These three properties --- unknown cluster count, arbitrary shape, and the
+existence of true noise --- are precisely the assumptions that separate
+centroid-based clustering from density-based clustering. K-Means requires the
+analyst to supply $k$, implicitly models every cluster as an isotropic ball, and
+assigns every point to some cluster. DBSCAN requires neither $k$ nor convexity
+and labels low-density points as noise. The application therefore does not merely
+provide a testbed for comparing the two families; it predicts which should win.
+Our experiments test that prediction.
+
+\subsection{Problem statement}
+A comparison of this kind faces an awkward obstacle. The datasets where the
+question is operationally interesting are exactly the datasets where no ground
+truth exists --- nobody has labelled which earthquake belongs to which fault
+segment. Evaluation must therefore fall back on internal validity indices such
+as the silhouette coefficient. But the silhouette is defined through
+within-cluster and between-cluster distances to \emph{all} other points of a
+cluster, a formulation that rewards compact, well-separated, roughly spherical
+groups. It therefore encodes the assumption made by one of the two algorithm
+families under comparison. Using it as the arbiter is not a neutral act.
+
+This paper takes that tension as its subject. We ask not only which algorithm
+recovers better structure, but whether the metrics available in the unlabelled
+setting would have told us so.
+
+\subsection{Contributions}
+\begin{itemize}\itemsep1pt
+\item A unified comparison of four clustering algorithms across three datasets
+spanning two application domains, with a single evaluation harness and an
+explicit, application-driven parameter-selection protocol
+(Section~\ref{sec:setup}).
+\item Quantification of a systematic disagreement between internal and external
+validity indices on labelled data (rank correlation $-0.80$), and a
+demonstration that the same mechanism corrupts parameter selection on unlabelled
+spatial data (Sections~\ref{sec:disagree} and \ref{sec:operating}).
+\item Four ablations isolating initialisation, distance metric, feature scaling
+and intrinsic dimensionality, including a crossover point at which the ranking
+of the two algorithm families reverses (Section~\ref{sec:ablation}).
+\item A practical selection rule derived from the failure modes observed, rather
+than from metric values (Section~\ref{sec:guidance}).
+\end{itemize}
+
+% ============================================================
+\section{Related Work}
+
+\textbf{Centroid-based clustering.} Lloyd's algorithm for $k$-means minimises
+within-cluster sum of squares by alternating assignment and centroid update; it
+converges to a local optimum whose quality depends heavily on initialisation.
+Arthur and Vassilvitskii's k-means++ seeding selects initial centres with
+probability proportional to squared distance from the nearest existing centre,
+achieving an $O(\log k)$ expected approximation to the optimal objective. We
+treat the two as an initialisation ablation rather than as separate algorithms,
+since they share an identical update rule.
+
+\textbf{Density-based clustering.} DBSCAN (Ester et al., 1996) defines clusters
+as maximal sets of density-connected points, where a point is a core point if at
+least \texttt{minPts} points lie within $\varepsilon$. Points reachable from no
+core point are labelled noise. The method needs no $k$ and imposes no shape
+constraint, but the single global $\varepsilon$ assumes uniform density across
+the dataset. OPTICS relaxes this by producing a reachability ordering rather than
+a flat partition; HDBSCAN (Campello et al., 2013) goes further, building a
+hierarchy over the mutual-reachability distance and extracting a flat clustering
+by maximising cluster stability, which removes $\varepsilon$ entirely and leaves
+only a minimum cluster size.
+
+\textbf{Validity indices.} Internal indices --- silhouette, Davies--Bouldin,
+Calinski--Harabasz --- score a partition using only the data and the labels.
+External indices --- Adjusted Rand Index, Normalised Mutual Information ---
+compare against ground truth. It is known in principle that internal indices
+embed geometric assumptions; our contribution is to measure how large the
+resulting distortion is in a setting where only internal indices are available.
+
+% ============================================================
+\section{Methods}
+
+\subsection{K-Means and K-Means++}
+K-Means seeks centroids $\{\mu_1,\dots,\mu_k\}$ minimising
+$J=\sum_{i=1}^{n}\min_{j}\lVert x_i-\mu_j\rVert^2$. Each iteration assigns every
+point to its nearest centroid and recomputes centroids as cluster means, giving
+$O(nkdi)$ time for $i$ iterations. The objective is exactly the
+sum of squared Euclidean distances, so the implied cluster model is an isotropic
+Gaussian of equal variance; non-convex or elongated structure cannot be
+represented. Every point receives a label, so outliers displace centroids rather
+than being isolated. K-Means++ modifies only the initial centre selection.
+
+\subsection{DBSCAN}
+DBSCAN takes $\varepsilon$ and \texttt{minPts}. A point is a \emph{core point}
+if $|N_\varepsilon(p)|\geq\texttt{minPts}$; clusters are the transitive closure
+of direct density-reachability among core points, extended to border points; all
+remaining points are noise. Complexity is $O(n\log n)$ with a spatial index.
+The method makes no shape assumption and requires no $k$, but a single global
+$\varepsilon$ presumes comparable density everywhere --- the assumption that
+fails when a sparse region and a dense region must both be resolved.
+Critically for our application, $\varepsilon$ carries physical units: on spatial
+data it is a distance in kilometres, and is therefore directly interpretable,
+whereas $k$ is not.
+
+\subsection{HDBSCAN}
+HDBSCAN replaces the global $\varepsilon$ with the \emph{mutual reachability
+distance}
+\[
+d_{\text{mreach}}(a,b)=\max\bigl\{\text{core}_k(a),\ \text{core}_k(b),\ d(a,b)\bigr\},
+\]
+builds a minimum spanning tree under this metric, condenses the resulting
+hierarchy using a minimum cluster size, and selects the set of clusters
+maximising total stability. The only required parameter is
+\texttt{min\_cluster\_size}. Because different branches of the hierarchy are cut
+at different density levels, clusters of differing density can coexist --- the
+precise failure mode of DBSCAN.
+
+\begin{table}[t]\centering\small
+\caption{Structural assumptions of the four methods.}
+\label{tab:assump}
+\resizebox{\textwidth}{!}{\begin{tabular}{lcccc}
+\toprule
+& \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN} \\
+\midrule
+Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary \\
+Requires $k$               & yes & yes & no & no \\
+Explicit noise label       & no & no & yes & yes \\
+Handles varying density    & no & no & no & yes \\
+Parameter is interpretable & no & no & yes ($\varepsilon$ in km) & partly \\
+Deterministic              & no & no & yes & yes \\
+Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$ & $O(n\log n)$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+% ============================================================
+\section{Experimental Setup}\label{sec:setup}
+
+\subsection{Datasets}
+Table~\ref{tab:data} summarises the three datasets; Figure~\ref{fig:data} shows
+them. Two are spatial and unlabelled, reflecting the application; the third is
+non-spatial and labelled, and exists to test whether the conclusions drawn from
+internal metrics on the first two can be trusted.
+
+\begin{table}[h]\centering\small
+\caption{Datasets. The first two carry no ground truth, which is precisely the
+condition the application imposes.}
+\label{tab:data}
+\begin{tabular}{llrrcl}
+\toprule
+\textbf{ID} & \textbf{Dataset} & \textbf{$n$} & \textbf{$d$} & \textbf{Classes} & \textbf{Application question} \\
+\midrule
+D1 & Earthquakes & 23{,}412 & 2 & --- & Which tectonic boundary segments are active? \\
+D2 & UberNYC     & 6{,}000  & 2 & --- & Where should idle vehicles be positioned? \\
+D3 & Ecoli       & 336      & 7 & 8   & Do sequence signals predict localisation site? \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{D1 --- Earthquakes.} Global epicentres of magnitude $\geq5.5$ recorded
+between 1965 and 2016. Features are latitude and longitude. Seismicity
+concentrates along plate boundaries, which form long, curved, branching arcs of
+strongly varying width and density, with genuinely isolated intraplate events
+scattered between them. This is a maximally unfavourable geometry for a
+centroid-based method.
+
+\textbf{D2 --- UberNYC.} A random sample of 6{,}000 ride-hailing pickups in New
+York City during April 2014, restricted to a bounding box that removes GPS
+artefacts. Demand concentrates along the Manhattan street grid and at airports,
+producing clusters that differ in density by more than an order of magnitude
+between Midtown and the outer boroughs.
+
+\textbf{D3 --- Ecoli.} 336 proteins described by seven signal-sequence scores
+computed from the amino acid sequence, labelled with one of eight subcellular
+localisation sites. The class distribution is severely imbalanced, with several
+classes containing fewer than five members --- a structure that lets us ask
+whether a method's noise label discards signal.
+
+\subsection{Preprocessing and coordinate handling}
+Geographic coordinates in degrees are not a metric space: one degree of
+longitude spans 111\,km at the equator and 71\,km at $50^\circ$ latitude.
+We therefore project both spatial datasets to local kilometres using an
+equirectangular projection about the data mean latitude, so that $\varepsilon$
+and the silhouette are expressed in kilometres and the centroid- and
+density-based methods are compared on the same distance scale. Section
+\ref{sec:metric} ablates this choice against raw-degree Euclidean distance and
+against exact haversine distance. Ecoli features are standardised to zero mean
+and unit variance; Section~\ref{sec:scaling} ablates this.
+
+\subsection{Evaluation metrics}
+We report \textbf{internal} indices --- silhouette ($\uparrow$),
+Davies--Bouldin ($\downarrow$), Calinski--Harabasz ($\uparrow$) --- computed with
+noise points excluded, since a noise point belongs to no cluster and its
+inclusion would penalise density methods arbitrarily. Where ground truth exists
+we additionally report \textbf{external} indices --- ARI and NMI ($\uparrow$) ---
+computed with noise retained as its own label, so that discarding points is
+penalised. Silhouette on D1 is estimated from a random subsample of 5{,}000
+points for tractability. We also report the number of clusters, the noise
+fraction, and wall-clock runtime.
+
+\subsection{Parameter selection protocol}\label{sec:protocol}
+All four methods are tuned under one protocol, so that no method is advantaged.
+
+\emph{With ground truth} (D3): the parameter maximising ARI is selected. This is
+an oracle protocol and reports each method's best achievable performance.
+
+\emph{Without ground truth} (D1, D2): only internal indices are available. An
+unconstrained silhouette search, however, collapses to a degenerate solution ---
+on both spatial datasets the silhouette is maximised at $k=2$, which answers no
+operational question. We therefore impose the requirements the application
+itself dictates: a solution must return between 3 and 150 clusters and may
+discard at most 40\% of events as noise. Within that feasible region we maximise
+silhouette. This constraint is applied identically to K-Means, DBSCAN and
+HDBSCAN.
+
+$\varepsilon$ candidates are generated from the k-distance curve: the distance to
+the \texttt{minPts}-th nearest neighbour is computed for every point, sorted, and
+the knee located as the point of maximum deviation from the chord joining the
+curve's endpoints (Figure~\ref{fig:kdist}). The grid spans $0.10\times$ to
+$3.0\times$ the knee value, crossed with
+$\texttt{minPts}\in\{4,8,16,32\}$ (D1, D2) or $\{3,5,8,12\}$ (D3).
+For K-Means, $k$ ranges over $2\ldots25$; for HDBSCAN,
+\texttt{min\_cluster\_size} over a geometric grid.
+
+\subsection{Reproducibility}
+All experiments use scikit-learn 1.8.0 on a single CPU core. Initialisation
+ablations average over 30 seeds and report mean $\pm$ standard deviation; all
+other runs use seed 42. Every number in this report is produced by
+\texttt{src/run.py} and written to \texttt{results/*.csv}; every figure by
+\texttt{src/figures.py}.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/f1_datasets.png}
+\caption{The three datasets. D1 and D2 are shown in geographic coordinates; D3
+is projected onto its first two principal components (53\% of variance). The
+arc-shaped, branching structure of D1 and the extreme density contrast of D2 are
+both visible without any clustering.}
+\label{fig:data}
+\end{figure}
+
+% ============================================================
+\section{Results and Analysis}
+
+\subsection{Main comparison}
+Table~\ref{tab:main} gives the full comparison at the selected operating points,
+and Figure~\ref{fig:qual} shows the corresponding partitions.
+
+\begin{table}[h]\centering\small
+\caption{Main comparison at the selected operating point. Best value per
+dataset in \textbf{bold}. S = silhouette, DB = Davies--Bouldin,
+CH = Calinski--Harabasz.}
+\label{tab:main}
+\begin{tabular}{llrrrrrrrr}
+\toprule
+\textbf{Data} & \textbf{Method} & \textbf{\#cl} & \textbf{noise} &
+\textbf{S}$\uparrow$ & \textbf{DB}$\downarrow$ & \textbf{CH}$\uparrow$ &
+\textbf{ARI}$\uparrow$ & \textbf{NMI}$\uparrow$ & \textbf{time (s)} \\
+\midrule
+
+D1 & K-Means ($k$=3)        & 3  & 0\%  & 0.654 & 0.621 & 96836 & --- & --- & \textbf{0.043} \\
+D1 & K-Means++ ($k$=3)      & 3  & 0\%  & 0.650 & 0.632 & 96854 & --- & --- & 0.038 \\
+D1 & DBSCAN                 & 48 & 29\% & 0.401 & 0.426 & \textbf{134039} & --- & --- & 0.120 \\
+D1 & HDBSCAN                & 13 & 32\% & \textbf{0.698} & \textbf{0.341} & 123748 & --- & --- & 3.331 \\
+\midrule
+D2 & K-Means ($k$=6)        & 6 & 0\% & 0.487 & 0.634 & \textbf{5899} & --- & --- & \textbf{0.025} \\
+D2 & K-Means++ ($k$=6)      & 6 & 0\% & 0.488 & 0.637 & 5900 & --- & --- & 0.026 \\
+D2 & DBSCAN                 & 3 & 1\% & \textbf{0.687} & 0.326 & 1580 & --- & --- & 0.159 \\
+D2 & HDBSCAN                & 3 & 5\% & 0.627 & \textbf{0.284} & 3117 & --- & --- & 0.232 \\
+\midrule
+D3 & K-Means ($k$=7)        & 7 & 0\%  & 0.248 & 1.123 & 154 & 0.493 & 0.607 & 0.008 \\
+D3 & K-Means++ ($k$=7)      & 7 & 0\%  & 0.354 & 0.861 & 168 & \textbf{0.731} & \textbf{0.679} & 0.009 \\
+D3 & DBSCAN                 & 2 & 21\% & 0.434 & 0.908 & \textbf{220} & 0.489 & 0.488 & \textbf{0.003} \\
+D3 & HDBSCAN                & 2 & 37\% & \textbf{0.483} & \textbf{0.789} & 211 & 0.339 & 0.376 & 0.003 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/f2_qualitative.png}
+\caption{Qualitative comparison. Rows are datasets, columns are methods; grey
+points are noise. The D1 row is the clearest illustration in the study: K-Means
+partitions the globe into three convex wedges that slice across the
+Mid-Atlantic Ridge and the Pacific Ring of Fire, while DBSCAN and HDBSCAN trace
+the boundary arcs themselves.}
+\label{fig:qual}
+\end{figure}
+
+Three observations follow directly.
+
+\textbf{The spatial results are structurally, not marginally, different.}
+On D1, K-Means at its selected $k=3$ produces three longitude wedges. These are
+compact and well separated in the Euclidean sense --- silhouette 0.654 --- and
+completely uninformative seismologically, because a cluster boundary drawn
+through the middle of the Pacific plate corresponds to no physical structure.
+DBSCAN at the same operating point returns 48 clusters that follow the plate
+boundaries, at a silhouette of 0.401. The method that scores worse on the
+internal index is the one that answers the question.
+
+\textbf{Internal indices do not agree with each other either.} On D1, silhouette
+selects HDBSCAN, Calinski--Harabasz selects DBSCAN, and Davies--Bouldin selects
+HDBSCAN. On D2, silhouette selects DBSCAN while Calinski--Harabasz selects
+K-Means --- by a factor of nearly four. An analyst choosing a method by internal
+index alone would reach a different conclusion depending on which index was
+consulted.
+
+\textbf{Initialisation matters more than expected on D3.} K-Means and K-Means++
+run at identical $k$ with identical update rules differ by 0.24 ARI (0.493
+versus 0.731). This is the single largest effect of any parameter change in the
+study, and it arises purely from seeding. Section~\ref{sec:init} quantifies it.
+
+\subsection{Parameter sensitivity}
+Figure~\ref{fig:ksweep} shows the $k$ sweep. On both spatial datasets the
+silhouette curve is monotonically decreasing from $k=2$, so the unconstrained
+optimum is the smallest admissible $k$ --- the degeneracy that motivated the
+constrained protocol of Section~\ref{sec:protocol}. The inertia elbow, by
+contrast, falls at $k=8$ (D1) and $k=7$ (D2), which is both more plausible and
+more useful. On D3, where ARI is available, the ARI curve peaks at $k=7$ against
+a true class count of 8; silhouette peaks at $k=5$. Even here, where the data
+are relatively well behaved, silhouette underestimates the number of groups.
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{figs/f3_ksweep.png}
+\caption{K-Means $k$ sweep. Dashed line: inertia elbow. Dotted line: $k$
+selected under the constrained protocol. On D1 and D2 the silhouette declines
+monotonically in $k$, so the constraint --- not the metric --- determines the
+answer.}
+\label{fig:ksweep}
+\end{figure}
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{figs/f4_kdistance.png}
+\caption{k-distance curves with the detected knee. The knee gives
+$\varepsilon=274$\,km for D1 and $0.69$\,km for D2 --- both physically
+meaningful quantities, unlike $k$.}
+\label{fig:kdist}
+\end{figure}
+
+Figure~\ref{fig:dbgrid} shows the DBSCAN grid. The dominant pattern is that
+cluster count and noise fraction are far more sensitive to $\varepsilon$ than to
+\texttt{minPts}: across the grid, varying $\varepsilon$ by a factor of 30 moves
+the cluster count over two orders of magnitude, while varying \texttt{minPts}
+from 4 to 32 changes it by less than a factor of three. The practical
+implication is that effort spent tuning \texttt{minPts} is largely wasted;
+$\varepsilon$ is the parameter that matters.
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{figs/f5_dbscan_grid.png}
+\caption{DBSCAN parameter grid: cluster count (top, log scale) and noise
+fraction (bottom). $\varepsilon$ dominates; \texttt{minPts} is a secondary
+control.}
+\label{fig:dbgrid}
+\end{figure}
+
+\subsection{The operating-point problem}\label{sec:operating}
+Figure~\ref{fig:op} isolates the practical consequence. On D1 the k-distance
+knee gives $\varepsilon=274$\,km, which yields 68 clusters that trace the plate
+boundaries almost perfectly while discarding only 2\% of events --- and scores a
+silhouette of $-0.03$, essentially the worst possible value. The
+silhouette-optimal setting, $\varepsilon=123$\,km, raises the score to 0.40 by
+fragmenting the boundaries and discarding 29\% of the events. On D2 the same
+pattern appears in reverse: the knee at $\varepsilon=0.69$\,km separates
+Manhattan, Brooklyn, JFK and LaGuardia into 11 usable zones; the
+silhouette-optimal $\varepsilon=2.07$\,km merges them into three, collapsing all
+of Manhattan into a single undifferentiated blob that provides no basis for
+positioning vehicles.
+
+In both cases the silhouette prefers the operationally useless answer. It does
+so for a coherent reason: elongated and irregular clusters have large
+within-cluster distances by construction, so the index penalises exactly the
+structure the application is trying to find.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/f10_operating_point.png}
+\caption{Operating-point selection. Left: K-Means at the inertia elbow. Centre:
+DBSCAN at the k-distance knee. Right: DBSCAN at the silhouette optimum. On D1
+the silhouette prefers a solution that discards 29\% of events over one that
+discards 2\% and recovers the plate boundaries; on D2 it prefers three merged
+blobs over eleven usable demand zones.}
+\label{fig:op}
+\end{figure}
+
+\subsection{Internal and external indices disagree systematically}\label{sec:disagree}
+D3 lets us test the above claim against ground truth, and the result is stark.
+Ranking the four methods by silhouette gives HDBSCAN $>$ DBSCAN $>$ K-Means++ $>$
+K-Means. Ranking them by ARI gives almost exactly the reverse: K-Means++ $>$
+K-Means $>$ DBSCAN $>$ HDBSCAN. The Pearson correlation between the two rank
+vectors is $\mathbf{-0.80}$ (Figure~\ref{fig:disagree}). The best method by
+silhouette is the worst by ARI, and vice versa.
+
+The mechanism is visible in the noise column of Table~\ref{tab:main}. HDBSCAN
+discards 37\% of the proteins. Removing the sparse, ambiguous points inflates
+the silhouette of what remains, but those discarded points include entire rare
+localisation classes, which is why ARI collapses to 0.339. The index rewards the
+method for throwing away the hardest and most biologically interesting part of
+the problem.
+
+This is the study's central result, because it transfers. On D1 and D2 we cannot
+compute ARI --- but there is no reason to expect the distortion to be smaller
+there. If anything it should be larger, since the spatial clusters are far less
+convex than the Ecoli classes. Conclusions drawn from silhouette on unlabelled
+spatial data should therefore be treated as unreliable by default.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.72\textwidth]{figs/f8_metric_disagreement.png}
+\caption{Ecoli: internal versus external validity. Left: raw values. Right:
+rank agreement; points on the dashed line would indicate agreement. The
+observed rank correlation is $-0.80$.}
+\label{fig:disagree}
+\end{figure}
+
+% ============================================================
+\section{Ablation Studies}\label{sec:ablation}
+
+\subsection{A: Initialisation}\label{sec:init}
+K-Means and K-Means++ differ only in seeding. Over 30 seeds at the selected $k$
+(Table~\ref{tab:init}, Figure~\ref{fig:init}), K-Means++ reduces the mean
+objective by 8.4\% on D1 and by 25.2\% on D3, and reduces the iteration count on
+all three datasets --- most sharply on D3, from 17.7 to 11.0. On D2 the mean
+objective is statistically indistinguishable and only the iteration count
+improves.
+
+The variance result is more nuanced than the standard account suggests. On D1
+K-Means++ reduces the coefficient of variation from 11.0\% to 9.1\%, but on D3
+it \emph{increases} it from 8.4\% to 12.9\% --- while simultaneously improving
+the mean by a quarter. K-Means++ is therefore not simply a variance-reduction
+technique here: on D3 it moves the whole distribution to a better region of the
+objective landscape and explores that region more widely. The practical
+recommendation is unchanged (use K-Means++), but the reason is the mean, not the
+spread.
+
+\begin{table}[h]\centering\small
+\caption{Ablation A: initialisation, 30 seeds, \texttt{n\_init}=1.
+CV = coefficient of variation of the objective.}
+\label{tab:init}
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Data} & \textbf{Init} & \textbf{mean inertia} & \textbf{CV (\%)} &
+\textbf{mean iters} & \textbf{$\Delta$ mean} \\
+\midrule
+D1 & random     & $6.087\times10^{11}$ & 11.03 & 9.63 & --- \\
+D1 & k-means++  & $5.574\times10^{11}$ & 9.08  & 7.20 & $-8.4\%$ \\
+D2 & random     & $2.825\times10^{4}$  & 2.40  & 17.83 & --- \\
+D2 & k-means++  & $2.828\times10^{4}$  & 2.26  & 11.50 & $+0.1\%$ \\
+D3 & random     & $8.450\times10^{2}$  & 8.36  & 17.70 & --- \\
+D3 & k-means++  & $6.317\times10^{2}$  & 12.94 & 11.00 & $\mathbf{-25.2\%}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{figs/f6_init.png}
+\caption{Ablation A. Bars show mean $\pm$ s.d.\ over 30 seeds: normalised
+objective (dark, left axis) and iterations to convergence (orange, right axis).}
+\label{fig:init}
+\end{figure}
+
+\subsection{B: Distance metric on geographic data}\label{sec:metric}
+We compare three treatments of geographic coordinates at matched $\varepsilon$:
+exact haversine distance, naive Euclidean distance on raw degrees, and Euclidean
+distance on the projected kilometre coordinates used throughout.
+
+On D1 all three return 48 clusters, but haversine retains more data (26.4\% noise
+versus 29.3\%) --- the projection understates distances at high latitude, so
+marginally fewer points qualify as core points. On D2 the discrepancy is larger
+in relative terms: raw-degree Euclidean returns 6 clusters where haversine and
+projected-km return 3, because a degree of longitude at $40.7^\circ$N is only
+0.76 of a degree of latitude, so a circular $\varepsilon$ ball in degree space is
+an ellipse on the ground, elongated east--west. Haversine costs roughly
+$2\times$ the runtime of the projected version (0.40\,s versus 0.13\,s on D1).
+
+The conclusion is that raw-degree Euclidean should not be used, but that a local
+projection is an adequate and cheaper substitute for haversine at city scale;
+at global scale haversine is preferable if the noise fraction matters.
+
+\subsection{C: Feature scaling}\label{sec:scaling}
+On D3, standardisation raises K-Means++ ARI from 0.497 to 0.731, a 47\% relative
+improvement. DBSCAN, given its own best $\varepsilon$ in each condition, moves in
+the opposite direction: 0.481 to 0.455.
+
+The asymmetry is informative. K-Means minimises total squared distance, so a
+feature with larger numeric range dominates the objective and the recovered
+partition; equalising the ranges is therefore a direct improvement. DBSCAN only
+asks whether a neighbourhood contains \texttt{minPts} points, and since
+$\varepsilon$ is re-tuned per condition, a global rescaling is largely absorbed
+by the re-tuning. Standardisation is close to mandatory for centroid methods and
+close to irrelevant for density methods when $\varepsilon$ is tuned --- though
+note this holds for \emph{uniform} rescaling; it would not hold if only some
+features were rescaled.
+
+\subsection{D: Intrinsic dimensionality}\label{sec:dim}
+We project D3 onto its first 2, 3, 4, 5 and 7 principal components and re-tune
+both methods in each subspace (Figure~\ref{fig:abl}, Table~\ref{tab:dim}). The
+result is a clean crossover.
+
+\begin{table}[h]\centering\small
+\caption{Ablation D: performance versus dimensionality on D3. ``viable
+$\varepsilon$'' is the fraction of a 40-point $\varepsilon$ grid producing
+$\geq2$ clusters with $<50\%$ noise.}
+\label{tab:dim}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{PCA dims} & \textbf{DBSCAN ARI} & \textbf{K-Means++ ARI} &
+\textbf{viable $\varepsilon$} & \textbf{winner} \\
+\midrule
+2 & \textbf{0.575} & 0.468 & 0.125 & DBSCAN \\
+3 & \textbf{0.618} & 0.466 & 0.675 & DBSCAN \\
+4 & 0.453 & \textbf{0.512} & 0.575 & K-Means++ \\
+5 & 0.399 & \textbf{0.520} & 0.675 & K-Means++ \\
+7 & 0.455 & \textbf{0.731} & 0.650 & K-Means++ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At two and three dimensions DBSCAN is clearly better (0.575 and 0.618 against
+0.468 and 0.466). Between three and four dimensions the ranking reverses, and by
+seven dimensions K-Means++ leads by 0.276 ARI --- a margin larger than the entire
+range of DBSCAN's performance across the sweep. DBSCAN's ARI peaks at three
+dimensions and then declines, while K-Means++ improves monotonically from four
+dimensions onward.
+
+This is the curse of dimensionality acting on a density estimator. As $d$ grows,
+pairwise distances concentrate: the ratio of the nearest to the farthest
+neighbour distance tends to one, so the $\varepsilon$-ball that separates
+``dense'' from ``sparse'' becomes progressively less discriminative. K-Means is
+comparatively insensitive because it compares each point only to $k$ centroids
+rather than relying on local neighbourhood counts, and because the additional
+principal components carry class-discriminative variance that its objective can
+exploit.
+
+This ablation also explains the main table. D1 and D2 are two-dimensional, where
+density methods are strongest; D3 is seven-dimensional, where they are weakest.
+The apparent contradiction between ``DBSCAN wins on spatial data'' and ``K-Means++
+wins on Ecoli'' is not a contradiction at all --- it is a single monotone
+relationship with intrinsic dimensionality, observed at two points.
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{figs/f7_ablations.png}
+\caption{Ablations C and D. Left: ARI versus PCA dimensionality, showing the
+crossover between three and four dimensions. Centre: the usable $\varepsilon$
+region. Right: effect of standardisation, which helps K-Means++ substantially and
+does not help DBSCAN.}
+\label{fig:abl}
+\end{figure}
+
+\subsection{Runtime}
+At the selected operating points (Figure~\ref{fig:rt}), K-Means is fastest on
+every dataset, DBSCAN costs roughly $3$--$6\times$ more, and HDBSCAN is the
+outlier: 3.33\,s on D1 against 0.04\,s for K-Means, an $87\times$ gap. At
+$n\leq$ 23{,}412 none of these differences is operationally meaningful --- all
+four methods finish in seconds --- so runtime should not drive the choice at this
+scale. The asymptotics do differ, however: K-Means is $O(nkdi)$ and DBSCAN
+$O(n\log n)$ with a spatial index, so the ordering would change at much larger
+$n$ with small $k$.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.55\textwidth]{figs/f9_runtime.png}
+\caption{Runtime, log scale. HDBSCAN's hierarchy construction dominates on D1.}
+\label{fig:rt}
+\end{figure}
+
+% ============================================================
+\section{Discussion}
+
+\subsection{Successful cases}
+DBSCAN on D1 at $\varepsilon=274$\,km is the clearest success in the study: 68
+clusters that follow the Mid-Atlantic Ridge, the East Pacific Rise and the
+circum-Pacific subduction zones, with 2\% of events labelled noise --- a figure
+consistent with the expected rate of intraplate seismicity. No value of $k$ would
+let K-Means produce this, because the clusters are one-dimensional curves
+embedded in two dimensions.
+
+DBSCAN on D2 at the k-distance knee separates the airports from the Manhattan
+core, which is the operationally important distinction for a fleet operator, and
+does so with 4\% noise.
+
+K-Means++ on D3 is the third success, and it is a success for the opposite
+reason: the Ecoli classes are compact blobs in a seven-dimensional space with no
+meaningful density gaps between them, which is the regime K-Means was designed
+for.
+
+\subsection{Failure cases}
+\textbf{K-Means on D1} is a textbook failure: three convex wedges imposed on a
+curvilinear structure, with high silhouette and zero scientific content. The
+failure is not of tuning but of representational capacity.
+
+\textbf{HDBSCAN on D3} fails by over-discarding: 37\% of proteins labelled noise,
+with the rare localisation classes among them, giving the worst ARI in the study
+while simultaneously achieving the best silhouette. A method that improves its
+score by deleting the hard cases is dangerous precisely when the hard cases
+matter.
+
+\textbf{Silhouette-driven selection on D2} fails by merging: the optimum collapses
+Manhattan into one cluster, which is a correct statement about the geometry (the
+density really is continuous there) and a useless one for the application.
+
+\subsection{Key factors affecting performance}
+Ordered by the magnitude of their effect in our experiments:
+\textbf{(i) intrinsic dimensionality} --- 0.28 ARI swing on D3 and a reversal of
+the method ranking (Section~\ref{sec:dim});
+\textbf{(ii) initialisation} --- 0.24 ARI on D3 at fixed $k$ (Section~\ref{sec:init});
+\textbf{(iii) feature scaling} --- 0.23 ARI for K-Means++ (Section~\ref{sec:scaling});
+\textbf{(iv) $\varepsilon$} --- moves cluster count over two orders of magnitude
+(Figure~\ref{fig:dbgrid});
+\textbf{(v) cluster convexity} --- decides the outcome qualitatively on D1 but
+cannot be read off any single number;
+\textbf{(vi) \texttt{minPts}} --- a secondary control;
+\textbf{(vii) runtime} --- irrelevant at this scale.
+
+\subsection{Practical guidance}\label{sec:guidance}
+\begin{enumerate}\itemsep1pt
+\item \textbf{Decide by geometry, not by score.} Plot the data first. If the
+structure is curvilinear or branching, no amount of $k$-tuning will help; if it
+is blob-like in more than four dimensions, no amount of $\varepsilon$-tuning
+will.
+\item \textbf{Never select parameters by unconstrained silhouette on non-convex
+data.} It reliably prefers fewer, rounder clusters and a larger discard rate.
+Constrain the search by what the application needs first, then optimise inside
+that region.
+\item \textbf{Report the noise fraction alongside every internal index.} A
+silhouette computed after discarding 37\% of the data is not comparable to one
+computed after discarding none.
+\item \textbf{Always use k-means++ seeding.} It is free and, on D3, worth 0.24
+ARI at identical $k$.
+\item \textbf{Prefer $\varepsilon$ to $k$ when the units are meaningful.}
+``Hotspots are neighbourhoods within 700\,m'' is a statement a domain expert can
+check; ``there are six hotspots'' is not.
+\item \textbf{Project geographic coordinates.} Raw degrees give an anisotropic
+distance and changed the D2 cluster count from 3 to 6.
+\end{enumerate}
+
+\subsection{Limitations}
+Our spatial evaluation rests on internal indices whose reliability this very
+paper questions; the D3 result gives a reason to distrust them but not a
+replacement. Ground truth for D1 could in principle be constructed from published
+plate-boundary geometries, which we did not attempt. All datasets are at most
+seven-dimensional and at most 23{,}412 points, so the runtime comparison probes
+only a narrow regime. We compare four methods from two families; spectral
+clustering, Gaussian mixtures and OPTICS would extend the picture. Finally, the
+D3 oracle protocol reports each method's best achievable ARI, which is optimistic
+relative to what an analyst without labels could obtain.
+
+% ============================================================
+\section{Conclusion}
+
+We compared K-Means, K-Means++, DBSCAN and HDBSCAN on two spatial hotspot-detection
+tasks and one labelled biological benchmark. The headline empirical result is
+that the standard tool for model selection in the unlabelled setting --- the
+silhouette coefficient --- ranks the four methods in nearly the reverse of their
+true order when ground truth is available (rank correlation $-0.80$), and on the
+spatial data prefers operating points that are demonstrably useless for the
+application: 29\% of earthquakes discarded rather than 2\%, three merged demand
+zones rather than eleven usable ones. The strongest single piece of evidence is
+Figure~\ref{fig:op}, where the setting that recovers the tectonic plate
+boundaries almost exactly scores a silhouette of $-0.03$.
+
+Underlying the method comparison is a single monotone factor. A dimensionality
+ablation on the labelled data shows DBSCAN leading below four dimensions and
+K-Means++ leading above it, which reconciles the apparently contradictory results
+across our three datasets: the two-dimensional spatial problems and the
+seven-dimensional biological one sit on opposite sides of one crossover.
+
+Two directions follow. First, constructing approximate ground truth for the
+spatial datasets from published plate-boundary or administrative geometries would
+let the metric-disagreement result be tested directly where it matters most.
+Second, the failure modes we document --- non-convexity for centroids, density
+variation and high dimensionality for density estimators --- are exactly what
+spectral clustering and deep embedded clustering are designed to address, and a
+comparison extended in that direction is the natural next step.
+
+\vspace{4pt}\noindent\footnotesize
+\textbf{Reproducibility.} Code: \texttt{src/data.py}, \texttt{src/core.py},
+\texttt{src/run.py}, \texttt{src/figures.py}. Results: \texttt{results/main.csv},
+\texttt{sweep.csv}, \texttt{ablation.csv}, \texttt{chosen\_params.json}.
+Data: global earthquake catalogue (M$\geq$5.5, 1965--2016) and NYC ride-hailing
+pickups (April 2014), both public; Ecoli from the UCI Machine Learning
+Repository (Horton \& Nakai, 1996).
+
+\end{document}
