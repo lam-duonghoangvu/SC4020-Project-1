@@ -1,0 +1,13 @@
+# Data and generated outputs (never committed, never submitted)
+data/
+results/
+figures/
+*.zip
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# OS
+.DS_Store
