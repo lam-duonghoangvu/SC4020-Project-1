@@ -12,5 +12,5 @@ wheels/
 # Notebooks
 .ipynb_checkpoints/
 
-# Raw datasets (see data/README.md for download instructions)
-data/*.csv
+# Raw datasets (see lam/data/README.md for download instructions)
+lam/data/*.csv
