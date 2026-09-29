@@ -1,0 +1,31 @@
+# Builds report/main.pdf on every push that touches the report, then commits the PDF back.
+name: Build report
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "report/**"
+      - "SC4020-Ky/figures/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: report
+
+      - name: Commit PDF
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Build report PDF"
+          file_pattern: report/main.pdf
