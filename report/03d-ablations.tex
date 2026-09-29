@@ -1,0 +1,38 @@
+\subsection{Ablation studies}\label{sec:ablation}
+\owner{Ky, Wei Yew}
+
+% Rubric: "ablation study of the key components". One change at a time, everything else fixed.
+
+\subsubsection{A: Initialisation (K-Means vs K-Means++)}
+\todo{Ky}{Port Ablation A (30 seeds, D3/D4). Add ARI mean $\pm$ s.d.\ over the 30 seeds:
+the 0.24 ARI claim currently rests on seed 42 only.}
+\todo{Wei Yew}{D2: worst single-start run 18.8\% (random) vs 11.5\% (K-Means++) above the best.
+D8: no difference, all 40 runs within 0.009\% of the best.}
+
+\subsubsection{B: Distance on geographic coordinates}
+\todo{Wei Yew}{Flat degrees vs sphere on D2: 92 close pairs straddle the $180^\circ$ line; sphere keeps
+92 (K-means), 86 (DBSCAN), 79 (HDBSCAN) together, flat degrees 0. K-means silhouette 0.528
+$\to$ 0.404. Source: \nolinkurl{weiyew/sc4020-earthquake/notebooks/ablation.ipynb}, Sec.~2.}
+\decide{Ky's projected-km pipeline has the same $\pm180^\circ$ cut. Rerun D3 on the sphere,
+or state that city scale makes it irrelevant.}
+
+\subsubsection{C: Feature scaling}
+\todo{Ky}{D4: standardisation lifts K-Means++ ARI 0.497 $\to$ 0.731; DBSCAN unaffected once
+$\varepsilon$ is re-tuned.}
+\todo{Wei Yew}{D8: raw units give price bands (silhouette 0.540, ARI 0.261 vs standardised).}
+
+\subsubsection{D: Dimensionality}
+\todo{Ky}{Port Ablation D. Call it PCA dimension; ``intrinsic dimensionality'' overclaims.}
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{f7_ablations}
+\caption{\todo{Ky}{existing figure (Ablations C and D on D4).}}
+\label{fig:abl}
+\end{figure}
+
+\subsubsection{E: Values recorded in steps}
+\todo{Wei Yew}{D8 storey bands: with a 50\% largest-cluster cap, 27 of 27 DBSCAN and 6 of 7 HDBSCAN
+clusters are single storey bands; jittering within the band removes them.}
+
+\subsubsection{F: Data subsets}
+\todo{Wei Yew}{D2: magnitude 5.0+ behaves like a random subset of equal size; half-year vs
+full-year HDBSCAN ARI 0.41--0.54.}

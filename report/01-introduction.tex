@@ -1,0 +1,117 @@
+\section{Introduction}\label{sec:intro}
+\owner{Wei Yew (draft); Ky to review}
+
+\subsection{Motivation}
+Clustering is used where no answer key exists. A seismologist grouping earthquake
+epicentres wants to find active fault systems. A housing analyst grouping resale
+transactions wants market segments. Neither has labels to check a result against.
+Any algorithm they run will still return a partition, along with a score.
+
+The methods differ in what they take a cluster to be. K-means~\cite{lloyd1982}
+looks for compact groups around centroids and assigns every point to one of them.
+DBSCAN~\cite{ester1996} looks for dense regions separated by sparse space and leaves
+isolated points as noise. Gaussian mixtures stretch the K-means model to ellipses.
+Spectral clustering drops the shape assumption and works on a similarity graph.
+When a method's assumption matches the data, it recovers real structure. When it
+does not, it still returns clusters. On one year of global earthquakes, K-means
+places five plate-boundary belts, lying 2{,}932 to 11{,}449\,km apart, in a single
+cluster (Section~\ref{sec:shape}).
+
+The practical question is which method fits which data. It has to be answered
+without labels.
+
+\subsection{Problem statement}
+Without labels, methods and parameters are usually chosen by an internal index. The
+most common is the silhouette coefficient~\cite{rousseeuw1987}. It compares each
+point's mean distance to its own cluster with its mean distance to the nearest other
+cluster. It is highest for compact, well-separated groups: the cluster model of
+K-means. Choosing between K-means and a density method by silhouette is therefore
+not a neutral test.
+
+The bias is large on our data. On Wine, DBSCAN scores a higher silhouette than
+K-Means++ (0.42 against 0.28) while agreeing far less with the true classes (ARI
+0.31 against 0.90). It earns that score by labelling 65\% of the wines as noise,
+which the silhouette leaves out. On Ecoli, the silhouette ranks four methods in
+almost the reverse of their ARI order (Spearman $\rho=-0.80$). On HDB resale flats,
+K-means on unscaled features scores 0.540 by splitting sales into four price bands,
+because price alone sets the distances.
+
+The data can also mislead before any method runs. Treated as flat coordinates,
+latitude and longitude put $179.9^\circ$E and $179.9^\circ$W at opposite edges of
+the map, although they lie about 20\,km apart. Storey numbers recorded in
+three-floor bands create thousands of identical values, which density methods read
+as dense clusters.
+
+This report asks two questions. Which properties of a dataset decide whether a
+centroid, mixture, density or graph-based method succeeds? What can an analyst
+check without labels to avoid a misleading choice?
+
+\subsection{Contributions}
+\todo{All}{update dataset and method counts once Table~\ref{tab:data} is final.}
+\begin{itemize}\itemsep1pt
+\item A comparison of four core methods (K-Means, K-Means++, DBSCAN, HDBSCAN) on
+eight datasets, extended with GMM, spectral and agglomerative clustering. Results are
+grouped by the data property that decides the outcome: cluster shape, density
+variation, dimensionality and the presence of gaps between groups
+(Section~\ref{sec:comparison}).
+\item Evidence from five datasets that the silhouette can prefer the wrong answer
+(Section~\ref{sec:silhouette}), with a fake-data check that catches data containing
+no structure to find (Section~\ref{sec:protocol}). On HDB, only K-means beats data
+whose columns are shuffled independently (silhouette 0.317 against 0.218). Both
+density methods score below their fake-data baseline.
+\item Ablations that change one component at a time: initialisation, coordinate
+handling, feature scaling, dimensionality and values recorded in steps
+(Section~\ref{sec:ablation}). On Ecoli, DBSCAN and K-Means++ swap rank between three
+and four PCA dimensions.
+\item Seven implemented improvements, each tied to an observed failure and a measured
+effect (Section~\ref{sec:improve}). Surface distance keeps together all 92 close
+earthquake pairs that straddle the $180^\circ$ meridian; flat coordinates keep none.
+HDBSCAN keeps 62\% of the sparse belts in the Americas, against 20\% for DBSCAN with
+one global radius.
+\item Runtime on all 234{,}294 HDB sales (Section~\ref{sec:runtime}). K-means
+finishes in under 0.06\,s and HDBSCAN in 212\,s; DBSCAN would need about 6\,GB for
+its neighbour lists. Section~\ref{sec:factors} turns these results into selection
+guidance.
+\end{itemize}
+
+\subsection{Related work}
+\paragraph{Centroid and mixture models.} Lloyd's algorithm~\cite{lloyd1982}
+minimises the within-cluster sum of squared distances by alternating assignment and
+centroid updates. It converges to a local optimum that depends on the starting
+centres. K-means++~\cite{arthur2007} picks each starting centre with probability
+proportional to its squared distance from the centres already chosen, which gives an
+$O(\log k)$ approximation to the optimum in expectation. A Gaussian mixture fitted by
+EM~\cite{dempster1977} generalises K-means to ellipsoidal clusters with soft
+assignments. Agglomerative clustering builds a hierarchy by repeatedly merging the
+closest pair of clusters. Under Ward's criterion~\cite{ward1963} the merge cost is the
+increase in within-cluster variance, the same objective as K-means.
+
+\paragraph{Density-based methods.} DBSCAN~\cite{ester1996} defines a cluster as a
+maximal set of density-connected points. A point is a core point if at least
+\texttt{minPts} points lie within radius $\varepsilon$. Points reachable from no core
+point are noise. The method needs no $k$ and imposes no shape, but its single global
+$\varepsilon$ assumes all clusters have similar density. OPTICS~\cite{ankerst1999}
+orders points by reachability so that clusters at several densities can be read from
+one plot. HDBSCAN~\cite{campello2013} builds a hierarchy over mutual reachability
+distances and keeps the clusters that persist longest. This removes $\varepsilon$ and
+leaves a minimum cluster size as the main parameter.
+
+\paragraph{Graph-based methods.} Spectral clustering~\cite{ng2002} embeds the points
+using the leading eigenvectors of a normalised affinity matrix, then runs K-means in
+that embedding. Groups connected through the affinity graph become compact in the
+embedding, so non-convex clusters can be separated. A dense affinity matrix needs
+$O(n^2)$ memory, which limits the method to modest $n$.
+
+\paragraph{Validation and cluster tendency.} Internal indices, such as the
+silhouette~\cite{rousseeuw1987}, Davies--Bouldin~\cite{davies1979} and
+Calinski--Harabasz~\cite{calinski1974} indices, score a partition from the data
+alone. External indices such as the Adjusted Rand Index~\cite{hubert1985} compare it
+with known labels. Von Luxburg et al.~\cite{luxburg2012} argue that no criterion can
+judge a clustering apart from its intended use. A separate line of work tests whether
+data contain clusters at all. The Hopkins statistic~\cite{hopkins1954} compares
+nearest-neighbour distances in the data with those in uniformly random points. The
+gap statistic~\cite{tibshirani2001} compares within-cluster dispersion with its value
+on reference data drawn from a null distribution. Our fake-data check applies the
+same idea to every method we compare. In high dimensions the ratio of nearest to
+farthest neighbour distance tends to one~\cite{beyer1999}, which weakens any method
+built on a density threshold.

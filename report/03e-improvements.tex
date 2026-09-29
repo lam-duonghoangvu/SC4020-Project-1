@@ -1,0 +1,27 @@
+\subsection{Improvements to the methods}\label{sec:improve}
+\owner{All}
+
+% Rubric: "discuss or implement possible solutions to improve the methods".
+% Each row: a failure we observed, its cause, the fix we implemented, and the measured effect.
+
+\begin{table}[h]\centering\small
+\caption{Implemented improvements. Each fix targets a failure observed in Section~\ref{sec:comparison}.}
+\label{tab:improve}
+\resizebox{\textwidth}{!}{\begin{tabular}{llllll}
+\toprule
+\textbf{Failure} & \textbf{Cause} & \textbf{Fix} & \textbf{Data} & \textbf{Before $\to$ after} & \textbf{Owner} \\
+\midrule
+Clusters split at $180^\circ$ & flat lat/lon & surface distance & D2 & 0 $\to$ 92 of 92 pairs kept & Wei Yew \\
+Poor local optimum & random seeding & K-Means++ & D4 & ARI 0.493 $\to$ 0.731 & Ky \\
+Sparse belts lost & one global $\varepsilon$ & HDBSCAN & D2 & Americas kept 20\% $\to$ 62\% & Wei Yew \\
+One feature dominates & unequal scales & standardisation & D4 & ARI 0.497 $\to$ 0.731 & Ky \\
+Clusters are storey bands & recorded steps & jitter within step & D8 & 27 of 27 band clusters $\to$ none & Wei Yew \\
+Curved clusters cut & convex assumption & spectral clustering & D1 & ARI 0.481 $\to$ 1.000 & Lam \\
+Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & \todo{Ky}{?} & Ky, Wei Yew \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\todo{All}{One short paragraph per row: why the fix works, and its cost.}
+\todo{All}{Proposed but not implemented: e.g.\ ground truth for D2 from plate-boundary maps;
+OPTICS; approximate spectral clustering for large $n$.}

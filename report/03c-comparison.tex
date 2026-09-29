@@ -1,0 +1,44 @@
+\subsection{Comparison by data property}\label{sec:comparison}
+\owner{All}
+
+% Rubric: "compare the performance", "strengths and weaknesses", "insightful comparisons".
+% Every number must come from a results CSV in the repo. Put the path in a % comment.
+
+\todo{All}{One results table per property (rows: dataset $\times$ method; columns: \#clusters,
+noise, S, DB, ARI, NMI, time, fake-data gap). Bold the best per dataset.}
+
+\subsubsection{Curved and elongated clusters}\label{sec:shape}
+\owner{Lam (D1), Wei Yew (D2)}
+\todo{Lam}{D1: DBSCAN ARI 0.982, Spectral 1.000, K-Means++ 0.481 (\nolinkurl{lam/results/make_moons_results.csv}).}
+\todo{Wei Yew}{D2: K-means puts 5 belts 2{,}932--11{,}449\,km apart into one cluster.}
+
+\subsubsection{Uneven density}\label{sec:density}
+\owner{Wei Yew (D2), Ky and Hoang Anh (D3)}
+\todo{Wei Yew}{D2: one $\varepsilon$ keeps 90\% of the dense south-west Pacific but 20\% of the sparse
+Americas; HDBSCAN keeps 62\% of the Americas.}
+\todo{Ky + Hoang Anh}{D3: Midtown vs outer boroughs; knee $\varepsilon$ vs silhouette-optimal $\varepsilon$.}
+
+\subsubsection{High dimensions}\label{sec:dims}
+\owner{Ky (D4), Lam (D5)}
+\todo{Ky}{D4: crossover between 3 and 4 PCA dimensions (Ablation D).}
+\todo{Lam}{D5: DBSCAN ARI 0.033; HDBSCAN labels 71\% of points noise.}
+
+\subsubsection{No gaps between groups}\label{sec:nogaps}
+\owner{Wei Yew (D8)}
+\todo{Wei Yew}{D8: only K-means beats the shuffled null (silhouette 0.317 vs 0.218); DBSCAN puts
+97.1\% of sales in one cluster; both density methods score below their null.}
+
+\subsubsection{Silhouette versus ground truth}\label{sec:silhouette}
+\owner{All}
+\todo{All}{One paragraph, one line per dataset:
+D4 best silhouette (HDBSCAN) has the worst ARI, rank correlation $-0.80$ (Ky);
+D6 DBSCAN silhouette 0.42 vs K-Means++ 0.28, ARI 0.31 vs 0.90 (Lam);
+D7 K-Means top silhouette 0.343, GMM best ARI 0.774 vs 0.654 (Hoang Anh);
+D8 unscaled K-means silhouette 0.540 from price bands (Wei Yew);
+D5 HDBSCAN top silhouette with 71\% noise (Lam).}
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.72\textwidth]{f8_metric_disagreement}
+\caption{\todo{Ky}{existing figure; extend to D5--D8 or make one panel per dataset.}}
+\label{fig:silhouette}
+\end{figure}

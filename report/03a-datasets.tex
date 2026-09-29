@@ -1,0 +1,43 @@
+\subsection{Datasets}\label{sec:data}
+\owner{each dataset's owner writes its paragraph (max.\ 120 words)}
+
+% Rubric: "target challenging datasets". Say why each dataset is hard for at least one method.
+
+\begin{table}[h]\centering\small
+\caption{Datasets, grouped by the data property each one tests. \decide{final list; drop or keep Mall;
+Ky's 1965--2016 earthquakes replaced by the 2023 surface-distance pipeline?}}
+\label{tab:data}
+\resizebox{\textwidth}{!}{\begin{tabular}{lllrrll}
+\toprule
+\textbf{ID} & \textbf{Dataset} & \textbf{Owner} & \textbf{$n$} & \textbf{$d$} & \textbf{Labels} & \textbf{Property tested} \\
+\midrule
+D1 & make\_moons (synthetic)          & Lam            & 1{,}000  & 2        & 2 classes    & curved shapes (control) \\
+D2 & Earthquakes, 2023, M$\geq$4.5    & Wei Yew        & 7{,}643  & 2        & none         & long belts, uneven density \\
+D3 & Uber NYC pickups, Apr 2014       & Ky, Hoang Anh  & \decide{6k or 15k} & 2 & none      & density contrast in a city \\
+D4 & Ecoli                            & Ky             & 336      & 7        & 8 classes    & dimensionality, rare classes \\
+D5 & Fashion-MNIST (PCA)              & Lam            & 3{,}000  & 50       & 10 classes   & high dimensions \\
+D6 & Wine                             & Lam, Hoang Anh & 178      & 13       & 3 classes    & silhouette vs labels \\
+D7 & Breast cancer (Wisconsin)        & Hoang Anh      & 569      & 30       & 2 classes    & silhouette vs labels \\
+D8 & HDB resale flats, 2017--2026     & Wei Yew        & 20{,}000\textsuperscript{b} & 4 & flat type (7) & no gaps, scale, recorded ties \\
+\bottomrule
+\end{tabular}}
+\par\raggedright\footnotesize\textsuperscript{b}\,Random sample of 234{,}294 usable sales; all 234{,}294 used for runtime (Section~\ref{sec:runtime}).
+\end{table}
+
+\paragraph{D1 make\_moons.} \todo{Lam}{generator settings (noise 0.07), why it is the shape control.}
+\paragraph{D2 Earthquakes.} \todo{Wei Yew}{USGS ComCat 2023, M$\geq$4.5; 8 volcanic events removed;
+depth not clustered (44\% default 10\,km). Source: \nolinkurl{weiyew/sc4020-earthquake/notebooks/eda.ipynb}.}
+\paragraph{D3 Uber NYC.} \todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
+\paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
+\paragraph{D5 Fashion-MNIST.} \todo{Lam}{3{,}000-image sample, PCA to 50 dims; why subsampled.}
+\paragraph{D6 Wine.} \todo{Lam + Hoang Anh}{one merged paragraph; both runs give K-Means ARI 0.897.}
+\paragraph{D7 Breast cancer.} \todo{Hoang Anh}{30 features, standardised; benign vs malignant.}
+\paragraph{D8 HDB resale.} \todo{Wei Yew}{4 features (floor area, remaining lease, storey,
+index-adjusted price), standardised; flat type held out as label.}
+
+\subsection{Preprocessing}\label{sec:prep}
+\owner{Wei Yew}
+\todo{Wei Yew}{Three rules applied to every dataset where relevant:
+(i) coordinates on the sphere (haversine for density methods, 3D unit vectors for K-means);
+(ii) standardise features; (iii) check for values recorded in steps and jitter within the step.
+Each rule is tested in Section~\ref{sec:ablation}.}

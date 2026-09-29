@@ -1,0 +1,26 @@
+\subsection{Evaluation metrics and parameter selection}\label{sec:protocol}
+\owner{Ky, Wei Yew}
+
+% Rubric: "analyze and discuss the parameter settings".
+
+\paragraph{Metrics.}
+\todo{Ky + Wei Yew}{Internal: silhouette, Davies--Bouldin, Calinski--Harabasz (noise excluded).
+Coverage: noise \%, largest-cluster \%. External (labelled data): ARI, NMI (noise kept as a label).
+Fake-data check: same method on shuffled columns (tabular) or uniform points (coordinates);
+a result counts only if the real data scores clearly higher. Runtime.}
+
+\paragraph{Selection rule.}
+\decide{One rule for every dataset and method. Ky: $\geq3$ clusters, $\leq40\%$ noise.
+Wei Yew: $\geq2$ clusters, $\leq50\%$ noise. Add a largest-cluster cap? (It picks storey-band
+artefacts on HDB, Section~\ref{sec:ablation}.)}
+\todo{All}{Labelled datasets: report both the rule's choice and the best-ARI (oracle) choice,
+so the gap between them is visible.}
+
+\paragraph{Parameter grids.}
+\todo{All}{One line per method: $k$ range; $\varepsilon$ grid (k-distance knee or quantiles);
+\texttt{minPts}; \texttt{min\_cluster\_size} and \texttt{min\_samples}; GMM components;
+spectral affinity.}
+
+\paragraph{Reproducibility.}
+\decide{shared code: Ky's src/core.py or Wei Yew's metrics.py, so every table has the same columns.}
+\todo{All}{scikit-learn version, seeds, hardware.}

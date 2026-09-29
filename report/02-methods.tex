@@ -1,0 +1,37 @@
+\section{Methods}\label{sec:methods}
+\owner{Ky (K-Means, K-Means++, DBSCAN, HDBSCAN); Lam (GMM, Spectral); Hoang Anh (Agglomerative)}
+
+% Rubric: "clear explanation of the tasks and the methods". Each method: idea, objective or
+% rule, parameters, complexity, assumption it makes, how it fails.
+
+\subsection{K-Means and K-Means++}
+\todo{Ky}{Port Sec.~3.1.}
+\subsection{DBSCAN}
+\todo{Ky}{Port Sec.~3.2.}
+\subsection{HDBSCAN}
+\todo{Ky}{Port Sec.~3.3.}
+\subsection{Gaussian Mixture Model}
+\todo{Lam}{EM fit, covariance type used, parameters, complexity, assumptions.}
+\subsection{Spectral clustering}
+\todo{Lam}{Affinity graph, eigenvectors, K-means step; affinity used per dataset.}
+\subsection{Agglomerative clustering}
+\todo{Hoang Anh}{Linkage used and why; parameters; complexity.}
+
+\begin{table}[h]\centering\small
+\caption{Structural assumptions of the methods compared.}
+\label{tab:assump}
+\resizebox{\textwidth}{!}{\begin{tabular}{lccccccc}
+\toprule
+& \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN}
+& \textbf{GMM} & \textbf{Spectral} & \textbf{Agglom.} \\
+\midrule
+Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Requires $k$               & yes & yes & no & no & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Explicit noise label       & no & no & yes & yes & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Handles varying density    & no & no & no & yes & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Parameter is interpretable & no & no & yes (km) & partly & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+\bottomrule
+\end{tabular}}
+\par\raggedright\footnotesize\textsuperscript{a}\,With an effective spatial index; $O(n^2)$ worst case.
+\end{table}

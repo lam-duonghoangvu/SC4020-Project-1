@@ -1,0 +1,56 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{graphicx,booktabs,amsmath,amssymb,caption,subcaption,tabularx}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{2pt}
+% Figures: put new ones in report/figures/. Ky's existing figures are found automatically.
+\graphicspath{{figures/}{../SC4020-Ky/figures/}}
+
+% ---------------------------------------------------------------
+% Team macros. Set \draftfalse before submission: owners, TODOs and
+% DECIDE notes then disappear from the PDF.
+\newif\ifdraft \drafttrue
+\ifdraft
+  \newcommand{\owner}[1]{\par\noindent{\small\color{gray}Owner: #1}\par\smallskip}
+  \newcommand{\todo}[2]{{\color{red}[\textbf{#1}: #2]}}
+  \newcommand{\decide}[1]{{\color{blue}[\textbf{DECIDE}: #1]}}
+  \newcommand{\figtodo}[2]{\fbox{\parbox[c][2.6cm][c]{0.92\linewidth}{\centering\small\color{red}\textbf{#1}: #2}}}
+\else
+  \newcommand{\owner}[1]{}
+  \newcommand{\todo}[2]{}
+  \newcommand{\decide}[1]{}
+  \newcommand{\figtodo}[2]{}
+\fi
+% ---------------------------------------------------------------
+
+\title{\vspace{-1.2cm}\textbf{When Does Density Beat Centroids?\\
+A Comparative Study of Clustering Methods Across Data Geometries}\\[2pt]
+\normalsize\decide{final title}}
+\author{SC4020 Project 1 --- Group XX\\
+\small\todo{All}{full names exactly as on student cards; replace XX with group ID}}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-0.9cm}
+
+\input{00-abstract}
+\input{01-introduction}
+\input{02-methods}
+
+\section{Experiments}\label{sec:experiments}
+\input{03a-datasets}
+\input{03b-protocol}
+\input{03c-comparison}
+\input{03d-ablations}
+\input{03e-improvements}
+\input{03f-runtime}
+\input{03g-cases}
+\input{03h-factors}
+
+\input{04-conclusion}
+\input{references}
+\end{document}
