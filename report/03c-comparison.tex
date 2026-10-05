@@ -9,7 +9,14 @@ noise, S, DB, ARI, NMI, time, fake-data gap). Bold the best per dataset.}
 
 \subsubsection{Curved and elongated clusters}\label{sec:shape}
 \owner{Lam (D1), Wei Yew (D2)}
-\todo{Lam}{D1: DBSCAN ARI 0.982, Spectral 1.000, K-Means++ 0.481 (\nolinkurl{lam/results/make_moons_results.csv}).}
+% Lam: lam/results/make_moons_results.csv
+On D1 the centroid methods fail and the graph and density methods succeed. K-Means++ (ARI 0.481) and
+GMM (0.489) both draw a straight boundary that cuts each moon in two, giving the tip of one moon to
+the other cluster (Figure~\ref{fig:lam-d1}). Spectral clustering with a 10-nearest-neighbour graph
+recovers both moons exactly (ARI 1.000), DBSCAN nearly so (0.982, 0.9\% noise) and HDBSCAN slightly
+less (0.947, 2.7\% noise, mostly the sparse moon tips). Silhouette ranks the methods the other way
+round: K-Means++ and GMM score 0.495 against 0.387 for Spectral, because silhouette rewards compact,
+convex groups, which is exactly the wrong assumption here.
 \todo{Wei Yew}{D2: K-means puts 5 belts 2{,}932--11{,}449\,km apart into one cluster.}
 
 \subsubsection{Uneven density}\label{sec:density}
@@ -21,7 +28,14 @@ Americas; HDBSCAN keeps 62\% of the Americas.}
 \subsubsection{High dimensions}\label{sec:dims}
 \owner{Ky (D4), Lam (D5)}
 \todo{Ky}{D4: crossover between 3 and 4 PCA dimensions (Ablation D).}
-\todo{Lam}{D5: DBSCAN ARI 0.033; HDBSCAN labels 71\% of points noise.}
+% Lam: lam/results/fashion_mnist_results.csv
+On D5 ($d=50$) the ranking reverses from D1. The $k$-based methods do best: Spectral (ARI 0.398),
+GMM (0.391) and K-Means++ (0.343), all well short of the labels because shirts, T-shirts, pullovers
+and coats overlap. DBSCAN finds two clusters and 33\% noise (ARI 0.033): one cluster absorbs almost
+every class (Figure~\ref{fig:lam-d5}). HDBSCAN finds 28 small clusters but labels 71\% of points
+noise (ARI 0.050). No setting in the HDBSCAN grid met the 50\% noise limit, because in 50 dimensions
+the k-distances of all points are similar and there is no density gap between the overlapping
+classes for one threshold to find.
 
 \subsubsection{No gaps between groups}\label{sec:nogaps}
 \owner{Wei Yew (D8)}
@@ -30,12 +44,16 @@ Americas; HDBSCAN keeps 62\% of the Americas.}
 
 \subsubsection{Silhouette versus ground truth}\label{sec:silhouette}
 \owner{All}
+% Lam: lam/results/wine_results.csv, lam/results/fashion_mnist_results.csv
+On D6, DBSCAN has the best silhouette (0.42 against 0.28 for K-Means++) but a far worse ARI (0.31
+against 0.90): it scores only the 35\% of points it keeps and drops the other 65\% as noise. On D5,
+HDBSCAN also has the top silhouette (0.228), computed on the 29\% of points it does not call noise,
+and an ARI of only 0.050. In both cases silhouette excludes noise, so a method can raise it by
+discarding the hard points.
 \todo{All}{One paragraph, one line per dataset:
 D4 best silhouette (HDBSCAN) has the worst ARI, rank correlation $-0.80$ (Ky);
-D6 DBSCAN silhouette 0.42 vs K-Means++ 0.28, ARI 0.31 vs 0.90 (Lam);
 D7 K-Means top silhouette 0.343, GMM best ARI 0.774 vs 0.654 (Hoang Anh);
-D8 unscaled K-means silhouette 0.540 from price bands (Wei Yew);
-D5 HDBSCAN top silhouette with 71\% noise (Lam).}
+D8 unscaled K-means silhouette 0.540 from price bands (Wei Yew).}
 
 \begin{figure}[h]\centering
 \includegraphics[width=0.72\textwidth]{f8_metric_disagreement}

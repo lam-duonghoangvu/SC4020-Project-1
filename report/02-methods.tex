@@ -11,9 +11,35 @@
 \subsection{HDBSCAN}
 \todo{Ky}{Port Sec.~3.3.}
 \subsection{Gaussian Mixture Model}
-\todo{Lam}{EM fit, covariance type used, parameters, complexity, assumptions.}
+% Lam. Code: lam/src/sc4020/clustering.py
+A Gaussian mixture model (GMM) treats the data as drawn from $k$ Gaussians,
+$p(\mathbf{x})=\sum_{j=1}^{k}\pi_j\,\mathcal{N}(\mathbf{x}\mid\boldsymbol{\mu}_j,\boldsymbol{\Sigma}_j)$,
+and fits the weights $\pi_j$, means and covariances by expectation--maximisation (EM)~\cite{dempster1977}.
+The E-step computes each point's responsibility (posterior probability) under every component; the
+M-step re-estimates $\pi_j$, $\boldsymbol{\mu}_j$ and $\boldsymbol{\Sigma}_j$ from those soft
+assignments; the two steps repeat until the log-likelihood stops improving. Each point is then given
+its most probable component. We use scikit-learn's \texttt{GaussianMixture}~\cite{pedregosa2011} with
+\emph{full} covariance matrices (the default), $k$-means initialisation, one start and a fixed seed.
+The only parameter is the number of components $k$, which we set to the number of classes on labelled
+data and to the silhouette-best $k\in[2,10]$ otherwise. One EM iteration costs $O(nkd^2+kd^3)$.
+GMM generalises K-Means: full covariances allow ellipsoidal clusters of different size, orientation
+and weight, but each cluster must still be a single convex blob. It fails on curved or nested shapes,
+has no noise label, and with full covariances it needs many points per component when $d$ is large.
 \subsection{Spectral clustering}
-\todo{Lam}{Affinity graph, eigenvectors, K-means step; affinity used per dataset.}
+% Lam. Code: lam/src/sc4020/clustering.py; affinity per dataset in lam/notebooks/0*_*.ipynb
+Spectral clustering~\cite{ng2002} turns clustering into graph partitioning. It (i) builds an affinity
+matrix $W$ whose entry $w_{ij}$ measures how similar points $i$ and $j$ are; (ii) forms the normalised
+graph Laplacian and takes its $k$ leading eigenvectors, giving each point a $k$-dimensional embedding;
+(iii) runs K-Means on the rows of that embedding. Points joined by a chain of close neighbours land
+near each other in the embedding even when they are far apart in the input space, so the method can
+recover curved and non-convex clusters. We use scikit-learn's \texttt{SpectralClustering} with two
+affinities: an RBF kernel $w_{ij}=\exp(-\gamma\lVert\mathbf{x}_i-\mathbf{x}_j\rVert^2)$, $\gamma=1$,
+for roughly globular data (D6 Wine, Mall), and a symmetric 10-nearest-neighbour graph for manifold-shaped
+data (D1 make\_moons, D5 Fashion-MNIST), where one global bandwidth fits poorly. Parameters are $k$
+and the affinity (with $\gamma$ or the neighbour count). A dense RBF affinity costs $O(n^2d)$ time and
+$O(n^2)$ memory, and a full eigendecomposition $O(n^3)$; the sparse $k$-NN graph with an iterative
+eigensolver is much cheaper but still limits $n$ (Section~\ref{sec:runtime}). Spectral clustering
+needs $k$, has no noise label, and is sensitive to the affinity scale.
 \subsection{Agglomerative clustering}
 \todo{Hoang Anh}{Linkage used and why; parameters; complexity.}
 
@@ -25,13 +51,16 @@
 & \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN}
 & \textbf{GMM} & \textbf{Spectral} & \textbf{Agglom.} \\
 \midrule
-Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Requires $k$               & yes & yes & no & no & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Explicit noise label       & no & no & yes & yes & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Handles varying density    & no & no & no & yes & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Parameter is interpretable & no & no & yes (km) & partly & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & ellipsoidal & connected (graph) & \todo{HA}{?} \\
+Requires $k$               & yes & yes & no & no & yes & yes & \todo{HA}{?} \\
+Explicit noise label       & no & no & yes & yes & no & no & \todo{HA}{?} \\
+Handles varying density    & no & no & no & yes & partly\textsuperscript{b} & partly\textsuperscript{c} & \todo{HA}{?} \\
+Parameter is interpretable & no & no & yes (km) & partly & no & no & \todo{HA}{?} \\
+Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & $O(nkd^2 i)$ & $O(n^2d+n^3)$\textsuperscript{d} & \todo{HA}{?} \\
 \bottomrule
 \end{tabular}}
 \par\raggedright\footnotesize\textsuperscript{a}\,With an effective spatial index; $O(n^2)$ worst case.
+\textsuperscript{b}\,Per-component covariance and weight.
+\textsuperscript{c}\,With a $k$-NN affinity, which adapts to local scale.
+\textsuperscript{d}\,Dense RBF affinity and full eigendecomposition; lower with a sparse $k$-NN graph.
 \end{table}

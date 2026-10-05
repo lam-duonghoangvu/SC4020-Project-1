@@ -22,6 +22,13 @@ Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D
 \end{tabular}}
 \end{table}
 
+\paragraph{Spectral clustering for curved clusters (D1, Lam).} % lam/results/make_moons_results.csv
+K-Means++ fails on D1 because it assigns each point to the nearest centroid, so cluster boundaries
+are straight lines. Spectral clustering replaces Euclidean distance with connectivity in a
+10-nearest-neighbour graph: points along one moon are linked by short hops, the two moons are
+not, and the eigenvectors of the graph Laplacian separate them. ARI rises from 0.481 to 1.000. The
+cost is that $k$ and the graph must still be chosen, and the affinity matrix and eigenvectors limit
+how far the method scales (Section~\ref{sec:runtime}).
 \todo{All}{One short paragraph per row: why the fix works, and its cost.}
 \todo{All}{Proposed but not implemented: e.g.\ ground truth for D2 from plate-boundary maps;
 OPTICS; approximate spectral clustering for large $n$.}

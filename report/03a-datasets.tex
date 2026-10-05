@@ -24,13 +24,31 @@ D8 & HDB resale flats, 2017--2026     & Wei Yew        & 20{,}000\textsuperscrip
 \par\raggedright\footnotesize\textsuperscript{b}\,Random sample of 234{,}294 usable sales; all 234{,}294 used for runtime (Section~\ref{sec:runtime}).
 \end{table}
 
-\paragraph{D1 make\_moons.} \todo{Lam}{generator settings (noise 0.07), why it is the shape control.}
+\paragraph{D1 make\_moons.} % Lam. lam/src/sc4020/data.py (load_make_moons)
+Two interleaving half-circles from scikit-learn's \texttt{make\_moons}~\cite{pedregosa2011}: 1{,}000 points,
+Gaussian noise 0.07, seed 42, then standardised. The two classes are dense, equal in size and clearly
+separated by a gap, but neither is convex: each moon wraps around the end of the other, so the
+straight boundary a centroid method draws must cut both. With the true labels known and no other
+difficulty present, D1 isolates cluster shape as the single property under test.
 \paragraph{D2 Earthquakes.} \todo{Wei Yew}{USGS ComCat 2023, M$\geq$4.5; 8 volcanic events removed;
 depth not clustered (44\% default 10\,km). Source: \nolinkurl{weiyew/sc4020-earthquake/notebooks/eda.ipynb}.}
 \paragraph{D3 Uber NYC.} \todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
 \paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
-\paragraph{D5 Fashion-MNIST.} \todo{Lam}{3{,}000-image sample, PCA to 50 dims; why subsampled.}
-\paragraph{D6 Wine.} \todo{Lam + Hoang Anh}{one merged paragraph; both runs give K-Means ARI 0.897.}
+\paragraph{D5 Fashion-MNIST.} % Lam. lam/src/sc4020/data.py (load_fashion_mnist), lam/notebooks/03_fashion_mnist.ipynb
+Fashion-MNIST~\cite{xiao2017} holds 70{,}000 $28\times28$ greyscale images of 10 clothing classes.
+We pool the train and test files, scale pixels to $[0,1]$, draw a class-stratified sample of 3{,}000
+images (300 per class, seed 42), and project the 784 pixels onto 50 principal components, which keep
+86.5\% of the variance. The sample keeps Spectral, DBSCAN and HDBSCAN within reach on a laptop
+(Section~\ref{sec:runtime}) while keeping the classes balanced. D5 is hard because the space is high
+dimensional, so distances concentrate~\cite{beyer1999}, and because several classes (shirt, T-shirt,
+pullover, coat) overlap heavily with no density gap between them.
+\paragraph{D6 Wine.} % Lam: lam/src/sc4020/data.py (load_wine_data), lam/results/wine_results.csv
+The UCI Wine data~\cite{wine1991}: 178 wines from three cultivars, described by 13 chemical
+measurements, all standardised before clustering. The cultivars form compact, roughly Gaussian groups,
+and K-Means++ with $k=3$ reaches ARI 0.897. D6 is hard for the density methods instead: with only 178
+points in 13 dimensions there are too few neighbours for a stable density estimate, and the score that
+looks best (silhouette) does not pick the partition that matches the labels (Section~\ref{sec:silhouette}).
+\todo{Hoang Anh}{merge your run here; both runs give K-Means ARI 0.897.}
 \paragraph{D7 Breast cancer.} \todo{Hoang Anh}{30 features, standardised; benign vs malignant.}
 \paragraph{D8 HDB resale.} \todo{Wei Yew}{4 features (floor area, remaining lease, storey,
 index-adjusted price), standardised; flat type held out as label.}

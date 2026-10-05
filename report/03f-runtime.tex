@@ -3,7 +3,16 @@
 
 \todo{Wei Yew}{D8, all 234{,}294 sales: K-means under 0.06\,s; HDBSCAN 212\,s; DBSCAN not run
 (neighbour lists need about 6\,GB). Plot runtime against $n$ (\nolinkurl{weiyew/sc4020-hdb/experiments/scalability.py}).}
-\todo{Lam}{Why D5 needed subsampling for Spectral, DBSCAN and HDBSCAN; fit times per method.}
+% Lam: lam/results/fashion_mnist_results.csv (fit_seconds; single fit at the chosen parameters, tuning excluded)
+D5 was sampled down from 70{,}000 to 3{,}000 images because three methods scale badly with $n$ in
+50 dimensions. Spectral clustering needs an $n\times n$ affinity matrix: dense, at $n=70{,}000$ it
+takes about 39\,GB in double precision, and the eigenvector step grows faster than linearly even with
+a sparse graph. DBSCAN and HDBSCAN rely on neighbour queries, and in 50 dimensions spatial indexes
+prune little, so these queries approach the $O(n^2)$ brute-force cost. On the 3{,}000-point sample
+one fit takes 0.011\,s for DBSCAN, 0.079\,s for K-Means++, 0.18\,s for Spectral, 0.30\,s for HDBSCAN
+and 2.80\,s for GMM. GMM is the slowest here: with full covariances each EM step costs
+$O(nkd^2)$ with $d=50$. These times exclude parameter search, which refits DBSCAN 15 times and
+HDBSCAN 6 times.
 \todo{Ky}{Existing Fig.~9 runtime at $n\leq23{,}412$, if kept.}
 
 \begin{figure}[h]\centering
