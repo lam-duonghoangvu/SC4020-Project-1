@@ -1,0 +1,16 @@
+k,real_silhouette,null_silhouette,ratio,passes,test,min_cluster_size,data,n_clusters,noise_fraction,largest_cluster_fraction,sample_size,seed
+2.0,0.29068409821706187,0.19892893993197755,1.4612459017599924,False,silhouette_vs_shuffled,,,,,,5000,0
+3.0,0.3079397557683305,0.20486492211771692,1.5031355909304278,False,silhouette_vs_shuffled,,,,,,5000,0
+4.0,0.32714272185604054,0.21512838138094015,1.520686018999744,False,silhouette_vs_shuffled,,,,,,5000,0
+5.0,0.29011657372006466,0.21773568166822185,1.3324254963508202,False,silhouette_vs_shuffled,,,,,,5000,0
+6.0,0.28483409319872044,0.19405940678559694,1.4677675146838631,False,silhouette_vs_shuffled,,,,,,5000,0
+7.0,0.2958630430720691,0.19091147915451243,1.5497394100258117,False,silhouette_vs_shuffled,,,,,,5000,0
+8.0,0.2936653066338432,0.1970939106180106,1.4899765584488223,False,silhouette_vs_shuffled,,,,,,5000,0
+,,,,,hdbscan_vs_shuffled,25.0,real,17.0,0.5382,0.0844,5000,0
+,,,,,hdbscan_vs_shuffled,25.0,null0,10.0,0.8536,0.0272,5000,0
+,,,,,hdbscan_vs_shuffled,25.0,null1,5.0,0.8614,0.0394,5000,0
+,,,,,hdbscan_vs_shuffled,25.0,null2,5.0,0.8176,0.0736,5000,0
+,,,,,hdbscan_vs_shuffled,50.0,real,2.0,0.2564,0.7084,5000,0
+,,,,,hdbscan_vs_shuffled,50.0,null0,3.0,0.8768,0.0692,5000,0
+,,,,,hdbscan_vs_shuffled,50.0,null1,2.0,0.9376,0.0358,5000,0
+,,,,,hdbscan_vs_shuffled,50.0,null2,2.0,0.9656,0.0222,5000,0

@@ -1,0 +1,5 @@
+data,min_cluster_size,n_clusters,noise_fraction,largest_cluster_fraction,clusters_single_storey_range,median_share_storey_range,clusters_single_floor_area_sqm,median_share_floor_area_sqm,clusters_single_remaining_lease,median_share_remaining_lease,clusters_single_flat_type,median_share_flat_type
+real,25,17,0.5382,0.0844,14,1.0,0,0.46601941747572817,0,0.041666666666666664,10,1.0
+real,50,2,0.2564,0.7084,0,0.2458886222473179,0,0.2920313382269904,0,0.0343555900621118,1,0.7402597402597403
+jittered,25,3,0.1438,0.8072,0,0.25743310208126857,0,0.4973544973544973,0,0.0582010582010582,2,1.0
+jittered,50,2,0.2486,0.7188,0,0.2545790359529004,0,0.2986956788922232,0,0.03373550327573905,1,0.739983305509182

@@ -1,0 +1,5 @@
+cluster,sales,share,single storey band,floor_area_sqm,remaining_lease_years,storey_mid,real_price,top flat_type,top flat_model,top town,top storey_range
+-1,277,0.01385,False,114.0,75.08333333333333,23.0,1223766.990291262,5 ROOM (47%),Improved (23%),QUEENSTOWN (16%),22 TO 24 (15%)
+0,19416,0.9708,False,93.0,72.91666666666667,8.0,631422.2518872604,4 ROOM (44%),Model A (36%),SENGKANG (8%),04 TO 06 (23%)
+1,296,0.0148,False,47.0,93.04166666666666,8.0,373824.8847926267,2 ROOM (100%),Model A (86%),PUNGGOL (16%),10 TO 12 (22%)
+2,11,0.00055,True,67.0,92.83333333333333,38.0,838465.1992861392,3 ROOM (100%),Model A (55%),QUEENSTOWN (36%),37 TO 39 (100%)

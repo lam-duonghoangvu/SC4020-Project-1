@@ -1,0 +1,3 @@
+method,setting,clusters,single-band clusters,sales in single-band clusters (% of clustered),median cluster size,median top flat type share
+DBSCAN,"eps=0.501, min_samples=20",27,27,100.0,68,1.0
+HDBSCAN,"min_cluster_size=400, min_samples=10",7,6,95.0640774525715,3251,0.4680232558139535

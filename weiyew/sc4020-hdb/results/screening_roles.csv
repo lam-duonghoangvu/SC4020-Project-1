@@ -1,0 +1,12 @@
+check,setting,metric,value
+scale,"raw features, K=6",ari_flat_type,0.20174089779920948
+scale,"standardized, K=6",ari_flat_type,0.23737670757259496
+scale,"raw features, K=6",overlapping_price_ranges,0.0
+price_adjustment,"nominal price, K=10",ari_sale_year,0.005758313583052977
+price_adjustment,"adjusted price, K=10",ari_sale_year,0.0006978933068727736
+hdbscan_without_storey,real,n_clusters,3.0
+hdbscan_without_storey,real,noise_fraction,0.0738
+hdbscan_without_storey,real,largest_cluster_fraction,0.8668
+hdbscan_without_storey,shuffled null,n_clusters,2.0
+hdbscan_without_storey,shuffled null,noise_fraction,0.5088
+hdbscan_without_storey,shuffled null,largest_cluster_fraction,0.3688

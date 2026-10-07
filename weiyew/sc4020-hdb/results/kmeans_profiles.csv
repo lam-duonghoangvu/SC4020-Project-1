@@ -1,0 +1,5 @@
+cluster,sales,share,floor_area_sqm,remaining_lease_years,storey_mid,real_price,top flat_type,top flat_model,top town,top storey_range
+0,7047,0.35235,93.0,90.25,8.0,632468.33422033,4 ROOM (62%),Model A (58%),PUNGGOL (18%),10 TO 12 (22%)
+1,6357,0.31785,73.0,59.583333333333336,5.0,469494.4119212347,3 ROOM (61%),New Generation (38%),BEDOK (10%),04 TO 06 (28%)
+2,4900,0.245,122.0,69.83333333333333,8.0,781035.8565737052,5 ROOM (53%),Improved (39%),TAMPINES (13%),04 TO 06 (27%)
+3,1696,0.0848,95.0,89.875,20.0,996948.9543433276,4 ROOM (52%),Model A (46%),BUKIT MERAH (15%),16 TO 18 (21%)

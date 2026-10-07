@@ -1,6 +1,8 @@
-# Data and generated outputs (never committed, never submitted)
+# Data never committed. Result tables cited by the report are committed, except per-point
+# label files; figures used by the report are copied to report/figures/.
 data/
-results/
+results/*_labels.csv
+!results/screening_labels.csv
 figures/
 *.zip
 

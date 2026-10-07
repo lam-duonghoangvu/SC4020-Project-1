@@ -1,0 +1,5 @@
+region,method,n_earthquakes,clustered_fraction
+Americas,DBSCAN,863,0.20393974507531865
+Americas,HDBSCAN,863,0.6245654692931634
+South-west Pacific,DBSCAN,1806,0.9003322259136213
+South-west Pacific,HDBSCAN,1806,0.7757475083056479

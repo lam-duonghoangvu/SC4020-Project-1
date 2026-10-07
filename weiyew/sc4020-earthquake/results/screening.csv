@@ -1,0 +1,23 @@
+k,real_silhouette,null_silhouette,ratio,passes,features,test,min_cluster_size,data,null,n_clusters,noise_fraction,largest_cluster_fraction
+2.0,0.4852728331927605,0.4609807970729381,1.0526964165840922,False,unit vectors,silhouette_vs_shuffled,,,,,,
+3.0,0.4381750885129899,0.4167385212287502,1.0514388907966419,False,unit vectors,silhouette_vs_shuffled,,,,,,
+4.0,0.5097927888649929,0.35957812511270065,1.4177525084575466,False,unit vectors,silhouette_vs_shuffled,,,,,,
+5.0,0.5115024198200548,0.379144903307403,1.34909480612308,False,unit vectors,silhouette_vs_shuffled,,,,,,
+6.0,0.5151939580926385,0.3690708351253536,1.3959216200804776,False,unit vectors,silhouette_vs_shuffled,,,,,,
+7.0,0.5152443137062893,0.380022696020522,1.3558251101888532,False,unit vectors,silhouette_vs_shuffled,,,,,,
+8.0,0.5207462610444352,0.3735041501367195,1.3942181388180517,False,unit vectors,silhouette_vs_shuffled,,,,,,
+2.0,0.7109764760169973,0.6932946830520668,1.025504007743274,False,degrees,silhouette_vs_shuffled,,,,,,
+3.0,0.6456810237529227,0.6178055291498444,1.045120176637845,False,degrees,silhouette_vs_shuffled,,,,,,
+4.0,0.5828982974413229,0.5211831929721601,1.1184134586482328,False,degrees,silhouette_vs_shuffled,,,,,,
+5.0,0.5124718229588768,0.4418967281673862,1.1597094757505366,False,degrees,silhouette_vs_shuffled,,,,,,
+6.0,0.5231135290024036,0.42107125725540073,1.2423396752657214,False,degrees,silhouette_vs_shuffled,,,,,,
+7.0,0.5340486434332717,0.40099900813394,1.3317954224337907,False,degrees,silhouette_vs_shuffled,,,,,,
+8.0,0.5524616548422776,0.39726237487386645,1.3906719835164052,False,degrees,silhouette_vs_shuffled,,,,,,
+,,,,,radians (haversine),hdbscan_vs_uniform_box,25.0,real,uniform_box,47.0,0.2273976187360984,0.1074185529242444
+,,,,,radians (haversine),hdbscan_vs_uniform_box,25.0,null0,uniform_box,20.0,0.5903441057176502,0.23917309956823238
+,,,,,radians (haversine),hdbscan_vs_uniform_box,25.0,null1,uniform_box,19.0,0.6369226743425357,0.20109904487766583
+,,,,,radians (haversine),hdbscan_vs_uniform_box,25.0,null2,uniform_box,19.0,0.660996990710454,0.15595970168781892
+,,,,,radians (haversine),hdbscan_vs_uniform_box,50.0,real,uniform_box,28.0,0.30707837236687163,0.07523223864974486
+,,,,,radians (haversine),hdbscan_vs_uniform_box,50.0,null0,uniform_box,4.0,0.4326835012429674,0.3425356535391862
+,,,,,radians (haversine),hdbscan_vs_uniform_box,50.0,null1,uniform_box,6.0,0.4621222033233024,0.3414889441318854
+,,,,,radians (haversine),hdbscan_vs_uniform_box,50.0,null2,uniform_box,2.0,0.4984953552270051,0.31649875703257885

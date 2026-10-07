@@ -1,0 +1,25 @@
+method,data,largest_cluster_cap,chosen,n_clusters,noise_fraction,largest_cluster_share,silhouette,ari,single_storey_clusters
+DBSCAN,real,1.0,"eps=0.567, min_samples=10",3.0,0.01385,0.9708,0.2385493486818355,0.0296537555666158,1.0
+DBSCAN,real,0.9,"eps=0.501, min_samples=20",27.0,0.075,0.21455,-0.0795199237983571,0.0145698504925199,27.0
+DBSCAN,real,0.8,"eps=0.501, min_samples=20",27.0,0.075,0.21455,-0.0795199237983571,0.0145698504925199,27.0
+DBSCAN,real,0.7,"eps=0.501, min_samples=20",27.0,0.075,0.21455,-0.0795199237983571,0.0145698504925199,27.0
+DBSCAN,real,0.6,"eps=0.501, min_samples=20",27.0,0.075,0.21455,-0.0795199237983571,0.0145698504925199,27.0
+DBSCAN,real,0.5,"eps=0.501, min_samples=20",27.0,0.075,0.21455,-0.0795199237983571,0.0145698504925199,27.0
+DBSCAN,jittered,1.0,"eps=0.661, min_samples=5",2.0,0.0031,0.9966,0.4944617703178801,0.0011144785788863,0.0
+DBSCAN,jittered,0.9,"eps=0.469, min_samples=20",5.0,0.06665,0.8767,0.0193330522072138,0.0655273527964347,0.0
+DBSCAN,jittered,0.8,"eps=0.313, min_samples=20",7.0,0.20715,0.70605,-0.0585606256644481,0.1259836994671166,0.0
+DBSCAN,jittered,0.7,"eps=0.220, min_samples=5",89.0,0.1999,0.68925,-0.4657707211173144,0.1313448299738838,49.0
+DBSCAN,jittered,0.6,none qualifies,,,,,,
+DBSCAN,jittered,0.5,none qualifies,,,,,,
+HDBSCAN,real,1.0,"min_cluster_size=200, min_samples=None",2.0,0.28475,0.68635,0.1599139533469496,0.0721818475948852,0.0
+HDBSCAN,real,0.9,"min_cluster_size=200, min_samples=None",2.0,0.28475,0.68635,0.1599139533469496,0.0721818475948852,0.0
+HDBSCAN,real,0.8,"min_cluster_size=200, min_samples=None",2.0,0.28475,0.68635,0.1599139533469496,0.0721818475948852,0.0
+HDBSCAN,real,0.7,"min_cluster_size=200, min_samples=None",2.0,0.28475,0.68635,0.1599139533469496,0.0721818475948852,0.0
+HDBSCAN,real,0.6,"min_cluster_size=400, min_samples=10",7.0,0.10655,0.21375,0.0167059182486303,0.0178642331520324,6.0
+HDBSCAN,real,0.5,"min_cluster_size=400, min_samples=10",7.0,0.10655,0.21375,0.0167059182486303,0.0178642331520324,6.0
+HDBSCAN,jittered,1.0,"min_cluster_size=200, min_samples=None",2.0,0.2737,0.69825,0.1499560471505877,0.0693745437468605,0.0
+HDBSCAN,jittered,0.9,"min_cluster_size=200, min_samples=None",2.0,0.2737,0.69825,0.1499560471505877,0.0693745437468605,0.0
+HDBSCAN,jittered,0.8,"min_cluster_size=200, min_samples=None",2.0,0.2737,0.69825,0.1499560471505877,0.0693745437468605,0.0
+HDBSCAN,jittered,0.7,"min_cluster_size=200, min_samples=None",2.0,0.2737,0.69825,0.1499560471505877,0.0693745437468605,0.0
+HDBSCAN,jittered,0.6,none qualifies,,,,,,
+HDBSCAN,jittered,0.5,none qualifies,,,,,,

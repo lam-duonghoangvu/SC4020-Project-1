@@ -1,0 +1,4 @@
+cluster,sales,share,single storey band,floor_area_sqm,remaining_lease_years,storey_mid,real_price,top flat_type,top flat_model,top town,top storey_range
+-1,5695,0.28475,False,104.0,77.16666666666667,11.0,862978.7234042553,4 ROOM (33%),Model A (35%),BUKIT MERAH (11%),10 TO 12 (16%)
+0,13727,0.68635,False,93.0,70.58333333333333,8.0,596470.5882352941,4 ROOM (48%),Model A (35%),SENGKANG (9%),04 TO 06 (27%)
+1,578,0.0289,False,68.0,93.25,8.0,515981.9346744926,3 ROOM (100%),Model A (85%),PUNGGOL (21%),10 TO 12 (24%)

@@ -1,0 +1,4 @@
+cluster,sales,share,single storey band,floor_area_sqm,remaining_lease_years,storey_mid,real_price,top flat_type,top flat_model,top town,top storey_range
+-1,62,0.0031,False,109.0,74.625,26.0,1091128.0043602088,5 ROOM (37%),Model A (26%),QUEENSTOWN (23%),01 TO 03 (15%)
+0,19932,0.9966,False,93.0,73.33333333333333,8.0,630324.877222107,4 ROOM (43%),Model A (37%),SENGKANG (8%),04 TO 06 (23%)
+1,6,0.0003,False,92.0,93.33333333333334,36.5,730418.8886109174,4 ROOM (100%),Model A (100%),JURONG EAST (83%),37 TO 39 (50%)

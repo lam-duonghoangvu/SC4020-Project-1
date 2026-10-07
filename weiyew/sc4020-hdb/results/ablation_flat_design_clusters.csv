@@ -1,0 +1,27 @@
+cluster,sales,floor area median,lease median,top flat type,top flat type share,top flat model,top flat model share,variant
+10,1817,104.0,69.75,4 ROOM,0.9988992845349477,Model A,0.9537699504678041,floor area and lease only
+8,1427,67.0,57.75,3 ROOM,1.0,New Generation,0.731604765241766,floor area and lease only
+6,1303,121.0,71.41666666666667,5 ROOM,0.9930928626247122,Improved,0.9378357636224098,floor area and lease only
+12,1102,93.0,94.25,4 ROOM,1.0,Model A,0.8421052631578947,floor area and lease only
+11,954,110.0,80.5,5 ROOM,0.9727463312368972,Improved,0.710691823899371,floor area and lease only
+1,932,68.0,93.16666666666667,3 ROOM,0.9989270386266095,Model A,0.8283261802575107,floor area and lease only
+5,846,113.0,93.83333333333333,5 ROOM,0.9988179669030733,Improved,0.7115839243498818,floor area and lease only
+2,817,146.0,69.33333333333333,EXECUTIVE,0.981640146878825,Maisonette,0.5177478580171359,floor area and lease only
+3,461,84.0,63.166666666666664,4 ROOM,0.8394793926247288,Simplified,0.8264642082429501,floor area and lease only
+4,418,92.0,58.75,4 ROOM,0.9976076555023924,New Generation,0.9665071770334929,floor area and lease only
+13,375,92.0,94.58333333333333,4 ROOM,1.0,Model A,0.8293333333333334,floor area and lease only
+9,338,90.0,82.08333333333333,4 ROOM,1.0,Model A,0.6923076923076923,floor area and lease only
+7,323,74.0,62.583333333333336,3 ROOM,1.0,Model A,0.9473684210526315,floor area and lease only
+0,257,47.0,93.25,2 ROOM,1.0,Model A,0.8638132295719845,floor area and lease only
+9,2771,93.0,93.5,4 ROOM,1.0,Model A,0.7621797185131721,"floor area and lease only, jittered"
+3,2411,67.0,59.166666666666664,3 ROOM,0.9995852343425964,New Generation,0.5093322272915802,"floor area and lease only, jittered"
+10,1852,104.0,69.83333333333333,4 ROOM,0.9989200863930886,Model A,0.9524838012958964,"floor area and lease only, jittered"
+7,1201,122.0,71.58333333333333,5 ROOM,0.9941715237302248,Improved,0.9408825978351374,"floor area and lease only, jittered"
+11,967,110.0,80.41666666666667,5 ROOM,0.9710444674250258,Improved,0.703205791106515,"floor area and lease only, jittered"
+1,933,68.0,93.16666666666667,3 ROOM,0.9989281886387996,Model A,0.8285101822079314,"floor area and lease only, jittered"
+4,843,113.0,93.83333333333333,5 ROOM,0.9988137603795967,Improved,0.7129300118623962,"floor area and lease only, jittered"
+2,827,146.0,69.25,EXECUTIVE,0.9758162031438936,Maisonette,0.5163240628778718,"floor area and lease only, jittered"
+5,451,84.0,63.166666666666664,4 ROOM,0.8492239467849224,Simplified,0.835920177383592,"floor area and lease only, jittered"
+6,419,92.0,58.75,4 ROOM,0.9952267303102625,New Generation,0.9594272076372315,"floor area and lease only, jittered"
+8,335,90.0,82.08333333333333,4 ROOM,1.0,Model A,0.6895522388059702,"floor area and lease only, jittered"
+0,230,47.0,93.25,2 ROOM,1.0,Model A,0.8695652173913043,"floor area and lease only, jittered"

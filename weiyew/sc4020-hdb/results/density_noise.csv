@@ -1,0 +1,5 @@
+method,data,noise_share,noise top flat type,noise median floor_area_sqm,noise median remaining_lease_years,noise median storey_mid,noise median real_price,clustered median floor_area_sqm,clustered median remaining_lease_years,clustered median storey_mid,clustered median real_price
+DBSCAN,real,0.01385,5 ROOM (47%),114.0,75.08333333333333,23.0,1223766.990291262,93.0,73.33333333333333,8.0,628282.3529411765
+DBSCAN,jittered,0.0031,5 ROOM (37%),109.0,74.625,26.0,1091128.0043602088,93.0,73.33333333333333,8.0,630374.7628781553
+HDBSCAN,real,0.28475,4 ROOM (33%),104.0,77.16666666666667,11.0,862978.7234042553,93.0,71.75,8.0,588845.4121306377
+HDBSCAN,jittered,0.2737,4 ROOM (33%),104.0,77.91666666666667,11.0,866189.3358733391,93.0,71.5,8.0,590679.6116504854

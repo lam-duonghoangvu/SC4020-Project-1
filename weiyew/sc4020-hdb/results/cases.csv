@@ -1,0 +1,8 @@
+case,outcome,cause,figure
+K-means finds 4 market segments,success,continuous features with weak but real joint structure (silhouette 1.45x null),figures/kmeans_clusters.png
+K-means on raw units cuts price bands,failure,scale: price holds all of the squared distance,figures/ablation_features.png
+Density settings chosen by the rule put 97% to 99.7% in one cluster,failure,density: one dense core with no gaps; silhouette rewards a giant plus a tiny cluster,figures/comparison.png
+"With a 50% cap, HDBSCAN clusters are single storey bands",failure,noise in measurement: discrete recorded values create ties,figures/failure_ties.png
+HDBSCAN finds new 3 ROOM flats as a compact group,success,density: a standard flat design sold at one lease age forms a real dense spot,figures/comparison.png
+No method recovers flat type from all four features,failure,label defined by one feature (floor area); price and storey cut across it,figures/kmeans_k_sweep.png
+HDBSCAN on floor area and lease finds flat designs,success,density: each flat design of a building era is a dense spot in size and lease; price and storey blur it,figures/success_flat_designs.png
