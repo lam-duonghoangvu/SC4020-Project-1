@@ -12,6 +12,7 @@ from sklearn.cluster import (
     AffinityPropagation,
     AgglomerativeClustering,
     DBSCAN,
+    HDBSCAN,
     KMeans,
     SpectralClustering,
 )
@@ -63,6 +64,17 @@ def uber_models(radius_km: float = 0.35) -> dict[str, ClusterMixin]:
         ),
         "K-Means (k=5)": KMeans(n_clusters=5, random_state=42, n_init=10),
         "GMM (k=5)": GaussianMixture(n_components=5, random_state=42),
+    }
+
+
+def four_models(params: dict[str, dict], random_state: int = 42) -> dict[str, ClusterMixin]:
+    """K-Means, DBSCAN, HDBSCAN and GMM built from per-method parameters
+    (e.g. `{name: selection.params}` from `tuning.select_all`)."""
+    return {
+        "K-Means": KMeans(**params["K-Means"], n_init=10, random_state=random_state),
+        "DBSCAN": DBSCAN(**params["DBSCAN"]),
+        "HDBSCAN": HDBSCAN(**params["HDBSCAN"]),
+        "GMM": GaussianMixture(**params["GMM"], n_init=3, random_state=random_state),
     }
 
 

@@ -35,11 +35,40 @@ compact-cluster assumption of K-means. Density varies widely: the distance to th
 runs from 1.2\,km (5th percentile) to 100.5\,km (95th), so no single DBSCAN radius suits every belt.
 And 17.2\% of earthquakes lie within $10^\circ$ of the $180^\circ$ meridian, where flat coordinates
 cut the map. There are no labels.
-\paragraph{D3 Uber NYC.} \todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
+\paragraph{D3 Uber NYC.}
+% [Hoang Anh]: my setup, for the merged paragraph. April 2014 file, 564,516 rows; 558,019 inside the
+% box lat 40.57 to 40.92, lon -74.15 to -73.70; random sample of 15,000 (seed 42).
+% Source: hoanganh/notebooks/03_uber_pickups.ipynb; hoanganh/src/sc4020/data.py (load_uber_pickups).
+\todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
 \paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
 \paragraph{D5 Fashion-MNIST.} \todo{Lam}{3{,}000-image sample, PCA to 50 dims; why subsampled.}
-\paragraph{D6 Wine.} \todo{Lam + Hoang Anh}{one merged paragraph; both runs give K-Means ARI 0.897.}
-\paragraph{D7 Breast cancer.} \todo{Hoang Anh}{30 features, standardised; benign vs malignant.}
+\habegin
+\paragraph{D6 Wine.} \hatag{}
+% [Hoang Anh]: drafted from my run; Lam to review and merge.
+% Source: hoanganh/notebooks/01_wine.ipynb; hoanganh/results/wine_results.csv; lam/results/wine_results.csv.
+The UCI Wine data~\cite{aeberhard1991}: 178 wines grown in one Italian region, each described by 13
+chemical measurements such as alcohol, malic acid, flavanoids and proline. The cultivar (3 classes of
+59, 71 and 48 wines) is held out as the label. Features are standardised, because proline runs from
+278 to 1{,}680 while hue stays below 2. The classes are compact, so K-means recovers them well: two
+members ran it independently and both obtained ARI 0.897. The dataset is in the study for the
+opposite reason. No sparse gap separates the cultivars, so the density methods return 2 clusters with
+about a third or more of the wines as noise, and the silhouette still prefers them
+(Section~\ref{sec:silhouette}).
+\haend
+\habegin
+\paragraph{D7 Breast cancer.} \hatag{}
+% Source: hoanganh/notebooks/02_breast_cancer.ipynb; hoanganh/src/sc4020/data.py (load_breast_cancer_data).
+% Class spread: root-mean-square distance to the class centre on the 30 standardised features,
+% 4.06 benign and 5.47 malignant (computed on the same data from sklearn.datasets.load_breast_cancer).
+The Wisconsin diagnostic breast cancer data~\cite{street1993}: 569 tumours, each described by 30
+measurements of the cell nuclei in an image of a fine-needle aspirate (the mean, standard error and
+largest value of 10 properties such as radius, texture and concavity). The diagnosis, 357 benign and
+212 malignant, is held out as the label. Features are standardised, because areas reach 4{,}254 while
+smoothness and symmetry stay below 1. Two properties make the data hard. The classes differ in spread:
+malignant tumours lie 35\% further from their class centre than benign ones (5.47 against 4.06 in
+standardised units), which breaks the equal-size assumption of K-means. And the two classes form one
+connected mass in 30 dimensions, with no sparse gap for a density method to cut along.
+\haend
 \paragraph{D8 HDB resale.}
 % Source: weiyew/sc4020-hdb/notebooks/eda.ipynb, sections 6, 10, 11 and 17;
 % sample size: weiyew/sc4020-hdb/notebooks/clustering.ipynb, section 1;

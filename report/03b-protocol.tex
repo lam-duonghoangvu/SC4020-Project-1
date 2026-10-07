@@ -48,10 +48,23 @@ distance from each point to its \texttt{minPts}-th neighbour: on D2 we take the 
 95th percentiles of the curve (11 to 810\,km); on D8 we take 0.5, 0.75, 1, 1.5 and 2 times the knee of the
 curve. HDBSCAN: \texttt{min\_cluster\_size} scaled to the data (25, 50, 100 on D2; 100, 200, 400 on D8)
 and \texttt{min\_samples} in \{default, 5, 10\}.
-\todo{Ky, Lam, Hoang Anh}{one line each for your datasets, and GMM components and spectral affinity.}
+\habegin
+% Source: hoanganh/src/sc4020/tuning.py; every setting tried is in
+% hoanganh/comparison/results/team_tuning.csv.
+\hatag{}On D6 and D7, K-means is searched over $K=2$ to 10 with 10 starts and reported at the number of
+classes. GMM takes 2 to 10 components and four covariance types (full, tied, diagonal, spherical),
+chosen by BIC. DBSCAN takes \texttt{minPts} in $\{10, 20, 40, 80\}$ and $\varepsilon$ at 0.5 to 4
+times the knee of the k-distance curve. HDBSCAN takes \texttt{min\_cluster\_size} from 5 up to
+$n/10$ (15 on D6, 50 on D7) and \texttt{min\_samples} in \{default, 5, 10\}. On these two datasets the
+density settings that pass the constraints (at least 2 clusters, at most 50\% noise, and at most 10
+clusters) are ranked by DBCV~\cite{moulavi2014}, a score built for density clusters, instead of the
+silhouette. Agglomerative clustering uses Ward linkage at the number of classes.
+\haend
+\todo{Ky, Lam}{one line each for your datasets, and GMM components and spectral affinity.}
 
 \paragraph{Reproducibility.}
 On D2 and D8 every random step uses seed 0, and repeated runs use seeds 0 to 19. They ran on Python
 3.12.13, scikit-learn~\cite{pedregosa2011} 1.9.1 and NumPy 2.5.3 on an Apple M2 with 16\,GB of memory.
-\todo{Ky, Lam, Hoang Anh}{versions and hardware if different.}
+\todo{Ky, Lam}{versions and hardware if different.}
+\todo{Hoang Anh}{D6, D7 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
 \decide{shared code: Ky's src/core.py or Wei Yew's metrics.py, so every table has the same columns.}

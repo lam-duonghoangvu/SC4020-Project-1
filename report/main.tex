@@ -18,12 +18,19 @@
   \newcommand{\todo}[2]{{\color{red}[\textbf{#1}: #2]}}
   \newcommand{\decide}[1]{{\color{blue}[\textbf{DECIDE}: #1]}}
   \newcommand{\figtodo}[2]{\fbox{\parbox[c][2.6cm][c]{0.92\linewidth}{\centering\small\color{red}\textbf{#1}: #2}}}
+  % Hoang Anh's text carries a [HoangAnh] tag for review (draft only):
+  % \ha{..} inline, \habegin..\haend around paragraphs, \hatag in captions.
+  \newcommand{\hatag}{\textbf{[HoangAnh]}\ }
 \else
+  \newcommand{\hatag}{}
   \newcommand{\owner}[1]{}
   \newcommand{\todo}[2]{}
   \newcommand{\decide}[1]{}
   \newcommand{\figtodo}[2]{}
 \fi
+\newcommand{\ha}[1]{\hatag #1}
+\newcommand{\habegin}{\begingroup}
+\newcommand{\haend}{\endgroup}
 % ---------------------------------------------------------------
 
 \title{\vspace{-1.2cm}\textbf{When Does Density Beat Centroids?\\

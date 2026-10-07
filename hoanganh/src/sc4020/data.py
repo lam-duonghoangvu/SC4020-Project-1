@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 import kagglehub
 import numpy as np
 import pandas as pd
-from sklearn.datasets import load_wine
+from sklearn.datasets import load_digits, load_wine, make_blobs, make_moons
 from sklearn.preprocessing import StandardScaler
 
 WINE_SLUG = "harrywang/wine-dataset-for-clustering"
@@ -38,7 +38,7 @@ class Dataset:
     def n_true_clusters(self) -> int | None:
         if self.y is None:
             return None
-        return int(len(np.unique(self.y)))
+        return int(len(np.unique(self.y[self.y != -1])))  # -1 marks background noise
 
 
 def _csv_paths(slug: str) -> list[str]:
@@ -101,4 +101,58 @@ def load_uber_pickups(n_samples: int = 15000, random_state: int = 42) -> Dataset
             "n_rows_raw": len(df),
             "n_rows_in_nyc": len(df_clean),
         },
+    )
+
+
+def load_moons_data(
+    n_samples: int = 1000, noise: float = 0.07, random_state: int = 42
+) -> Dataset:
+    """Two interleaving half-moons: non-convex clusters with known labels."""
+    raw_X, y = make_moons(n_samples=n_samples, noise=noise, random_state=random_state)
+    return Dataset(
+        name="make_moons",
+        X=StandardScaler().fit_transform(raw_X),
+        y=y,
+        feature_names=["x1", "x2"],
+        class_names=["moon_0", "moon_1"],
+    )
+
+
+def load_digits_data() -> Dataset:
+    """8x8 handwritten digits (1,797 images, 64 pixels, 10 classes).
+
+    Pixels are kept on their shared 0-16 intensity scale: standardizing would
+    blow up the near-constant border pixels into noise dimensions.
+    """
+    raw = load_digits()
+    return Dataset(
+        name="digits",
+        X=raw.data.astype(float),
+        y=raw.target,
+        feature_names=list(raw.feature_names),
+        class_names=[str(c) for c in raw.target_names],
+    )
+
+
+def load_varied_density_data(n_noise: int = 120, random_state: int = 0) -> Dataset:
+    """Two tight, dense blobs next to each other, one wide sparse blob, and
+    uniform background noise (label -1).
+
+    The dense pair sit closer together than the spread of the sparse blob, so no
+    single density threshold separates the pair and still keeps the sparse blob.
+    """
+    blobs, y = make_blobs(
+        n_samples=[400, 400, 400],
+        centers=[[0.0, 0.0], [3.0, 0.0], [10.0, 8.0]],
+        cluster_std=[0.3, 0.3, 2.0],
+        random_state=random_state,
+    )
+    noise = np.random.default_rng(random_state).uniform(-6, 16, size=(n_noise, 2))
+    return Dataset(
+        name="varied_density",
+        X=StandardScaler().fit_transform(np.vstack([blobs, noise])),
+        y=np.concatenate([y, np.full(n_noise, -1)]),
+        feature_names=["x1", "x2"],
+        class_names=["dense_0", "dense_1", "sparse"],
+        extra={"n_noise": n_noise},
     )

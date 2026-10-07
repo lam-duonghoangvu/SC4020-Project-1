@@ -8,6 +8,13 @@
 the sparse belts of the Americas (62\% of earthquakes clustered, against 20\% for DBSCAN) as long
 clusters that follow the plate boundary. It succeeds because its density threshold adapts to each
 cluster, the property D2 needs most.
+\habegin
+% Source: hoanganh/comparison/results/report_d6_d7.csv; figure from hoanganh/comparison/run_report_tables.py.
+\paragraph{GMM on D7: classes of unequal spread.} \hatag{} Shown in Figure~\ref{fig:bc_cases}. GMM matches the
+diagnosis best of all methods (ARI 0.774). K-means places its boundary too far into the wide malignant
+class (ARI 0.654); the full covariance of each GMM component lets the boundary follow the compact benign
+class. Cause of success: the model allows clusters of different spread.
+\haend
 \todo{Lam}{DBSCAN / Spectral on D1.}
 \todo{Ky}{K-Means++ on D4: compact classes in 7 dimensions.}
 % Sources: weiyew/sc4020-hdb/results/ablation_features.csv, ablation_flat_design_clusters.csv
@@ -38,6 +45,21 @@ Mid-Indian Ridge. Cause: cluster shape. Compact regions cannot follow long belts
 and~\ref{fig:abl_ties}. At the chosen settings DBSCAN puts 97.1\% of sales in one cluster. Under a cap on
 the largest cluster, the clusters become single storey bands. Causes: no gaps between groups, and values
 recorded in steps.
+\habegin
+\paragraph{DBSCAN on D7: half the data discarded.} \hatag{} Shown in Figure~\ref{fig:bc_cases}. The least noisy
+two-cluster setting keeps the dense benign core as one cluster, finds a second cluster of 14 malignant tumours and
+labels 55.5\% of tumours noise, including 183 of the 212 malignant ones. Its silhouette (0.356) is higher than that
+of GMM or K-means, and its ARI is 0.222. Causes: 30 dimensions, and one class much sparser than the other.
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{bc_cases}
+\caption{\hatag D7 on its first two principal components (grey: noise; each cluster takes the colour
+of its majority class). Success of GMM against K-means: the boundary follows the compact benign class.
+Failure of DBSCAN: only the dense benign core is clustered. Causes: classes of unequal spread, and no
+density contrast in 30 dimensions.}
+\label{fig:bc_cases}
+\end{figure}
+\haend
 \todo{Lam}{DBSCAN on D5.}
 \todo{Ky}{HDBSCAN on D4: 37\% noise removes rare classes.}
 

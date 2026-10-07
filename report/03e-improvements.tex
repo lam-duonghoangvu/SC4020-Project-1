@@ -17,6 +17,7 @@ Sparse belts lost & one global $\varepsilon$ & HDBSCAN & D2 & Americas kept 20\%
 One feature dominates & unequal scales & standardisation & D4 & ARI 0.497 $\to$ 0.731 & Ky \\
 Clusters are storey bands & recorded steps & jitter within step & D8 & band clusters 107 of 124 $\to$ 0 of 23 & Wei Yew \\
 Curved clusters cut & convex assumption & spectral clustering & D1 & ARI 0.481 $\to$ 1.000 & Lam \\
+\ha{Classes of unequal spread} & equal-size assumption & GMM, full covariance & D7 & ARI 0.654 $\to$ 0.774 & Hoang Anh \\
 Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & D2 null gap 0.015 $\to$ 0.144; D3 \todo{Ky}{?} & Ky, Wei Yew \\
 \bottomrule
 \end{tabular}}
@@ -50,5 +51,22 @@ distribution of latitude and longitude on their own, not their combination. Requ
 fake data rules out $K=2$ and $K=3$. From $K=4$ the gap is 0.126 to 0.149 and almost flat, so the final
 choice, $K=6$, rests on agreement between seeds (ARI 0.993). The check costs extra clustering runs on fake
 data for each $K$.
+\habegin
+% Source: hoanganh/comparison/results/report_d6_d7.csv; label-free choices from
+% hoanganh/comparison/results/team_results.csv (label_free_choice).
+\paragraph{GMM instead of K-means (D7).} \hatag{} K-means cuts the space halfway between two centres, which
+suits clusters of equal spread. On D7 the malignant class is the wider one, so the boundary falls inside
+it: 36 of the 212 malignant tumours join the benign cluster. With GMM that falls to 16. A GMM with one full covariance matrix per component
+models the spread of each class and moves the boundary accordingly: ARI rises from 0.654 to 0.774 and
+NMI from 0.532 to 0.661. The costs are a slower fit, 465 covariance parameters per component estimated
+from 569 tumours, and a lower silhouette (0.314 against 0.343), so an analyst who trusts the silhouette
+would reject the better result. BIC, the model's own criterion, also selects two components with full
+covariance, so this fix can be chosen without labels.
+
+\paragraph{Proposed, not implemented (D6, D7).} \hatag{} The density methods fail on both tables because 13 and
+30 standardised features leave little contrast in density. Projecting onto a few principal components
+before DBSCAN or HDBSCAN is the natural next step; on D7 the first two components already hold 63.2\% of
+the variance.
+\haend
 \todo{All}{Proposed but not implemented: e.g.\ ground truth for D2 from plate-boundary maps;
 OPTICS; approximate spectral clustering for large $n$.}

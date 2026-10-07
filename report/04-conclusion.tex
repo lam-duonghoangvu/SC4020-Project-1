@@ -3,5 +3,13 @@
 \todo{Ky}{Summary of findings with numbers; answer the title question.}
 
 \subsection*{Limitations}
+\habegin
+% [Hoang Anh]: my line for D6 and D7. Source: hoanganh/comparison/results/team_results.csv (label_free_choice).
+\hatag{}On D6 and D7, the methods that need $k$ were given the number of classes, which an analyst would not
+know. The label-free criteria happen to agree here (the silhouette picks $k=3$ on D6 and $k=2$ on D7 for
+K-means), so the cost is small on these two tables, but both are small (178 and 569 points) and their
+density settings were ranked by DBCV, not by the silhouette used elsewhere.
+\haend
+
 \todo{All}{One line each: D2 has no ground truth; D8 has no location feature; oracle ARI on labelled
 data is optimistic; datasets up to 50 dimensions.}

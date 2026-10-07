@@ -15,7 +15,22 @@
 \subsection{Spectral clustering}
 \todo{Lam}{Affinity graph, eigenvectors, K-means step; affinity used per dataset.}
 \subsection{Agglomerative clustering}
-\todo{Hoang Anh}{Linkage used and why; parameters; complexity.}
+\habegin
+% Source: hoanganh/src/sc4020/clustering.py (wine_models, breast_cancer_models);
+% ARI from hoanganh/results/{wine,breast_cancer}_results.csv.
+\hatag{}Agglomerative clustering starts with every point as its own cluster and repeatedly merges the two
+closest clusters until $k$ remain. The linkage defines which two are closest. We use Ward
+linkage~\cite{ward1963}, which merges the pair whose union raises the total within-cluster variance
+least. This is the K-means objective, searched greedily from the bottom up. The method therefore
+needs no starting centres and returns the same partition on every run, which makes it a direct check
+on K-means: same objective, different search. The only parameter is $k$, set to the number of classes
+(3 on D6, 2 on D7); distances are Euclidean on standardised features. It needs $O(n^2)$ time and
+memory for the pairwise distances, so we ran it on the two small tables only ($n=178$ and $n=569$).
+Like K-means, it assumes compact clusters, assigns every point and has no noise label. Its own
+weakness is that a merge is never undone, so an early mistake stays in the final partition. On both
+datasets it matched the labels less well than K-means (ARI 0.790 against 0.897 on D6, 0.575 against
+0.654 on D7).
+\haend
 
 \begin{table}[h]\centering\small
 \caption{Structural assumptions of the methods compared.}
@@ -23,14 +38,14 @@
 \resizebox{\textwidth}{!}{\begin{tabular}{lccccccc}
 \toprule
 & \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN}
-& \textbf{GMM} & \textbf{Spectral} & \textbf{Agglom.} \\
+& \textbf{GMM} & \textbf{Spectral} & \hatag\textbf{Agglom.} \\
 \midrule
-Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Requires $k$               & yes & yes & no & no & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Explicit noise label       & no & no & yes & yes & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Handles varying density    & no & no & no & yes & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Parameter is interpretable & no & no & yes (km) & partly & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
-Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & \todo{Lam}{?} & \todo{Lam}{?} & \todo{HA}{?} \\
+Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & \todo{Lam}{?} & \todo{Lam}{?} & compact (Ward) \\
+Requires $k$               & yes & yes & no & no & \todo{Lam}{?} & \todo{Lam}{?} & yes \\
+Explicit noise label       & no & no & yes & yes & \todo{Lam}{?} & \todo{Lam}{?} & no \\
+Handles varying density    & no & no & no & yes & \todo{Lam}{?} & \todo{Lam}{?} & no \\
+Parameter is interpretable & no & no & yes (km) & partly & \todo{Lam}{?} & \todo{Lam}{?} & no \\
+Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & \todo{Lam}{?} & \todo{Lam}{?} & $O(n^2)$ \\
 \bottomrule
 \end{tabular}}
 \par\raggedright\footnotesize\textsuperscript{a}\,With an effective spatial index; $O(n^2)$ worst case.
