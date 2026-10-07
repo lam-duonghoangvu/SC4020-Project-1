@@ -25,19 +25,58 @@ D8 & HDB resale flats, 2017--2026     & Wei Yew        & 20{,}000\textsuperscrip
 \end{table}
 
 \paragraph{D1 make\_moons.} \todo{Lam}{generator settings (noise 0.07), why it is the shape control.}
-\paragraph{D2 Earthquakes.} \todo{Wei Yew}{USGS ComCat 2023, M$\geq$4.5; 8 volcanic events removed;
-depth not clustered (44\% default 10\,km). Source: \nolinkurl{weiyew/sc4020-earthquake/notebooks/eda.ipynb}.}
+\paragraph{D2 Earthquakes.}
+% Source: weiyew/sc4020-earthquake/notebooks/eda.ipynb, sections 1, 4, 8 and 12.
+Every event of magnitude 4.5 or more in 2023 from the USGS ComCat catalogue~\cite{usgs2017}: 7{,}651 events, of which
+8 volcanic eruptions near Saipan are removed, leaving 7{,}643 earthquakes. We cluster the epicentre only.
+Depth is left out because 44.2\% of events carry the default depth of 10\,km. Each method meets a
+different difficulty. Earthquakes lie along narrow belts thousands of kilometres long, which breaks the
+compact-cluster assumption of K-means. Density varies widely: the distance to the nearest earthquake
+runs from 1.2\,km (5th percentile) to 100.5\,km (95th), so no single DBSCAN radius suits every belt.
+And 17.2\% of earthquakes lie within $10^\circ$ of the $180^\circ$ meridian, where flat coordinates
+cut the map. There are no labels.
 \paragraph{D3 Uber NYC.} \todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
 \paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
 \paragraph{D5 Fashion-MNIST.} \todo{Lam}{3{,}000-image sample, PCA to 50 dims; why subsampled.}
 \paragraph{D6 Wine.} \todo{Lam + Hoang Anh}{one merged paragraph; both runs give K-Means ARI 0.897.}
 \paragraph{D7 Breast cancer.} \todo{Hoang Anh}{30 features, standardised; benign vs malignant.}
-\paragraph{D8 HDB resale.} \todo{Wei Yew}{4 features (floor area, remaining lease, storey,
-index-adjusted price), standardised; flat type held out as label.}
+\paragraph{D8 HDB resale.}
+% Source: weiyew/sc4020-hdb/notebooks/eda.ipynb, sections 6, 10, 11 and 17;
+% sample size: weiyew/sc4020-hdb/notebooks/clustering.ipynb, section 1;
+% floor-area ARI: weiyew/sc4020-hdb/results/screening_labels.csv.
+Every resale of a public housing flat in Singapore from January 2017, from data.gov.sg~\cite{hdb2026}. The 6{,}051
+sales after June 2026 (2.5\%) have no price index value yet and are dropped, leaving 234{,}294. Methods
+are compared on a random sample of 20{,}000 (seed 0); all 234{,}294 are used for runtime. There are four
+features: floor area, remaining lease, storey, and price adjusted to 2026 levels with the HDB resale
+price index. Flat type (7 classes) is held out as a label, but it is nearly a function of size: floor
+area alone reaches ARI 0.601 against it. The data are hard for density methods. There are no gaps
+between groups of flats, and storeys are recorded in 3-storey bands, so 77.7\% of sales share their
+floor area, lease and storey with at least one other sale.
 
 \subsection{Preprocessing}\label{sec:prep}
 \owner{Wei Yew}
-\todo{Wei Yew}{Three rules applied to every dataset where relevant:
-(i) coordinates on the sphere (haversine for density methods, 3D unit vectors for K-means);
-(ii) standardise features; (iii) check for values recorded in steps and jitter within the step.
-Each rule is tested in Section~\ref{sec:ablation}.}
+Three rules apply wherever a dataset has the property they address. Each is tested by an ablation in
+Section~\ref{sec:ablation}.
+
+\paragraph{Coordinates on the sphere.}
+% Source: weiyew/sc4020-earthquake/notebooks/eda.ipynb, section 12.
+Latitude and longitude treated as flat numbers put two earthquakes 6.07\,km apart at $359.94^\circ$ of
+longitude from each other, because they lie on either side of the $180^\circ$ meridian. Density methods
+therefore use the haversine (great-circle) distance on coordinates in radians. K-means needs a vector
+space to average in, so each epicentre becomes a 3D point on the unit sphere. The straight-line distance
+between two such points grows with their great-circle distance, so the clustering follows surface distance
+(Ablation~B).
+
+\paragraph{Standardised features.}
+% Source: weiyew/sc4020-hdb/notebooks/eda.ipynb, section 9.
+Features in their raw units are not comparable. On D8, price (in dollars) accounts for 100.0\% of the
+squared distance between sales, so the other three features are ignored. Every feature is scaled to mean
+0 and standard deviation 1 (Ablation~C).
+
+\paragraph{Values recorded in steps.}
+% Source: weiyew/sc4020-hdb/hdb/features.py, jitter_ties.
+When a feature is recorded in steps, many points share exact values, and density methods read each shared
+value as a dense spot. Before running a density method on D8, each stepped value is moved by a uniform
+random amount of up to half its step: $\pm1.5$ storeys, $\pm0.5$\,m$^2$ of floor area and
+$\pm\frac{1}{24}$ year of lease. Price is continuous and is left unchanged. Results are reported with and
+without this jitter (Ablation~E).

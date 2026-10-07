@@ -4,15 +4,40 @@
 % Rubric: "illustrate and discuss the successful cases and failure cases", "good visualizations".
 
 \subsubsection{Successes}
-\todo{Wei Yew}{HDBSCAN on D2: follows dense and sparse belts.}
+\paragraph{HDBSCAN on D2: belts of varying density.} Shown in Figure~\ref{fig:density}. HDBSCAN keeps
+the sparse belts of the Americas (62\% of earthquakes clustered, against 20\% for DBSCAN) as long
+clusters that follow the plate boundary. It succeeds because its density threshold adapts to each
+cluster, the property D2 needs most.
 \todo{Lam}{DBSCAN / Spectral on D1.}
 \todo{Ky}{K-Means++ on D4: compact classes in 7 dimensions.}
-\todo{Wei Yew}{HDBSCAN on D8 floor area + lease: 14 clusters, each one flat design. Frame it as a
-sanity check: a group-by on flat model and floor area gives similar groups.}
+% Sources: weiyew/sc4020-hdb/results/ablation_features.csv, ablation_flat_design_clusters.csv
+% (variant "floor area and lease only").
+\paragraph{HDBSCAN on D8, floor area and lease only: flat designs.} This feature set was chosen after
+seeing the main results, so we present it as an ablation finding and a sanity check, not as a tuned
+setting. Dropped to two features, D8 does contain dense spots: standard flat designs, built to fixed
+plans in particular years. HDBSCAN finds 14 clusters (43.2\% noise), and 13 of them are at least 97\% one
+flat type (Figure~\ref{fig:flat_designs}); in the median cluster one flat model accounts for
+83\% of sales. A simple grouping by flat
+model and lease would give similar groups, which is the point: the method recovers a structure we can
+name. ARI against flat type is still only 0.127, because each type is split into several designs and
+the noise counts as a cluster. A low ARI here reflects a finer partition than the labels, not a failure.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.8\textwidth]{hdb_success_flat_designs}
+\caption{D8, success of HDBSCAN on floor area and remaining lease only (\texttt{min\_cluster\_size}~200;
+grey: noise). Each cluster is one standard flat design; the legend gives its main flat type and model.
+Cause of success: fixed building plans create real dense spots in these two features.}
+\label{fig:flat_designs}
+\end{figure}
 
 \subsubsection{Failures}
-\todo{Wei Yew}{K-means on D2: one cluster of 5 separate belts.}
-\todo{Wei Yew}{Density methods on D8: one mass, or storey bands.}
+\paragraph{K-Means++ on D2: unrelated belts merged.} Shown in Figure~\ref{fig:kmeans_belts}. One
+cluster joins five belts whose centres are 2{,}932 to 11{,}449\,km apart, from Iceland to the
+Mid-Indian Ridge. Cause: cluster shape. Compact regions cannot follow long belts.
+\paragraph{Density methods on D8: one mass, or storey bands.} Shown in Figures~\ref{fig:hdb_cmp}
+and~\ref{fig:abl_ties}. At the chosen settings DBSCAN puts 97.1\% of sales in one cluster. Under a cap on
+the largest cluster, the clusters become single storey bands. Causes: no gaps between groups, and values
+recorded in steps.
 \todo{Lam}{DBSCAN on D5.}
 \todo{Ky}{HDBSCAN on D4: 37\% noise removes rare classes.}
 

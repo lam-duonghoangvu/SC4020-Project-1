@@ -1,13 +1,27 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 \owner{Wei Yew, Lam}
 
-\todo{Wei Yew}{D8, all 234{,}294 sales: K-means under 0.06\,s; HDBSCAN 212\,s; DBSCAN not run
-(neighbour lists need about 6\,GB). Plot runtime against $n$ (\nolinkurl{weiyew/sc4020-hdb/experiments/scalability.py}).}
+% Sources: weiyew/sc4020-hdb/results/scalability_summary.csv (median of runs per size);
+% weiyew/sc4020-hdb/experiments/scalability.py; memory estimate from
+% weiyew/sc4020-hdb/notebooks/ablation.ipynb, scalability section.
+D8 is large enough to measure how each method grows. Each method ran at its chosen setting on random
+subsets of 1{,}000 to 234{,}294 sales (K-means from one start). Figure~\ref{fig:runtime} plots the median
+time against size on log scales, where the slope of a line estimates the exponent $b$ in
+$t \propto n^{b}$. K-means is far cheaper than either density method at every size: under 0.06\,s on all
+234{,}294 sales. Its fitted slopes (0.57 and 0.67) are below 1 only because a fixed start-up cost
+dominates at these sizes; each iteration is linear in $n$. HDBSCAN grows with slope 1.79, from 0.02\,s at
+1{,}000 sales to 212\,s at 234{,}294. DBSCAN grows with slope 1.65, but at full size it was not run at
+all, because of memory rather than time. With a fixed $\varepsilon$, every sale has more neighbours as
+the data grow. Estimated from 2{,}000 probe points, the full data would hold about 742 million neighbour
+pairs, about 6\,GB for the neighbour indices alone, which scikit-learn's DBSCAN stores in full. HDBSCAN,
+slower at every size, did run on all sales within 16\,GB.
 \todo{Lam}{Why D5 needed subsampling for Spectral, DBSCAN and HDBSCAN; fit times per method.}
 \todo{Ky}{Existing Fig.~9 runtime at $n\leq23{,}412$, if kept.}
 
 \begin{figure}[h]\centering
-\figtodo{Wei Yew}{runtime vs number of sales, log--log, one line per method}
-\caption{\todo{Wei Yew}{caption}}
+\includegraphics[width=0.75\textwidth]{hdb_scalability}
+\caption{D8, median fit time against the number of sales, log--log, at the chosen settings; the slope of
+each line is in the legend. DBSCAN stops at 100{,}000 sales: the full data would need about 6\,GB of
+neighbour indices.}
 \label{fig:runtime}
 \end{figure}

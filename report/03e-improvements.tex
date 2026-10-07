@@ -15,13 +15,40 @@ Clusters split at $180^\circ$ & flat lat/lon & surface distance & D2 & 0 $\to$ 9
 Poor local optimum & random seeding & K-Means++ & D4 & ARI 0.493 $\to$ 0.731 & Ky \\
 Sparse belts lost & one global $\varepsilon$ & HDBSCAN & D2 & Americas kept 20\% $\to$ 62\% & Wei Yew \\
 One feature dominates & unequal scales & standardisation & D4 & ARI 0.497 $\to$ 0.731 & Ky \\
-Clusters are storey bands & recorded steps & jitter within step & D8 & 27 of 27 band clusters $\to$ none & Wei Yew \\
+Clusters are storey bands & recorded steps & jitter within step & D8 & band clusters 107 of 124 $\to$ 0 of 23 & Wei Yew \\
 Curved clusters cut & convex assumption & spectral clustering & D1 & ARI 0.481 $\to$ 1.000 & Lam \\
-Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & \todo{Ky}{?} & Ky, Wei Yew \\
+Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & D2 null gap 0.015 $\to$ 0.144; D3 \todo{Ky}{?} & Ky, Wei Yew \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\todo{All}{One short paragraph per row: why the fix works, and its cost.}
+% Sources: weiyew/sc4020-earthquake/results/ablation_distance.csv, case_density_regions.csv,
+% kmeans_k_selection.csv; weiyew/sc4020-hdb/results/hdbscan_grid.csv (single_storey_clusters, 9 settings
+% per data version).
+\paragraph{Surface distance (D2).} Haversine distance for density methods and 3D unit vectors for
+K-means measure what matters, the distance along the Earth's surface. The fix is exact, and its only
+cost is that $\varepsilon$ must be given in kilometres and the coordinates converted. It changes the
+answer for every method (Ablation~B), which makes it a correctness fix rather than a tuning choice.
+
+\paragraph{HDBSCAN instead of DBSCAN (D2).} HDBSCAN replaces the single radius with a hierarchy of
+densities and keeps the clusters that persist longest, so sparse and dense belts can both survive. In the
+Americas it clusters 62\% of earthquakes against 20\%. The costs are real: dense cores are trimmed (78\%
+against 90\% in the south-west Pacific), each fit takes about 20 times longer (1.08\,s against 0.05\,s),
+and \texttt{min\_cluster\_size} is a count, so the result changes with the size of the dataset
+(Ablation~F).
+
+\paragraph{Jitter within the recording step (D8).} Moving each stepped value by up to half its step
+spreads exact ties without moving any sale into another band. Across the 9 HDBSCAN settings, 107 of the
+124 clusters found on recorded data are single storey bands; on jittered data, 0 of 23 are. The fix costs
+nothing at the chosen setting (recorded and jittered agree at ARI 0.886), but it adds randomness, so the
+seed must be fixed and reported. It also shows that D8 has fewer real density clusters than the recorded
+data suggest.
+
+\paragraph{Fake-data check for choosing $K$ (D2).} The silhouette alone picks $K=2$ on D2 (0.544, the
+highest of any $K$), but shuffled coordinates score 0.529 at the same $K$: the split follows the
+distribution of latitude and longitude on their own, not their combination. Requiring a clear gap over the
+fake data rules out $K=2$ and $K=3$. From $K=4$ the gap is 0.126 to 0.149 and almost flat, so the final
+choice, $K=6$, rests on agreement between seeds (ARI 0.993). The check costs extra clustering runs on fake
+data for each $K$.
 \todo{All}{Proposed but not implemented: e.g.\ ground truth for D2 from plate-boundary maps;
 OPTICS; approximate spectral clustering for large $n$.}

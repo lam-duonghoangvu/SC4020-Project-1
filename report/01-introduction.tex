@@ -28,11 +28,17 @@ cluster. It is highest for compact, well-separated groups: the cluster model of
 K-means. Choosing between K-means and a density method by silhouette is therefore
 not a neutral test.
 
+% Sources: Wine lam/results/wine_results.csv (DBSCAN noise_ratio 0.646); HDB
+% weiyew/sc4020-hdb/results/kmeans_sensitivity.csv; Ecoli: no CSV found in SC4020-Ky/results (7 Oct).
 The bias is large on our data. On Wine, DBSCAN scores a higher silhouette than
 K-Means++ (0.42 against 0.28) while agreeing far less with the true classes (ARI
 0.31 against 0.90). It earns that score by labelling 65\% of the wines as noise,
 which the silhouette leaves out. On Ecoli, the silhouette ranks four methods in
-almost the reverse of their ARI order (Spearman $\rho=-0.80$). On HDB resale flats,
+almost the reverse of their ARI order (Spearman $\rho=-0.80$).
+\todo{Lam}{this Wine DBSCAN setting labels 64.6\% of wines noise, above the agreed 50\% cap
+(Section~\ref{sec:protocol}). Rerun the selection under the rule and update the numbers, or present it
+explicitly as what the silhouette picks without the cap.}
+\todo{Ky}{which results CSV holds the Ecoli $\rho=-0.80$?} On HDB resale flats,
 K-means on unscaled features scores 0.540 by splitting sales into four price bands,
 because price alone sets the distances.
 

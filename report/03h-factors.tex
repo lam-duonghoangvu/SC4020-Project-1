@@ -6,5 +6,9 @@
 \todo{Ky}{Port Sec.~7.3 (key factors) and re-rank them with evidence from all datasets:
 cluster shape, density variation, dimensionality, gaps between groups, scaling, initialisation,
 recorded steps, parameter choice.}
+% [Wei Yew]: evidence for the two guidance items handed to Ky.
+% Fake-data check: D2 K=2 silhouette 0.544 vs 0.529 on shuffled coordinates (kmeans_k_selection.csv);
+% D8 density methods below their null (comparison.csv). Recorded steps: D8 107 of 124 HDBSCAN clusters
+% are single storey bands on recorded data, 0 of 23 on jittered data (hdbscan_grid.csv).
 \todo{Ky}{Port Sec.~7.4 (guidance). Add: compare every result against fake data (Wei Yew);
 check for values recorded in steps (Wei Yew); report noise \% next to every silhouette.}

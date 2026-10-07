@@ -7,15 +7,78 @@
 \todo{All}{One results table per property (rows: dataset $\times$ method; columns: \#clusters,
 noise, S, DB, ARI, NMI, time, fake-data gap). Bold the best per dataset.}
 
+% [Wei Yew]: Table tab:cmp_d2d8 uses the shared columns; merge its rows into the per-property tables
+% once the other datasets are in the same format.
+% Sources: weiyew/sc4020-earthquake/results/method_comparison.csv; weiyew/sc4020-hdb/results/comparison.csv.
+\begin{table}[h]\centering\small
+\caption{D2 and D8 at the settings chosen in Section~\ref{sec:protocol}. S: silhouette; DB:
+Davies--Bouldin; null S: silhouette of the same setting on fake data (D2: shuffled coordinates for K-means,
+uniform points for density methods; D8: shuffled columns). ``none'': no clusters formed on the fake data.
+D2 has no labels.}
+\label{tab:cmp_d2d8}
+\resizebox{\textwidth}{!}{\begin{tabular}{llrrrrrrrrr}
+\toprule
+\textbf{Data} & \textbf{Method} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
+& \textbf{ARI} & \textbf{NMI} & \textbf{Time (s)} & \textbf{Null S} \\
+\midrule
+D2 & K-Means ($K=6$)      & 6  & 0\%    & 44.3\% & 0.525 & 0.800 & -- & -- & 0.004 & 0.389 \\
+D2 & K-Means++ ($K=6$)    & 6  & 0\%    & 31.0\% & 0.528 & 0.738 & -- & -- & 0.005 & 0.391 \\
+D2 & DBSCAN (101.8\,km, 20) & 41 & 40.4\% & 11.8\% & 0.703 & 0.351 & -- & -- & 0.051 & none \\
+D2 & HDBSCAN (50)         & 28 & 30.7\% & 7.5\%  & 0.757 & 0.329 & -- & -- & 1.081 & 0.320 \\
+\midrule
+D8 & K-Means ($K=4$)      & 4  & 0\%    & 36.2\% & 0.317 & 1.116 & 0.220 & 0.299 & 0.011 & 0.195 \\
+D8 & K-Means++ ($K=4$)    & 4  & 0\%    & 35.1\% & 0.317 & 1.116 & 0.213 & 0.293 & 0.010 & 0.218 \\
+D8 & DBSCAN (0.567, 10)   & 3  & 1.4\%  & 97.1\% & 0.239 & 0.732 & 0.030 & 0.091 & 0.428 & 0.330 \\
+D8 & HDBSCAN (200)        & 2  & 28.5\% & 68.6\% & 0.160 & 1.133 & 0.072 & 0.101 & 2.022 & 0.593 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsubsection{Curved and elongated clusters}\label{sec:shape}
 \owner{Lam (D1), Wei Yew (D2)}
 \todo{Lam}{D1: DBSCAN ARI 0.982, Spectral 1.000, K-Means++ 0.481 (\nolinkurl{lam/results/make_moons_results.csv}).}
-\todo{Wei Yew}{D2: K-means puts 5 belts 2{,}932--11{,}449\,km apart into one cluster.}
+
+% Source: weiyew/sc4020-earthquake/notebooks/ablation.ipynb, section 5 (K-means belt case, printed
+% centre distances); figure from the same cell.
+K-means assumes compact clusters, and D2 breaks that assumption at planetary scale. Earthquakes follow
+plate boundaries, so a cluster is a long,
+narrow belt rather than a ball around a centre. K-Means++ with $K=6$ must cover the whole globe with six
+roughly round regions, so each region takes in several unrelated belts
+(Figure~\ref{fig:kmeans_belts}). One cluster of 905 earthquakes joins Turkey, the Reykjanes Ridge and
+Iceland, Afghanistan and Tajikistan, Somalia and Eritrea, and the Mid-Indian Ridge. HDBSCAN finds each of
+these as its own cluster, and their centres are 2{,}932 to 11{,}449\,km apart. K-means also has no noise
+label, so every isolated earthquake in the oceans is assigned to some region. Its silhouette is still
+0.528, well above the 0.391 of shuffled coordinates: the score confirms that the data are not random, not
+that the clusters are meaningful.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.9\textwidth]{eq_case_kmeans_merges_belts}
+\caption{D2, failure of K-Means++ ($K=6$). All points shown in colour or dark grey belong to one K-means
+cluster; colours are the HDBSCAN clusters inside it, crosses their centres. Cause: cluster shape. Belts
+thousands of kilometres apart are joined because K-means can only draw compact regions.}
+\label{fig:kmeans_belts}
+\end{figure}
 
 \subsubsection{Uneven density}\label{sec:density}
 \owner{Wei Yew (D2), Ky and Hoang Anh (D3)}
-\todo{Wei Yew}{D2: one $\varepsilon$ keeps 90\% of the dense south-west Pacific but 20\% of the sparse
-Americas; HDBSCAN keeps 62\% of the Americas.}
+% Sources: weiyew/sc4020-earthquake/results/case_density_regions.csv, method_comparison.csv;
+% k-distance spread from weiyew/sc4020-earthquake/notebooks/eda.ipynb, section 12.
+On D2 the distance to the nearest earthquake runs from 1.2\,km to 100.5\,km (5th to 95th percentile), and
+the k-distance curve rises smoothly with no knee. Any single $\varepsilon$ is therefore too small for some
+belts and too large for others. At the chosen $\varepsilon=101.8$\,km, DBSCAN clusters 90\% of the
+earthquakes in the dense south-west Pacific but only 20\% in the sparser Americas
+(Figure~\ref{fig:density}). HDBSCAN, which picks a density level per cluster, clusters 62\% of the
+Americas and keeps the Mexico to Panama belt and the Chile and Argentina belt as long clusters. The price is paid in the dense
+region, where it clusters 78\% instead of 90\%. Overall HDBSCAN keeps more earthquakes (69.3\% against
+59.6\%) with a higher silhouette (0.757 against 0.703, Table~\ref{tab:cmp_d2d8}).
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.85\textwidth]{eq_case_density_dbscan_vs_hdbscan}
+\caption{D2, DBSCAN ($\varepsilon=101.8$\,km) against HDBSCAN in a sparse region (top, the Americas)
+and a dense one (bottom, the south-west Pacific); grey points are noise. Success of HDBSCAN on the sparse
+belts, at the cost of trimming the dense ones. Cause: density varies along and between belts.}
+\label{fig:density}
+\end{figure}
 \todo{Ky + Hoang Anh}{D3: Midtown vs outer boroughs; knee $\varepsilon$ vs silhouette-optimal $\varepsilon$.}
 
 \subsubsection{High dimensions}\label{sec:dims}
@@ -25,8 +88,27 @@ Americas; HDBSCAN keeps 62\% of the Americas.}
 
 \subsubsection{No gaps between groups}\label{sec:nogaps}
 \owner{Wei Yew (D8)}
-\todo{Wei Yew}{D8: only K-means beats the shuffled null (silhouette 0.317 vs 0.218); DBSCAN puts
-97.1\% of sales in one cluster; both density methods score below their null.}
+% Sources: weiyew/sc4020-hdb/results/comparison.csv, kmeans_k_sweep.csv, screening.csv.
+D8 is one continuous mass: flats come in every combination of size, lease, storey and price, with no empty
+space between groups. Table~\ref{tab:cmp_d2d8} shows what each method does with it. K-means still finds a
+weak partition, four market segments (newer mid-size, older small, large older, newer high-floor), with a
+silhouette of 0.317 against 0.218 on shuffled columns. That ratio of 1.45 is modest, but it is the only
+result on D8 that beats its fake data. Density methods have no sparse region to cut along. The DBSCAN
+setting chosen by the rule puts 97.1\% of sales in one cluster, and HDBSCAN finds one core holding 68.6\%
+of sales plus a compact block of new 3-room flats, and calls 28.5\% noise. Both score below the same
+setting on shuffled columns (0.239 against 0.330, and 0.160 against 0.593). On shuffled columns HDBSCAN calls
+94.0\% of sales noise and keeps two small, well-separated clusters, which the silhouette rewards. On data
+with no gaps, a density method has nothing to find, and the selection rule
+cannot tell.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.95\textwidth]{hdb_comparison}
+% Three of the six panels of weiyew/sc4020-hdb/figures/comparison.png (recorded data), cropped side by side.
+\caption{D8 at the chosen settings on recorded data, drawn on the first two principal components
+(6{,}000 sales; grey: noise). K-means cuts the mass into four segments; DBSCAN and HDBSCAN return one dominant cluster. Cause:
+no gaps between groups.}
+\label{fig:hdb_cmp}
+\end{figure}
 
 \subsubsection{Silhouette versus ground truth}\label{sec:silhouette}
 \owner{All}
@@ -34,7 +116,9 @@ Americas; HDBSCAN keeps 62\% of the Americas.}
 D4 best silhouette (HDBSCAN) has the worst ARI, rank correlation $-0.80$ (Ky);
 D6 DBSCAN silhouette 0.42 vs K-Means++ 0.28, ARI 0.31 vs 0.90 (Lam);
 D7 K-Means top silhouette 0.343, GMM best ARI 0.774 vs 0.654 (Hoang Anh);
-D8 unscaled K-means silhouette 0.540 from price bands (Wei Yew);
+D8 unscaled K-means silhouette 0.540 from price bands, against 0.317 standardised (Wei Yew, written in
+Ablation~C); D2 K-means silhouette flat at 0.516 to 0.532 for every $K$ from 4 to 12, so it cannot choose
+$K$ (Wei Yew, \nolinkurl{weiyew/sc4020-earthquake/results/kmeans_k_selection.csv});
 D5 HDBSCAN top silhouette with 71\% noise (Lam).}
 
 \begin{figure}[h]\centering
