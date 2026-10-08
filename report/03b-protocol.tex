@@ -67,11 +67,19 @@ K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) 
 $\{\lfloor m/2\rfloor, m, 2m\}$ with $m=\mathrm{clip}(2d,4,20)$, $\varepsilon$ from $\{0.5,0.75,1,1.5,2\}\times$
 the k-distance knee; \texttt{min\_cluster\_size} from $\{5,10,20,30,50,n/20\}$; the setting with the
 best silhouette (noise excluded, $\geq2$ clusters, $\leq50\%$ noise) is kept.
-\todo{Ky}{one line for your datasets.}
+% [Ky]: SC4020-Ky/src/run.py (grids); SC4020-Ky/src/shared_rule.py -> SC4020-Ky/results/shared_rule.csv;
+% K choice on D3 from SC4020-Ky/results/fake_data_check.csv.
+On D3 and D4: K-means and K-means++ $K=2$ to 25, 10 starts. DBSCAN \texttt{minPts} in $\{4,8,16,32\}$
+(D3) or $\{3,5,8,12\}$ (D4), with $\varepsilon$ at 0.1 to 3 times the knee of the k-distance curve.
+HDBSCAN \texttt{min\_cluster\_size} from 10 to 250 (D3) or 5 to 30 (D4). The shared rule picks the
+density settings. On D3 the silhouette alone picks $K=2$; we use $K=5$, where the gap to fake data is
+larger (0.113 against 0.089). On D4 the silhouette picks $K=5$, and $K=7$ gives the best ARI.
 
 \paragraph{Reproducibility.}
 On D2 and D8 every random step uses seed 0, and repeated runs use seeds 0 to 19. They ran on Python
 3.12.13, scikit-learn~\cite{pedregosa2011} 1.9.1 and NumPy 2.5.3 on an Apple M2 with 16\,GB of memory.
-\todo{Ky, Lam}{versions and hardware if different.}
+On D3 and D4 the same library versions ran on Python 3.12.10, on an Intel Core Ultra 5 225 with 32\,GB
+of memory; every random step uses seed 42, and repeated runs use seeds 0 to 29.
+\todo{Lam}{versions and hardware if different.}
 \todo{Hoang Anh}{D6, D7 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
 \decide{shared code: Ky's src/core.py or Wei Yew's metrics.py, so every table has the same columns.}

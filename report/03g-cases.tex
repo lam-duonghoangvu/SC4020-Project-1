@@ -85,7 +85,9 @@ DBSCAN merges most classes into one cluster (ARI 0.03); HDBSCAN calls 71\% of po
 Spectral, GMM and K-Means++ reach ARI 0.40, 0.39, 0.34.}
 \label{fig:lam-d5}
 \end{figure}
-\todo{Ky}{HDBSCAN on D4: 37\% noise removes rare classes.}
+\todo{Ky}{HDBSCAN on D4: 37\% noise removes rare classes. This is the best-ARI setting
+(\texttt{min\_cluster\_size} 12, ARI 0.339); the shared rule picks 5 instead: 2 clusters, ARI 0.038
+(SC4020-Ky/results/shared_rule.csv). Say which one.}
 
 \begin{figure}[h]\centering
 \figtodo{All}{success/failure panel grid: one panel per case above}

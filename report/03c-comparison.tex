@@ -87,6 +87,10 @@ and a dense one (bottom, the south-west Pacific); grey points are noise. Success
 belts, at the cost of trimming the dense ones. Cause: density varies along and between belts.}
 \label{fig:density}
 \end{figure}
+% [Ky]: numbers for the 15,000-point D3 (SC4020-Ky/results/sweep.csv, shared_rule.csv): knee eps 0.525 km
+% gives 13 clusters, 3.1% noise, silhouette 0.04; the rule picks eps 1.58 km, minPts 32: 2 clusters,
+% 1.9% noise, silhouette 0.779 (Manhattan and the outer boroughs merged). HDBSCAN (mcs 250): 3 clusters,
+% 4.8% noise, silhouette 0.641. K-means K=5: 0.475.
 \todo{Ky + Hoang Anh}{D3: Midtown vs outer boroughs; knee $\varepsilon$ vs silhouette-optimal $\varepsilon$.}
 
 \subsubsection{High dimensions}\label{sec:dims}
@@ -134,7 +138,7 @@ HDBSCAN also has the top silhouette (0.228), computed on the 29\% of points it d
 and an ARI of only 0.050. In both cases silhouette excludes noise, so a method can raise it by
 discarding the hard points.
 \todo{All}{One paragraph, one line per dataset:
-D4 best silhouette (HDBSCAN) has the worst ARI, rank correlation $-0.80$ (Ky);
+D4 under the rule DBSCAN has the top silhouette (0.560) but ARI 0.039, against 0.731 for K-Means++; Spearman $-0.80$ (Ky);
 D7 K-Means top silhouette 0.343, GMM best ARI 0.774 vs 0.654 (Hoang Anh);
 D6 DBSCAN silhouette 0.42 vs K-Means++ 0.28, ARI 0.31 vs 0.90 (Lam);
 D8 unscaled K-means silhouette 0.540 from price bands, against 0.317 standardised (Wei Yew, written in

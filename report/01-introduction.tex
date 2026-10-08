@@ -41,10 +41,10 @@ the labelled datasets where we ran them (D1, D5, D6, D7), not as part of the mai
 
 \subsection{Findings in brief}
 % Sources: lam/results/{make_moons,fashion_mnist,wine}_results.csv; hoanganh/results/breast_cancer_results.csv;
-% SC4020-Ky/data/raw/main.csv (Ecoli); weiyew/sc4020-earthquake/results/{case_density_regions,
+% SC4020-Ky/results/{main,shared_rule}.csv (Ecoli); weiyew/sc4020-earthquake/results/{case_density_regions,
 % method_comparison,ablation_distance}.csv; weiyew/sc4020-hdb/results/comparison.csv.
 % RQ2 count, method with top silhouette vs method with top ARI, density settings within the 50% noise cap:
-% D1 K-means 0.495 (ARI 0.481) vs Spectral 1.000; D4 HDBSCAN 0.483 (0.339) vs K-Means++ 0.731;
+% D1 K-means 0.495 (ARI 0.481) vs Spectral 1.000; D4 DBSCAN 0.560 (0.039) vs K-Means++ 0.731;
 % D5 K-means 0.202 (0.343) vs Spectral 0.398; D6 HDBSCAN 0.359 (0.263) vs K-means 0.897;
 % D7 K-means 0.343 (0.654) vs GMM 0.774; D8 K-means is top on both (not counted).
 \begin{description}\itemsep1pt
@@ -68,7 +68,11 @@ none. HDBSCAN raised the clustered share of the Americas from 20\% to 62\%, at t
 densest belts (78\% against 90\%). Nothing we tried produced meaningful density clusters on D8 with all
 four features: capping the size of the largest cluster only made the rule select storey bands.
 \end{description}
-\todo{Lam, Ky, Hoang Anh}{confirm the RQ2 numbers above are your settings under the shared selection
+% [Ky]: D4 confirmed under the shared rule (SC4020-Ky/results/shared_rule.csv): DBSCAN has the top
+% silhouette, 0.560 with ARI 0.039; HDBSCAN is 0.559 with ARI 0.038. Spearman -0.80 holds both under the
+% rule and at each method's best-ARI setting. Fake-data check now also run on D3 and D4
+% (SC4020-Ky/results/fake_data_check.csv), so "ran on D2 and D8" above can widen.
+\todo{Lam, Hoang Anh}{confirm the RQ2 numbers above are your settings under the shared selection
 rule (Section~\ref{sec:protocol}); the comment above lists each one.}
 
 Section~\ref{sec:methods} describes the methods and Section~\ref{sec:experiments} the datasets,

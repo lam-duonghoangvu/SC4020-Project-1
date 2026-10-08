@@ -13,7 +13,7 @@ Ky's 1965--2016 earthquakes replaced by the 2023 surface-distance pipeline?}}
 \midrule
 D1 & make\_moons (synthetic)          & Lam            & 1{,}000  & 2        & 2 classes    & curved shapes (control) \\
 D2 & Earthquakes, 2023, M$\geq$4.5    & Wei Yew        & 7{,}643  & 2        & none         & long belts, uneven density \\
-D3 & Uber NYC pickups, Apr 2014       & Ky, Hoang Anh  & \decide{6k or 15k} & 2 & none      & density contrast in a city \\
+D3 & Uber NYC pickups, Apr 2014       & Ky, Hoang Anh  & 15{,}000 & 2 & none      & density contrast in a city \\
 D4 & Ecoli                            & Ky             & 336      & 7        & 8 classes    & dimensionality, rare classes \\
 D5 & Fashion-MNIST (PCA)              & Lam            & 3{,}000  & 50       & 10 classes   & high dimensions \\
 D6 & Wine                             & Lam, Hoang Anh & 178      & 13       & 3 classes    & silhouette vs labels \\
@@ -44,7 +44,17 @@ cut the map. There are no labels.
 % [Hoang Anh]: my setup, for the merged paragraph. April 2014 file, 564,516 rows; 558,019 inside the
 % box lat 40.57 to 40.92, lon -74.15 to -73.70; random sample of 15,000 (seed 42).
 % Source: hoanganh/notebooks/03_uber_pickups.ipynb; hoanganh/src/sc4020/data.py (load_uber_pickups).
-\todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
+% [Ky]: setup agreed with Hoang Anh. Same file, box, sample size and seed, so both pipelines cluster the
+% same 15,000 points (K-means k=5 silhouette 0.475 in both). Ky projects to km; Hoang Anh uses haversine.
+% Source: SC4020-Ky/src/data.py (load_uber).
+Uber pickups in New York City in April 2014, from the trip records the city's Taxi and Limousine
+Commission released to FiveThirtyEight~\cite{fivethirtyeight2014}: 564{,}516 pickups, each a latitude
+and longitude. We keep the 558{,}019 inside a box around the city (latitude 40.57 to 40.92, longitude
+$-74.15$ to $-73.70$), which drops GPS errors, and sample 15{,}000 at random (seed 42). For K-means and
+DBSCAN the coordinates are projected to kilometres about the mean latitude, so $\varepsilon$ is a
+distance on the ground. Pickups crowd into Midtown and Lower Manhattan, with smaller dense spots at the
+two airports and sparse demand in the outer boroughs, so density varies widely with no clear gap between
+areas. There are no labels.
 \paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
 \paragraph{D5 Fashion-MNIST.} % Lam. lam/src/sc4020/data.py (load_fashion_mnist), lam/notebooks/03_fashion_mnist.ipynb
 Fashion-MNIST~\cite{xiao2017} holds 70{,}000 $28\times28$ greyscale images of 10 clothing classes.

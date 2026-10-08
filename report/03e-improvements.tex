@@ -3,6 +3,8 @@
 
 % Rubric: "discuss or implement possible solutions to improve the methods".
 % Each row: a failure we observed, its cause, the fix we implemented, and the measured effect.
+% [Ky] Sources: K-Means++ row SC4020-Ky/results/ablation.csv (init, Ecoli); D3 gap = silhouette minus
+% shuffled-data silhouette at K=2 and K=5, SC4020-Ky/results/fake_data_check.csv.
 
 \begin{table}[h]\centering\small
 \caption{Implemented improvements. Each fix targets a failure observed in Section~\ref{sec:comparison}.}
@@ -12,13 +14,13 @@
 \textbf{Failure} & \textbf{Cause} & \textbf{Fix} & \textbf{Data} & \textbf{Before $\to$ after} & \textbf{Owner} \\
 \midrule
 Clusters split at $180^\circ$ & flat lat/lon & surface distance & D2 & 0 $\to$ 92 of 92 pairs kept & Wei Yew \\
-Poor local optimum & random seeding & K-Means++ & D4 & ARI 0.493 $\to$ 0.731 & Ky \\
+Poor local optimum & random seeding & K-Means++ & D4 & ARI 0.485 $\to$ 0.561 (30 seeds) & Ky \\
 Sparse belts lost & one global $\varepsilon$ & HDBSCAN & D2 & Americas kept 20\% $\to$ 62\% & Wei Yew \\
 One feature dominates & unequal scales & standardisation & D4 & ARI 0.497 $\to$ 0.731 & Ky \\
 Clusters are storey bands & recorded steps & jitter within step & D8 & band clusters 107 of 124 $\to$ 0 of 23 & Wei Yew \\
 Curved clusters cut & convex assumption & spectral clustering & D1 & ARI 0.481 $\to$ 1.000 & Lam \\
 \ha{Classes of unequal spread} & equal-size assumption & GMM, full covariance & D7 & ARI 0.654 $\to$ 0.774 & Hoang Anh \\
-Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & D2 null gap 0.015 $\to$ 0.144; D3 \todo{Ky}{?} & Ky, Wei Yew \\
+Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & D2 null gap 0.015 $\to$ 0.144; D3 0.089 $\to$ 0.113 & Ky, Wei Yew \\
 \bottomrule
 \end{tabular}}
 \end{table}

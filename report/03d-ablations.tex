@@ -4,8 +4,14 @@
 % Rubric: "ablation study of the key components". One change at a time, everything else fixed.
 
 \subsubsection{A: Initialisation (K-Means vs K-Means++)}
-\todo{Ky}{Port Ablation A (30 seeds, D3/D4). Add ARI mean $\pm$ s.d.\ over the 30 seeds:
-the 0.24 ARI claim currently rests on seed 42 only.}
+% [Ky] Sources: SC4020-Ky/results/ablation.csv (rows ablation=init), init_seeds.csv (one row per seed).
+On D3 ($K=5$) and D4 ($K=7$) each initialisation ran from one start with 30 seeds. On D4, K-Means++
+lowers the mean inertia by 25\% (845 to 632) and the mean iterations from 17.7 to 11.0, and raises ARI
+from $0.485\pm0.095$ to $0.561\pm0.104$. That gain is a third of the gap between the two main runs
+(10 starts, seed 42: ARI 0.493 against 0.731), so the larger figure rests on one seed. On D3 the mean
+inertia is the same for both (within 0.01\%); only the iterations fall, from 22.7 to 15.5, and two runs
+agree at ARI 0.96 with random starts and 0.98 with K-Means++.
+\todo{Ky}{Inertia table and Figure f6 if space allows.}
 
 % Sources: weiyew/sc4020-earthquake/results/kmeans_init_ablation_summary.csv;
 % weiyew/sc4020-hdb/results/kmeans_init_ablation.csv (max gap_to_best_% per init, mean n_iter).
@@ -56,12 +62,14 @@ meridian). Top: on the sphere, clusters cross the line. Bottom: on flat degrees,
 system at the line. Cause: flat coordinates treat $179.9^\circ$E and $179.9^\circ$W as $359.8^\circ$ apart.}
 \label{fig:abl_sphere}
 \end{figure}
-\decide{Ky's projected-km pipeline has the same $\pm180^\circ$ cut. Rerun D3 on the sphere,
-or state that city scale makes it irrelevant.}
+% [Ky]: decided, no rerun. SC4020-Ky/src/data.py: D3 box longitude -74.15 to -73.70, latitude 40.57 to 40.92.
+D3 lies more than $105^\circ$ from the $180^\circ$ meridian and spans $0.45^\circ$ of longitude, so the cut
+cannot occur there; across its $0.35^\circ$ of latitude the projection to kilometres changes the east--west
+scale by at most 0.3\%.
 
 \subsubsection{C: Feature scaling}
-\todo{Ky}{D4: standardisation lifts K-Means++ ARI 0.497 $\to$ 0.731; DBSCAN unaffected once
-$\varepsilon$ is re-tuned.}
+\todo{Ky}{D4: standardisation lifts K-Means++ ARI 0.497 $\to$ 0.731; DBSCAN 0.481 $\to$ 0.455, little change once
+$\varepsilon$ is re-tuned (SC4020-Ky/results/ablation.csv).}
 
 % Source: weiyew/sc4020-hdb/results/kmeans_sensitivity.csv; price share from
 % weiyew/sc4020-hdb/notebooks/eda.ipynb, section 9.
