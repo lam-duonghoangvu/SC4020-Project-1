@@ -52,10 +52,18 @@ Commission released to FiveThirtyEight~\cite{fivethirtyeight2014}: 564{,}516 pic
 and longitude. We keep the 558{,}019 inside a box around the city (latitude 40.57 to 40.92, longitude
 $-74.15$ to $-73.70$), which drops GPS errors, and sample 15{,}000 at random (seed 42). For K-means and
 DBSCAN the coordinates are projected to kilometres about the mean latitude, so $\varepsilon$ is a
-distance on the ground. Pickups crowd into Midtown and Lower Manhattan, with smaller dense spots at the
-two airports and sparse demand in the outer boroughs, so density varies widely with no clear gap between
-areas. There are no labels.
-\paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
+distance on the ground. Pickups crowd into lower and midtown Manhattan (71\% of the sample), with
+smaller dense spots at the two airports and sparse demand in the outer boroughs. The distance to the
+8th nearest pickup runs from 0.017\,km to 0.418\,km (5th to 95th percentile), but the dense and sparse
+areas meet with no clear gap between them. There are no labels.
+% [Ky] 71%, k-distance percentiles: SC4020-Ky/results/case_stats.csv.
+\paragraph{D4 Ecoli.} % Ky. SC4020-Ky/src/data.py (load_ecoli); class sizes SC4020-Ky/results/case_stats.csv.
+The UCI Ecoli data~\cite{horton1996}: 336 proteins of \emph{E.~coli}, each described by seven scores
+computed from its amino-acid sequence and labelled with one of eight sites in the cell where the protein
+is found. Features are standardised. The classes are very unequal: the five largest hold 143, 77, 52, 35
+and 20 proteins, the three smallest 5, 2 and 2. D4 is hard for density methods in two ways. Seven
+dimensions already spread the points so that a density threshold separates less well, and the rare
+classes are too small to form a dense region of their own, so a density method tends to call them noise.
 \paragraph{D5 Fashion-MNIST.} % Lam. lam/src/sc4020/data.py (load_fashion_mnist), lam/notebooks/03_fashion_mnist.ipynb
 Fashion-MNIST~\cite{xiao2017} holds 70{,}000 $28\times28$ greyscale images of 10 clothing classes.
 We pool the train and test files, scale pixels to $[0,1]$, draw a class-stratified sample of 3{,}000

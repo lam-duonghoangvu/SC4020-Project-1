@@ -5,11 +5,46 @@
 % rule, parameters, complexity, assumption it makes, how it fails.
 
 \subsection{K-Means and K-Means++}
-\todo{Ky}{Port Sec.~3.1.}
+% Ky. Code: SC4020-Ky/src/core.py (run_kmeans)
+K-means~\cite{lloyd1982} looks for $k$ centres $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$ that minimise
+the within-cluster sum of squares (inertia), $J=\sum_{i=1}^{n}\min_j\lVert\mathbf{x}_i-\boldsymbol{\mu}_j\rVert^2$.
+Each iteration assigns every point to its nearest centre and moves each centre to the mean of its points.
+$J$ never rises, so the method stops at a local optimum that depends on the starting centres. One
+iteration costs $O(nkd)$. Random starts pick $k$ data points uniformly. K-means++~\cite{arthur2007} picks
+the first centre at random and each next one with probability proportional to its squared distance from
+the nearest centre already chosen. Only the start differs, so we treat the two as one method with two
+initialisations (Ablation~A). We use scikit-learn's \texttt{KMeans} with 10 starts; the only parameter is
+$k$. Because $J$ sums squared Euclidean distances, K-means suits compact, roughly round clusters of
+similar spread. It cuts curved or elongated clusters, gives every point a cluster, so outliers pull the
+centres, and depends on the scale of each feature (Ablation~C).
 \subsection{DBSCAN}
-\todo{Ky}{Port Sec.~3.2.}
+% Ky. Code: SC4020-Ky/src/core.py (run_dbscan, k_distance_curve, knee)
+DBSCAN~\cite{ester1996} takes a radius $\varepsilon$ and a count \texttt{minPts}. A point is a core point
+if at least \texttt{minPts} points lie within $\varepsilon$ of it. Core points within $\varepsilon$ of
+each other join the same cluster, points within $\varepsilon$ of a core point join its cluster as border
+points, and every other point is noise. The method needs no $k$ and assumes no shape, and on coordinates
+$\varepsilon$ is a distance on the ground that an analyst can judge. With a spatial index a fit costs
+about $O(n\log n)$ in few dimensions, rising towards $O(n^2)$ in many dimensions or with a large
+$\varepsilon$. A reference value for $\varepsilon$ comes from the k-distance curve, each point's distance
+to its \texttt{minPts}-th nearest neighbour in sorted order; its knee is the point farthest from the line
+joining the two ends of the curve. The weakness is the single radius. It assumes all clusters have
+similar density, so a radius that separates dense clusters calls sparse ones noise, and one that keeps
+sparse clusters merges dense ones. In many dimensions distances become alike~\cite{beyer1999}, and a
+radius separates little.
 \subsection{HDBSCAN}
-\todo{Ky}{Port Sec.~3.3.}
+% Ky. Code: SC4020-Ky/src/core.py (run_hdbscan)
+HDBSCAN~\cite{campello2013} removes $\varepsilon$. Each point's core distance is the distance to its
+$m$-th nearest neighbour, and the mutual reachability distance
+$d_{\mathrm{mr}}(a,b)=\max\{\mathrm{core}(a),\mathrm{core}(b),d(a,b)\}$ pushes points in sparse regions
+apart. A minimum spanning tree under $d_{\mathrm{mr}}$ holds the DBSCAN clusterings at every density
+level at once. The tree is condensed by dropping any split that leaves fewer than
+\texttt{min\_cluster\_size} points, and the clusters that persist over the widest range of density are
+kept; the remaining points are noise. Different branches can thus be cut at different densities, which is
+what DBSCAN cannot do. We use scikit-learn's \texttt{HDBSCAN}; the main parameter is
+\texttt{min\_cluster\_size}, and $m$ (\texttt{min\_samples}) defaults to it. A fit costs between
+$O(n\log n)$ and $O(n^2)$. Because \texttt{min\_cluster\_size} is a count, the result changes with the
+size of the sample. HDBSCAN can call large parts of the data noise, and like DBSCAN it has nothing to
+find where the data have no density gaps.
 \subsection{Gaussian Mixture Model}
 % Lam. Code: lam/src/sc4020/clustering.py
 A Gaussian mixture model (GMM) treats the data as drawn from $k$ Gaussians,

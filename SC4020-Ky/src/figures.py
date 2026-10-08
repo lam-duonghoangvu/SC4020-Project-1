@@ -163,6 +163,31 @@ for ax, nm in zip(axes, DS):
     ax2.set_ylabel("iterations", fontsize=6.5)
 fig.tight_layout(); fig.savefig(f"{FIG}/f6_init.png"); plt.close(fig)
 
+# ------------------------------- F6b init ablation, team report (D3, D4 only)
+# One measure per panel, no second axis. Colours: categorical slots 1-2 of the
+# dataviz reference palette, validated for colour-blind separation.
+seeds = pd.read_csv(f"{RES}/init_seeds.csv")
+INIT_COL = {"KMeans": "#2a78d6", "KMeans++": "#eb6834"}
+INIT_LAB = {"KMeans": "random", "KMeans++": "K-Means++"}
+panels = [("UberNYC", "inertia", "D3 Uber: gap to best inertia (%)"),
+          ("Ecoli", "inertia", "D4 Ecoli: gap to best inertia (%)"),
+          ("Ecoli", "ari", "D4 Ecoli: ARI against the sites")]
+rng = np.random.default_rng(SEED)
+fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.3))
+for ax, (nm, col, title) in zip(axes, panels):
+    s = seeds[seeds.dataset == nm]
+    vals = 100 * (s.inertia / s.inertia.min() - 1) if col == "inertia" else s.ari
+    for x, meth in enumerate(["KMeans", "KMeans++"]):
+        v = vals[s.method == meth].to_numpy()
+        ax.scatter(x + rng.uniform(-.15, .15, len(v)), v, s=10, color=INIT_COL[meth],
+                   alpha=.75, linewidths=0)
+        ax.hlines(v.mean(), x - .28, x + .28, color="#222222", lw=1.6)
+    ax.set_xticks([0, 1]); ax.set_xticklabels([INIT_LAB[m] for m in INIT_COL])
+    ax.set_xlim(-.6, 1.6)
+    ax.set_title(f"{title}\nK={int(s.k.iloc[0])}, 30 seeds, 1 start", fontsize=7)
+    ax.grid(axis="x", visible=False)
+fig.tight_layout(); fig.savefig(f"{FIG}/f6_init_d3d4.png"); plt.close(fig)
+
 # -------------------------------------------------- F7 dimensionality + scaling
 d = abl[abl.ablation == "dimensionality"]
 sc = abl[abl.ablation == "scaling"]

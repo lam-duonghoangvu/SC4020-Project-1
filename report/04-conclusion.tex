@@ -1,6 +1,23 @@
 \section{Conclusion}\label{sec:conclusion}
 \owner{Ky}
-\todo{Ky}{Summary of findings with numbers; answer the title question.}
+% [Ky]: draft; every number is quoted from Sections 3.3 to 3.5. Adjust once the title is decided.
+We compared K-means, K-means++, DBSCAN and HDBSCAN on eight datasets, each chosen to test one data
+property, with GMM, spectral and agglomerative clustering as reference points. Density beats centroids
+when clusters are separated by gaps and have any shape, in few dimensions: on D1 DBSCAN reaches ARI 0.98
+against 0.48 for K-means, and on D2 HDBSCAN follows belts that K-means merges. Centroids win when classes
+are compact and touch, or the data have many dimensions: on D4 K-Means++ reaches ARI 0.697 without labels
+while both density methods fall to 0.04, and the ranking reverses between 3 and 4 principal components.
+Where the data have no gaps at all, as in the core of D3 and in D8, neither family finds natural groups.
+Density methods return one dominant cluster, and K-means draws borders where its objective puts them.
+
+The silhouette did not tell us which case we were in. On five of the six labelled datasets the method
+with the top silhouette was not the one that matched the labels best, and on D4 it ranks the four methods
+almost in reverse (Spearman $\rho=-0.80$). Rerunning each result on fake data helps where a method finds
+nothing real (D4, D8), but not where it finds the wrong structure (D2). Known remedies, namely surface
+distance, HDBSCAN for uneven density, standardisation and K-means++, repaired the failures they target,
+each at a cost, and none produced clusters in data with no gaps. The choice of method should follow from
+what the data look like and what the analysis needs, and every score should be checked against fake data
+and against the points it ignores.
 
 \subsection*{Limitations}
 \habegin
@@ -10,6 +27,11 @@ know. The label-free criteria happen to agree here (the silhouette picks $k=3$ o
 K-means), so the cost is small on these two tables, but both are small (178 and 569 points) and their
 density settings were ranked by DBCV, not by the silhouette used elsewhere.
 \haend
+
+% [Ky]: my line for D3 and D4. Sources: SC4020-Ky/results/shared_rule.csv, case_stats.csv.
+D3 has no labels, so its clusters are judged against known geography only, and it is one 15{,}000-point
+sample of one month. The D4 settings with the best ARI use the labels and overstate what an analyst could
+reach without them; D4 is also small (336 proteins), so a single protein moves a rare class's share by up to 50\%.
 
 \todo{All}{One line each: D2 has no ground truth; D8 has no location feature; oracle ARI on labelled
 data is optimistic; datasets up to 50 dimensions.}

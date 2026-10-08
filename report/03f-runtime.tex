@@ -26,7 +26,10 @@ one fit takes 0.011\,s for DBSCAN, 0.079\,s for K-Means++, 0.18\,s for Spectral,
 and 2.80\,s for GMM. GMM is the slowest here: with full covariances each EM step costs
 $O(nkd^2)$ with $d=50$. These times exclude parameter search, which refits DBSCAN 15 times and
 HDBSCAN 6 times.
-\todo{Ky}{Existing Fig.~9 runtime at $n\leq23{,}412$, if kept.}
+% [Ky] Source: SC4020-Ky/results/shared_rule.csv (runtime_s, one fit at the chosen setting).
+On D3 (15{,}000 points, 2 dimensions) one fit takes 0.04 to 0.06\,s for K-means, 0.52\,s for DBSCAN and
+1.1\,s for HDBSCAN; on D4 (336 proteins) every method takes under 0.03\,s (Table~\ref{tab:cmp_d3d4}). At
+these sizes runtime does not decide the choice of method.
 
 \begin{figure}[h]\centering
 \includegraphics[width=0.75\textwidth]{hdb_scalability}

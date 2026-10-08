@@ -2,7 +2,23 @@
 \begin{abstract}
 \noindent
 \owner{Ky (write last)}
-\todo{Ky}{150--250 words: task, methods compared, datasets, 3 headline findings with numbers, one-line conclusion.}
+% [Ky]: draft (about 230 words) following the thesis proposed below; revise once the title is decided.
+Clustering methods differ in what they take a cluster to be, and real data break those ideas in
+different ways. We compare K-means, K-means++, DBSCAN and HDBSCAN on eight datasets, each chosen to test
+one data property: curved shapes, long belts of uneven density, density contrast within a city, rare
+classes, high dimensions, classes of unequal spread, and data with no gaps between groups. We ask where
+each method fails, whether the scores available without labels reveal those failures, and whether known
+remedies repair them. Each method failed where the data broke its idea of a cluster. K-means cut the
+curved classes of make\_moons (ARI 0.48 against 0.98 for DBSCAN); one DBSCAN radius clustered 90\% of
+earthquakes in the dense south-west Pacific but 20\% in the Americas; and in 7 to 50 dimensions the
+density methods fell to ARI 0.03 to 0.05. The silhouette did not reveal these failures: on five of six
+labelled datasets the method with the top silhouette was not the one that matched the labels best, and
+on Ecoli it ranked the four methods almost in reverse (Spearman $\rho=-0.80$). Rerunning each result on
+fake data caught methods that found nothing real, but not ones that found the wrong structure. Surface
+distance, HDBSCAN and standardisation each fixed a specific failure at a cost; none produced clusters in
+data with no gaps. The choice of method should follow from the structure of the data, and every score
+needs a check against fake data.
+
 
 \decide{Thesis, proposed 7 Oct (Wei Yew), to match the research question in Section~\ref{sec:intro}:
 each method fails where the data break its idea of a cluster (RQ1); the silhouette does not reveal

@@ -35,6 +35,35 @@ D8 & HDBSCAN (200)        & 2  & 28.5\% & 68.6\% & 0.160 & 1.133 & 0.072 & 0.101
 \end{tabular}}
 \end{table}
 
+% [Ky] Source: SC4020-Ky/results/shared_rule.csv (columns as in Table tab:cmp_d2d8; null S on shuffled
+% columns for K-means and D4, uniform points in the bounding box for density methods on D3).
+\begin{table}[h]\centering\small
+\caption{D3 and D4, same columns as Table~\ref{tab:cmp_d2d8}. Top: settings chosen without labels
+(Section~\ref{sec:protocol}). Bottom: D4 settings with the best ARI, which need the labels. ``none'':
+fewer than 2 clusters formed on the fake data. D3 has no labels.}
+\label{tab:cmp_d3d4}
+\resizebox{\textwidth}{!}{\begin{tabular}{llrrrrrrrrr}
+\toprule
+\textbf{Data} & \textbf{Method} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
+& \textbf{ARI} & \textbf{NMI} & \textbf{Time (s)} & \textbf{Null S} \\
+\midrule
+D3 & K-Means ($K=5$)          & 5 & 0\%   & 44.5\% & 0.475 & 0.699 & -- & -- & 0.064 & 0.361 \\
+D3 & K-Means++ ($K=5$)        & 5 & 0\%   & 44.5\% & 0.475 & 0.699 & -- & -- & 0.036 & 0.362 \\
+D3 & DBSCAN (1.58\,km, 32)    & 2 & 1.9\% & 96.1\% & \textbf{0.779} & 0.172 & -- & -- & 0.521 & none \\
+D3 & HDBSCAN (250)            & 3 & 4.8\% & 91.2\% & 0.641 & 0.266 & -- & -- & 1.111 & 0.395 \\
+\midrule
+D4 & K-Means ($K=5$)          & 5 & 0\%   & 44.6\% & 0.408 & 0.743 & 0.684 & 0.652 & 0.022 & 0.191 \\
+D4 & K-Means++ ($K=5$)        & 5 & 0\%   & 44.0\% & 0.405 & 0.747 & \textbf{0.697} & 0.666 & 0.015 & 0.185 \\
+D4 & DBSCAN (2.09, 5)         & 2 & 1.8\% & 96.7\% & \textbf{0.560} & 0.504 & 0.039 & 0.135 & 0.002 & 0.548 \\
+D4 & HDBSCAN (5)              & 2 & 0.3\% & 97.0\% & 0.559 & 0.637 & 0.038 & 0.118 & 0.002 & 0.551 \\
+\midrule
+D4 & K-Means++ ($K=7$), best ARI  & 7 & 0\%    & 43.5\% & 0.354 & 0.861 & \textbf{0.731} & 0.679 & 0.017 & 0.195 \\
+D4 & DBSCAN (0.97, 8), best ARI   & 2 & 21.1\% & 53.6\% & 0.434 & 0.908 & 0.489 & 0.488 & 0.001 & 0.278 \\
+D4 & HDBSCAN (12), best ARI       & 2 & 37.2\% & 44.3\% & 0.483 & 0.789 & 0.339 & 0.376 & 0.002 & none \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsubsection{Curved and elongated clusters}\label{sec:shape}
 \owner{Lam (D1), Wei Yew (D2)}
 % Lam: lam/results/make_moons_results.csv
@@ -87,15 +116,30 @@ and a dense one (bottom, the south-west Pacific); grey points are noise. Success
 belts, at the cost of trimming the dense ones. Cause: density varies along and between belts.}
 \label{fig:density}
 \end{figure}
-% [Ky]: numbers for the 15,000-point D3 (SC4020-Ky/results/sweep.csv, shared_rule.csv): knee eps 0.525 km
-% gives 13 clusters, 3.1% noise, silhouette 0.04; the rule picks eps 1.58 km, minPts 32: 2 clusters,
-% 1.9% noise, silhouette 0.779 (Manhattan and the outer boroughs merged). HDBSCAN (mcs 250): 3 clusters,
-% 4.8% noise, silhouette 0.641. K-means K=5: 0.475.
-\todo{Ky + Hoang Anh}{D3: Midtown vs outer boroughs; knee $\varepsilon$ vs silhouette-optimal $\varepsilon$.}
+% [Ky] Sources: SC4020-Ky/results/case_stats.csv (cluster shares and centres), sweep.csv (knee setting),
+% shared_rule.csv (chosen settings). Hoang Anh: please check against your D3 run.
+On D3 density varies as much, but inside one connected mass. Lower and midtown Manhattan, the rest of
+Manhattan, Brooklyn and western Queens meet without a gap, so the density methods keep them together.
+DBSCAN at the knee of the k-distance curve ($\varepsilon=0.525$\,km) returns 13 clusters, yet 91.6\% of
+pickups sit in the first; the others are the two airports and small spots in Jersey City, Astoria, Harlem
+and Brooklyn, and the silhouette is 0.04. The rule prefers $\varepsilon=1.58$\,km: two clusters, the city
+(96.1\%) and JFK, with a silhouette of 0.779 (Table~\ref{tab:cmp_d3d4}). HDBSCAN finds the city, JFK and
+LaGuardia (91.2\%, 2.0\% and 1.9\%; 4.8\% noise). The airports are the only parts of D3 with a gap around
+them, and both density methods find them. K-means ($K=5$) does divide the core, into southern Manhattan
+(44.5\%), northern Manhattan with the Bronx (39.9\%) and Brooklyn (9.3\%), plus the two airport areas, but
+those borders follow the K-means objective, not gaps in the data. Its silhouette is 0.475 against 0.362
+on shuffled coordinates, so the split is not random, but nothing in the data marks where it should fall.
 
 \subsubsection{High dimensions}\label{sec:dims}
 \owner{Ky (D4), Lam (D5)}
-\todo{Ky}{D4: crossover between 3 and 4 PCA dimensions (Ablation D).}
+% [Ky] Sources: SC4020-Ky/results/ablation.csv (dimensionality), shared_rule.csv.
+D4 has only seven dimensions, but it already shows the effect. Given its best $\varepsilon$ in each case,
+DBSCAN beats K-Means++ on the first two and three principal components (ARI 0.575 and 0.618 against 0.468
+and 0.466) and loses from four components on, by 0.276 on all seven (0.455 against 0.731; Ablation~D).
+Without labels the density methods do far worse. On all seven features the rule picks settings where one
+cluster holds 97\% of proteins, with ARI 0.04 (Table~\ref{tab:cmp_d3d4}), and their silhouettes (0.560
+and 0.559) are barely above the same settings on shuffled columns (0.548 and 0.551). The fake-data check
+flags both. K-means at the $K=5$ the silhouette picks reaches ARI 0.684 to 0.697.
 % Lam: lam/results/fashion_mnist_results.csv
 On D5 ($d=50$) the ranking reverses from D1. The $k$-based methods do best: Spectral (ARI 0.398),
 GMM (0.391) and K-Means++ (0.343), all well short of the labels because shirts, T-shirts, pullovers
@@ -208,6 +252,10 @@ D7 & HDBSCAN (5)                 & 2 & 59.2\% & 38.5\% & \textbf{0.364} & 0.844 
 
 \begin{figure}[h]\centering
 \includegraphics[width=0.72\textwidth]{f8_metric_disagreement}
-\caption{\todo{Ky}{existing figure; extend to D5--D8 or make one panel per dataset.}}
+% [Ky] Source: SC4020-Ky/results/main.csv (Ecoli rows, best-ARI settings); SC4020-Ky/src/figures.py.
+\caption{D4, silhouette against ARI for the four methods at each method's best-ARI setting. Left: the
+two scores. Right: their ranks; points on the dashed line would mean the two agree. The silhouette ranks
+the methods almost in reverse (Spearman $\rho=-0.80$); the same holds at the settings chosen without
+labels (Table~\ref{tab:cmp_d3d4}). Cause: the silhouette ignores noise and favours compact clusters.}
 \label{fig:silhouette}
 \end{figure}

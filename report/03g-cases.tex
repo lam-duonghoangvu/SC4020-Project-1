@@ -27,7 +27,15 @@ fail on the same data because they assume convex clusters.
 DBSCAN, HDBSCAN and Spectral follow the curves (ARI 0.98, 0.95, 1.00). Grey crosses: noise.}
 \label{fig:lam-d1}
 \end{figure}
-\todo{Ky}{K-Means++ on D4: compact classes in 7 dimensions.}
+% [Ky] Sources: SC4020-Ky/results/main.csv, shared_rule.csv, case_stats.csv (class shares).
+\paragraph{K-Means++ on D4: compact classes in seven dimensions.} With $K=7$, K-Means++ matches the
+localisation sites best of all methods on D4 (ARI 0.731; with the $K=5$ the silhouette picks, 0.697). It
+keeps 96\% of the largest class (cytoplasm, 143 proteins) in one cluster, 86 to 91\% of the three
+mid-sized classes, and all 5 proteins of the outer-membrane lipoproteins together. It succeeds because the
+classes are compact groups in seven dimensions that touch, with no density gap between them: the case
+K-means is built for, and the case where a density threshold fails (Ablation~D). The inner-membrane
+proteins (77) are its weak spot: they overlap the related inner-membrane classes, and only 52\% end up in
+one cluster.
 % Sources: weiyew/sc4020-hdb/results/ablation_features.csv, ablation_flat_design_clusters.csv
 % (variant "floor area and lease only").
 \paragraph{HDBSCAN on D8, floor area and lease only: flat designs.} This feature set was chosen after
@@ -85,9 +93,16 @@ DBSCAN merges most classes into one cluster (ARI 0.03); HDBSCAN calls 71\% of po
 Spectral, GMM and K-Means++ reach ARI 0.40, 0.39, 0.34.}
 \label{fig:lam-d5}
 \end{figure}
-\todo{Ky}{HDBSCAN on D4: 37\% noise removes rare classes. This is the best-ARI setting
-(\texttt{min\_cluster\_size} 12, ARI 0.339); the shared rule picks 5 instead: 2 clusters, ARI 0.038
-(SC4020-Ky/results/shared_rule.csv). Say which one.}
+% [Ky] Sources: SC4020-Ky/results/shared_rule.csv (Ecoli HDBSCAN rows), case_stats.csv (noise per class).
+\paragraph{HDBSCAN on D4: rare classes called noise.} Even at its best setting by ARI, a minimum
+cluster size of 12, HDBSCAN returns two clusters and calls 37\% of proteins noise (ARI 0.339),
+yet it has the highest silhouette of the four methods at their best-ARI settings (0.483,
+Figure~\ref{fig:silhouette}). The noise is not spread evenly. It takes 95\% of the outer-membrane class (20
+proteins), every protein of two of the three smallest classes (5 and 2), and about half of the inner-membrane
+and periplasm classes. Cause: a class of 2 to 20 proteins in seven dimensions is not dense enough to form
+a cluster of 12, so HDBSCAN discards exactly the classes that are hardest to find, and the silhouette,
+which skips noise, rewards it. The setting the rule picks without labels avoids the noise only by putting
+97\% of proteins in one cluster (ARI 0.038).
 
 \begin{figure}[h]\centering
 \figtodo{All}{success/failure panel grid: one panel per case above}

@@ -11,7 +11,43 @@ from $0.485\pm0.095$ to $0.561\pm0.104$. That gain is a third of the gap between
 (10 starts, seed 42: ARI 0.493 against 0.731), so the larger figure rests on one seed. On D3 the mean
 inertia is the same for both (within 0.01\%); only the iterations fall, from 22.7 to 15.5, and two runs
 agree at ARI 0.96 with random starts and 0.98 with K-Means++.
-\todo{Ky}{Inertia table and Figure f6 if space allows.}
+
+% [Ky] Gaps and the count of seeds with ARI >= 0.7: SC4020-Ky/results/case_stats.csv (Ablation A rows);
+% figure from SC4020-Ky/src/figures.py (F6b).
+Table~\ref{tab:init} measures each run the same way as the D2 and D8 runs below: how far its inertia lies
+above the best of all 60 runs. K-Means++ moves most D4 starts close to the best (mean gap 8.9\% against 45.7\%),
+but its worst start is as bad as the worst random one (55\%). Figure~\ref{fig:init} shows why the ARI
+gain is modest. The starts fall into two groups, one near ARI 0.73 and one near 0.5, and K-Means++
+reaches the high group in 8 of 30 seeds against 3 of 30. It raises the chance of a good start, but one
+start is still not enough. On D3, 29 of 30 starts with either method reach the best inertia, and one
+lands 28\% above it.
+
+\begin{table}[h]\centering\small
+\caption{Ablation A on D3 and D4: 30 seeds, one start each. Gap: inertia above the best of all 60 runs.
+Agreement: mean ARI between pairs of runs.}
+\label{tab:init}
+\begin{tabular}{llrrrrr}
+\toprule
+\textbf{Data} & \textbf{Start} & \textbf{Mean gap} & \textbf{Worst gap} & \textbf{Iterations}
+& \textbf{ARI} & \textbf{Agreement} \\
+\midrule
+D3 ($K=5$) & random    & 0.9\%  & 28.2\% & 22.7 & -- & 0.961 \\
+D3 ($K=5$) & K-Means++ & 0.9\%  & 28.4\% & 15.5 & -- & 0.979 \\
+\midrule
+D4 ($K=7$) & random    & 45.7\% & 55.8\% & 17.7 & $0.485\pm0.095$ & 0.645 \\
+D4 ($K=7$) & K-Means++ & 8.9\%  & 55.5\% & 11.0 & $0.561\pm0.104$ & 0.678 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{f6_init_d3d4}
+\caption{Ablation A, one dot per seed (30 per start method); bars mark the mean. Left and centre: inertia
+above the best run on D3 and D4. Right: ARI on D4. K-Means++ moves most D4 starts near the best inertia,
+and reaches the high-ARI group (about 0.73) in 8 of 30 seeds against 3 of 30 for random starts. Cause:
+spreading the starting centres out makes a good local optimum more likely, not certain.}
+\label{fig:init}
+\end{figure}
 
 % Sources: weiyew/sc4020-earthquake/results/kmeans_init_ablation_summary.csv;
 % weiyew/sc4020-hdb/results/kmeans_init_ablation.csv (max gap_to_best_% per init, mean n_iter).
@@ -68,8 +104,12 @@ cannot occur there; across its $0.35^\circ$ of latitude the projection to kilome
 scale by at most 0.3\%.
 
 \subsubsection{C: Feature scaling}
-\todo{Ky}{D4: standardisation lifts K-Means++ ARI 0.497 $\to$ 0.731; DBSCAN 0.481 $\to$ 0.455, little change once
-$\varepsilon$ is re-tuned (SC4020-Ky/results/ablation.csv).}
+% [Ky] Source: SC4020-Ky/results/ablation.csv (rows ablation=scaling).
+On D4, standardising the seven features raises K-Means++ ARI ($K=7$) from 0.497 to 0.731
+(Figure~\ref{fig:abl}, right). DBSCAN, given its best $\varepsilon$ in each case, moves slightly the other
+way, from 0.481 to 0.455. K-means sums squared distances, so until the features are scaled the ones with
+the widest range decide the partition. DBSCAN only counts neighbours within $\varepsilon$, and re-tuning
+$\varepsilon$ absorbs most of a change of scale.
 
 % Source: weiyew/sc4020-hdb/results/kmeans_sensitivity.csv; price share from
 % weiyew/sc4020-hdb/notebooks/eda.ipynb, section 9.
@@ -81,10 +121,40 @@ The raw partition agrees with the standardised one at ARI 0.261 only, and neithe
 silhouette, measured in each run's own units, cannot say which is right.
 
 \subsubsection{D: Dimensionality}
-\todo{Ky}{Port Ablation D. Call it PCA dimension; ``intrinsic dimensionality'' overclaims.}
+% [Ky] Source: SC4020-Ky/results/ablation.csv (rows ablation=dimensionality).
+We project D4 onto its first 2, 3, 4 and 5 principal components, keep all 7 features as the last case,
+and tune both methods again in each: DBSCAN with \texttt{minPts} 5 and the $\varepsilon$ with the best ARI,
+K-Means++ with $K=7$ (Table~\ref{tab:dim}). DBSCAN leads at 2 and 3 components, and K-Means++ from 4 on.
+DBSCAN peaks at 3 components and then falls, while K-Means++ rises from 4 components to 7, where it leads
+by 0.276. As components are added, distances between points become more alike~\cite{beyer1999}, so a
+radius separates dense from sparse less well, while the added components still carry class information
+that K-means can use. The viable-$\varepsilon$ column shows a second effect. On 2 components only 12.5\%
+of the $\varepsilon$ grid gives at least 2 clusters with under 50\% noise, so DBSCAN's best result there
+would be hard to find without labels. We vary the number of PCA components, not the intrinsic dimension
+of the data, which we do not know.
+
+\begin{table}[h]\centering\small
+\caption{Ablation D on D4: ARI against the number of principal components. Viable $\varepsilon$: share of
+a 40-point $\varepsilon$ grid that gives at least 2 clusters with under 50\% noise.}
+\label{tab:dim}
+\begin{tabular}{lrrrl}
+\toprule
+\textbf{Components} & \textbf{DBSCAN ARI} & \textbf{K-Means++ ARI} & \textbf{Viable $\varepsilon$} & \textbf{Better} \\
+\midrule
+2 & \textbf{0.575} & 0.468 & 12.5\% & DBSCAN \\
+3 & \textbf{0.618} & 0.466 & 67.5\% & DBSCAN \\
+4 & 0.453 & \textbf{0.512} & 57.5\% & K-Means++ \\
+5 & 0.399 & \textbf{0.520} & 67.5\% & K-Means++ \\
+7 (all) & 0.455 & \textbf{0.731} & 65.0\% & K-Means++ \\
+\bottomrule
+\end{tabular}
+\end{table}
 \begin{figure}[h]\centering
 \includegraphics[width=\textwidth]{f7_ablations}
-\caption{\todo{Ky}{existing figure (Ablations C and D on D4).}}
+\caption{Ablations C and D on D4. Left: ARI against the number of principal components; DBSCAN leads
+at 2 and 3, K-Means++ from 4. Centre: share of the $\varepsilon$ grid that gives at least 2 clusters with
+under 50\% noise. Right: standardisation helps K-Means++ (0.497 to 0.731) and not DBSCAN (0.481 to 0.455).
+Cause: K-means depends on feature scale, and a density threshold weakens as dimensions are added.}
 \label{fig:abl}
 \end{figure}
 

@@ -1,0 +1,86 @@
+dataset,setting,item,value
+UberNYC,"k-distance, minPts 8",p5_km,0.0168500973168193
+UberNYC,"k-distance, minPts 8",p50_km,0.06056503235756038
+UberNYC,"k-distance, minPts 8",p95_km,0.41818370809099115
+UberNYC,data,share_in_midtown_box,0.7114666666666667
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)",noise_frac,0.0314
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)",n_clusters,13.0
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 0 (40.741, -73.984)",0.9162666666666667
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 1 (40.645, -73.784) JFK",0.019866666666666668
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 2 (40.771, -73.868) LaGuardia",0.016466666666666668
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 3 (40.828, -73.926)",0.0013333333333333333
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 4 (40.841, -73.942)",0.0011333333333333334
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 5 (40.823, -73.951)",0.0008
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 6 (40.745, -74.033)",0.0044
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 7 (40.721, -74.035)",0.0017333333333333333
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 8 (40.763, -73.922)",0.0034
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 9 (40.773, -73.886) LaGuardia",0.0016666666666666668
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 10 (40.853, -73.930)",0.0006
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 11 (40.624, -73.963)",0.0005333333333333334
+UberNYC,"DBSCAN knee (eps 0.525 km, minPts 8)","cluster 12 (40.657, -73.958)",0.0004
+UberNYC,"DBSCAN rule (eps 1.576 km, minPts 32)",noise_frac,0.019
+UberNYC,"DBSCAN rule (eps 1.576 km, minPts 32)",n_clusters,2.0
+UberNYC,"DBSCAN rule (eps 1.576 km, minPts 32)","cluster 0 (40.742, -73.982)",0.9611333333333333
+UberNYC,"DBSCAN rule (eps 1.576 km, minPts 32)","cluster 1 (40.645, -73.784) JFK",0.019866666666666668
+UberNYC,HDBSCAN rule (mcs 250),noise_frac,0.04833333333333333
+UberNYC,HDBSCAN rule (mcs 250),n_clusters,3.0
+UberNYC,HDBSCAN rule (mcs 250),"cluster 0 (40.646, -73.783) JFK",0.020466666666666668
+UberNYC,HDBSCAN rule (mcs 250),"cluster 1 (40.741, -73.985)",0.9124
+UberNYC,HDBSCAN rule (mcs 250),"cluster 2 (40.771, -73.870) LaGuardia",0.0188
+UberNYC,K-Means++ K=5,noise_frac,0.0
+UberNYC,K-Means++ K=5,n_clusters,5.0
+UberNYC,K-Means++ K=5,"cluster 0 (40.792, -73.889) LaGuardia",0.03953333333333333
+UberNYC,K-Means++ K=5,"cluster 1 (40.684, -73.967)",0.09313333333333333
+UberNYC,K-Means++ K=5,"cluster 2 (40.654, -73.786) JFK",0.023733333333333332
+UberNYC,K-Means++ K=5,"cluster 3 (40.730, -73.997)",0.4448666666666667
+UberNYC,K-Means++ K=5,"cluster 4 (40.764, -73.975)",0.39873333333333333
+Ecoli,data,class 0 size,143.0
+Ecoli,data,class 1 size,77.0
+Ecoli,data,class 2 size,2.0
+Ecoli,data,class 3 size,2.0
+Ecoli,data,class 4 size,35.0
+Ecoli,data,class 5 size,20.0
+Ecoli,data,class 6 size,5.0
+Ecoli,data,class 7 size,52.0
+Ecoli,HDBSCAN best-ARI (mcs 12),class 0 (n=143) noise_frac,0.17482517482517482
+Ecoli,HDBSCAN best-ARI (mcs 12),class 0 (n=143) share in its main cluster,0.8251748251748252
+Ecoli,HDBSCAN best-ARI (mcs 12),class 1 (n=77) noise_frac,0.4935064935064935
+Ecoli,HDBSCAN best-ARI (mcs 12),class 1 (n=77) share in its main cluster,0.4935064935064935
+Ecoli,HDBSCAN best-ARI (mcs 12),class 2 (n=2) noise_frac,1.0
+Ecoli,HDBSCAN best-ARI (mcs 12),class 2 (n=2) share in its main cluster,0.0
+Ecoli,HDBSCAN best-ARI (mcs 12),class 3 (n=2) noise_frac,0.5
+Ecoli,HDBSCAN best-ARI (mcs 12),class 3 (n=2) share in its main cluster,0.5
+Ecoli,HDBSCAN best-ARI (mcs 12),class 4 (n=35) noise_frac,0.34285714285714286
+Ecoli,HDBSCAN best-ARI (mcs 12),class 4 (n=35) share in its main cluster,0.6571428571428571
+Ecoli,HDBSCAN best-ARI (mcs 12),class 5 (n=20) noise_frac,0.95
+Ecoli,HDBSCAN best-ARI (mcs 12),class 5 (n=20) share in its main cluster,0.05
+Ecoli,HDBSCAN best-ARI (mcs 12),class 6 (n=5) noise_frac,1.0
+Ecoli,HDBSCAN best-ARI (mcs 12),class 6 (n=5) share in its main cluster,0.0
+Ecoli,HDBSCAN best-ARI (mcs 12),class 7 (n=52) noise_frac,0.4423076923076923
+Ecoli,HDBSCAN best-ARI (mcs 12),class 7 (n=52) share in its main cluster,0.5576923076923077
+Ecoli,K-Means++ K=7,class 0 (n=143) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 0 (n=143) share in its main cluster,0.958041958041958
+Ecoli,K-Means++ K=7,class 1 (n=77) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 1 (n=77) share in its main cluster,0.5194805194805194
+Ecoli,K-Means++ K=7,class 2 (n=2) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 2 (n=2) share in its main cluster,0.5
+Ecoli,K-Means++ K=7,class 3 (n=2) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 3 (n=2) share in its main cluster,0.5
+Ecoli,K-Means++ K=7,class 4 (n=35) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 4 (n=35) share in its main cluster,0.9142857142857143
+Ecoli,K-Means++ K=7,class 5 (n=20) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 5 (n=20) share in its main cluster,0.9
+Ecoli,K-Means++ K=7,class 6 (n=5) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 6 (n=5) share in its main cluster,1.0
+Ecoli,K-Means++ K=7,class 7 (n=52) noise_frac,0.0
+Ecoli,K-Means++ K=7,class 7 (n=52) share in its main cluster,0.8653846153846154
+UberNYC,"Ablation A, KMeans, K=5",gap_to_best_mean_pct,0.9414546233684644
+UberNYC,"Ablation A, KMeans, K=5",gap_to_best_max_pct,28.20129539541316
+UberNYC,"Ablation A, KMeans++, K=5",gap_to_best_mean_pct,0.9491971263348857
+UberNYC,"Ablation A, KMeans++, K=5",gap_to_best_max_pct,28.43753720486464
+Ecoli,"Ablation A, KMeans, K=7",gap_to_best_mean_pct,45.69935171079606
+Ecoli,"Ablation A, KMeans, K=7",gap_to_best_max_pct,55.80049108390086
+Ecoli,"Ablation A, KMeans, K=7",seeds_with_ari_ge_0.7,3.0
+Ecoli,"Ablation A, KMeans++, K=7",gap_to_best_mean_pct,8.929767096187936
+Ecoli,"Ablation A, KMeans++, K=7",gap_to_best_max_pct,55.455034434800176
+Ecoli,"Ablation A, KMeans++, K=7",seeds_with_ari_ge_0.7,8.0
