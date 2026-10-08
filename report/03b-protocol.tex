@@ -60,7 +60,14 @@ density settings that pass the constraints (at least 2 clusters, at most 50\% no
 clusters) are ranked by DBCV~\cite{moulavi2014}, a score built for density clusters, instead of the
 silhouette. Agglomerative clustering uses Ward linkage at the number of classes.
 \haend
-\todo{Ky, Lam}{one line each for your datasets, and GMM components and spectral affinity.}
+% Lam: lam/src/sc4020/hyperparams.py
+GMM and Spectral (Lam): $k$ set to the number of classes on labelled data, else the silhouette-best
+K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) for D6 and Mall,
+10-nearest-neighbour graph for D1 and D5. Lam's DBSCAN and HDBSCAN runs: \texttt{minPts} from
+$\{\lfloor m/2\rfloor, m, 2m\}$ with $m=\mathrm{clip}(2d,4,20)$, $\varepsilon$ from $\{0.5,0.75,1,1.5,2\}\times$
+the k-distance knee; \texttt{min\_cluster\_size} from $\{5,10,20,30,50,n/20\}$; the setting with the
+best silhouette (noise excluded, $\geq2$ clusters, $\leq50\%$ noise) is kept.
+\todo{Ky}{one line for your datasets.}
 
 \paragraph{Reproducibility.}
 On D2 and D8 every random step uses seed 0, and repeated runs use seeds 0 to 19. They ran on Python

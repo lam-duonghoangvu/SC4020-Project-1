@@ -15,7 +15,18 @@ diagnosis best of all methods (ARI 0.774). K-means places its boundary too far i
 class (ARI 0.654); the full covariance of each GMM component lets the boundary follow the compact benign
 class. Cause of success: the model allows clusters of different spread.
 \haend
-\todo{Lam}{DBSCAN / Spectral on D1.}
+\paragraph{Spectral and DBSCAN on D1 (Lam).} % lam/results/make_moons_results.csv
+Both follow the curve of each moon (Figure~\ref{fig:lam-d1}): Spectral reaches ARI 1.000 and DBSCAN
+0.982, leaving 9 outlying points as noise. They succeed for the same reason: each moon is a chain of
+close neighbours, and the gap between moons is wider than any link in the chain. K-Means++ and GMM
+fail on the same data because they assume convex clusters.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.9\textwidth]{lam_d1_moons_grid}
+\caption{D1 make\_moons. K-Means++ and GMM cut both moons with a straight boundary (ARI 0.48, 0.49);
+DBSCAN, HDBSCAN and Spectral follow the curves (ARI 0.98, 0.95, 1.00). Grey crosses: noise.}
+\label{fig:lam-d1}
+\end{figure}
 \todo{Ky}{K-Means++ on D4: compact classes in 7 dimensions.}
 % Sources: weiyew/sc4020-hdb/results/ablation_features.csv, ablation_flat_design_clusters.csv
 % (variant "floor area and lease only").
@@ -60,7 +71,20 @@ density contrast in 30 dimensions.}
 \label{fig:bc_cases}
 \end{figure}
 \haend
-\todo{Lam}{DBSCAN on D5.}
+\paragraph{DBSCAN on D5 (Lam).} % lam/results/fashion_mnist_results.csv
+DBSCAN puts most of the ten classes into one cluster, a second small cluster at the edge, and 33\%
+of images into noise (ARI 0.033; Figure~\ref{fig:lam-d5}). The cause is one global $\varepsilon$ in 50
+dimensions: an $\varepsilon$ large enough to connect points within a class also connects the
+overlapping classes to each other, and a smaller one turns most points into noise. The $k$-based
+methods, which are not tied to a density threshold, reach ARI 0.34--0.40 on the same data.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.9\textwidth]{lam_d5_fashion_grid}
+\caption{D5 Fashion-MNIST (3{,}000 images; clustered in 50 PCA dimensions, plotted in the first two).
+DBSCAN merges most classes into one cluster (ARI 0.03); HDBSCAN calls 71\% of points noise (ARI 0.05).
+Spectral, GMM and K-Means++ reach ARI 0.40, 0.39, 0.34.}
+\label{fig:lam-d5}
+\end{figure}
 \todo{Ky}{HDBSCAN on D4: 37\% noise removes rare classes.}
 
 \begin{figure}[h]\centering

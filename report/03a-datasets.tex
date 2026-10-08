@@ -24,7 +24,12 @@ D8 & HDB resale flats, 2017--2026     & Wei Yew        & 20{,}000\textsuperscrip
 \par\raggedright\footnotesize\textsuperscript{b}\,Random sample of 234{,}294 usable sales; all 234{,}294 used for runtime (Section~\ref{sec:runtime}).
 \end{table}
 
-\paragraph{D1 make\_moons.} \todo{Lam}{generator settings (noise 0.07), why it is the shape control.}
+\paragraph{D1 make\_moons.} % Lam. lam/src/sc4020/data.py (load_make_moons)
+Two interleaving half-circles from scikit-learn's \texttt{make\_moons}~\cite{pedregosa2011}: 1{,}000 points,
+Gaussian noise 0.07, seed 42, then standardised. The two classes are dense, equal in size and clearly
+separated by a gap, but neither is convex: each moon wraps around the end of the other, so the
+straight boundary a centroid method draws must cut both. With the true labels known and no other
+difficulty present, D1 isolates cluster shape as the single property under test.
 \paragraph{D2 Earthquakes.}
 % Source: weiyew/sc4020-earthquake/notebooks/eda.ipynb, sections 1, 4, 8 and 12.
 Every event of magnitude 4.5 or more in 2023 from the USGS ComCat catalogue~\cite{usgs2017}: 7{,}651 events, of which
@@ -41,7 +46,14 @@ cut the map. There are no labels.
 % Source: hoanganh/notebooks/03_uber_pickups.ipynb; hoanganh/src/sc4020/data.py (load_uber_pickups).
 \todo{Ky + Hoang Anh}{one merged paragraph; agree sample size and bounding box.}
 \paragraph{D4 Ecoli.} \todo{Ky}{Port from Sec.~4.1.}
-\paragraph{D5 Fashion-MNIST.} \todo{Lam}{3{,}000-image sample, PCA to 50 dims; why subsampled.}
+\paragraph{D5 Fashion-MNIST.} % Lam. lam/src/sc4020/data.py (load_fashion_mnist), lam/notebooks/03_fashion_mnist.ipynb
+Fashion-MNIST~\cite{xiao2017} holds 70{,}000 $28\times28$ greyscale images of 10 clothing classes.
+We pool the train and test files, scale pixels to $[0,1]$, draw a class-stratified sample of 3{,}000
+images (300 per class, seed 42), and project the 784 pixels onto 50 principal components, which keep
+86.5\% of the variance. The sample keeps Spectral, DBSCAN and HDBSCAN within reach on a laptop
+(Section~\ref{sec:runtime}) while keeping the classes balanced. D5 is hard because the space is high
+dimensional, so distances concentrate~\cite{beyer1999}, and because several classes (shirt, T-shirt,
+pullover, coat) overlap heavily with no density gap between them.
 \habegin
 \paragraph{D6 Wine.} \hatag{}
 % [Hoang Anh]: drafted from my run; Lam to review and merge.
