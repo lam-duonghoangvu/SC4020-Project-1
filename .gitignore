@@ -15,5 +15,9 @@ wheels/
 # Raw datasets (see lam/data/README.md for download instructions)
 lam/data/*.csv
 
+# Ky's raw datasets (download commands in SC4020-Ky/README.md)
+SC4020-Ky/data/*.csv
+SC4020-Ky/data/*.arff
+
 # Team datasets downloaded by hoanganh/comparison/team_data.py
 hoanganh/data/team/

@@ -12,7 +12,7 @@ import data as D
 import core as C
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FIG, RES = os.path.join(ROOT, "figs"), os.path.join(ROOT, "results")
+FIG, RES = os.path.join(ROOT, "figures"), os.path.join(ROOT, "results")
 SEED = 42
 plt.rcParams.update({"font.size": 8, "figure.dpi": 200,
                      "axes.grid": True, "grid.alpha": .25,

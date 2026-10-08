@@ -5,12 +5,13 @@ Three datasets, two application domains:
   UBER  - NYC Uber pickups              (spatial, no ground truth)
   ECOLI - protein localisation sites    (non-spatial, ground truth available)
 """
+import os
 import numpy as np
 import pandas as pd
 from scipy.io.arff import loadarff
 
 R_EARTH_KM = 6371.0088
-DATA = __file__.rsplit("/", 2)[0] + "/data"
+DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 SEED = 42
 
 
@@ -44,12 +45,15 @@ def load_earthquakes(min_mag=5.5):
     }
 
 
-def load_uber(n_sample=6000, seed=SEED):
-    df = pd.read_csv(f"{DATA}/uber_apr14.csv")
+def load_uber(n_sample=15000, seed=SEED):
+    """April 2014 pickups, same setup as Hoang Anh (hoanganh/src/sc4020/data.py):
+    FiveThirtyEight uber-raw-data-apr14.csv (564,516 rows), NYC box
+    lat 40.57-40.92, lon -74.15 to -73.70 (558,019 rows), 15,000 sampled, seed 42."""
+    df = pd.read_csv(f"{DATA}/uber-raw-data-apr14.csv")
     df.columns = [c.strip().strip('"') for c in df.columns]
     df = df.rename(columns={"Lat": "lat", "Lon": "lon"})
-    # NYC bounding box - drops a small number of GPS artefacts
-    df = df[(df.lat.between(40.50, 40.95)) & (df.lon.between(-74.10, -73.70))]
+    df = df[(df.lat.between(40.57, 40.92)) & (df.lon.between(-74.15, -73.70))]
+    df = df.dropna(subset=["lat", "lon"])
     df = df.sample(n=min(n_sample, len(df)), random_state=seed)
     lat = df["lat"].to_numpy()
     lon = df["lon"].to_numpy()

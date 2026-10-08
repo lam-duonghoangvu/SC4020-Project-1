@@ -176,24 +176,41 @@ for ds in DSETS:
 
 # ===========================================================================
 # 5. ABLATION A - initialisation, 30 seeds
+#    ARI vs labels per seed (Ecoli), and mean pairwise ARI between seeds
+#    (stability, all datasets). Per-seed rows -> results/init_seeds.csv
 # ===========================================================================
 print("\n[5] ablation A: initialisation (30 seeds)")
+from sklearn.metrics import adjusted_rand_score
+rows_seed = []
 for ds in DSETS:
-    X, nm = ds["X"], ds["name"]
+    X, y, nm = ds["X"], ds["y"], ds["name"]
     k = best_k[nm]["selected"]
     for init, label in [("random", "KMeans"), ("k-means++", "KMeans++")]:
-        inert, iters, times = [], [], []
+        inert, iters, times, aris, labs = [], [], [], [], []
         for s in range(30):
             lab, rt, ex = C.run_kmeans(X, k, init, s, n_init=1)
             inert.append(ex["inertia"]); iters.append(ex["n_iter"]); times.append(rt)
+            labs.append(lab)
+            ari = adjusted_rand_score(y, lab) if y is not None else np.nan
+            aris.append(ari)
+            rows_seed.append({"dataset": nm, "method": label, "k": k, "seed": s,
+                              "inertia": ex["inertia"], "n_iter": ex["n_iter"],
+                              "ari": ari})
+        pair = [adjusted_rand_score(labs[i], labs[j])
+                for i in range(30) for j in range(i + 1, 30)]
         rows_abl.append({"ablation": "init", "dataset": nm, "method": label,
                          "k": k, "inertia_mean": np.mean(inert),
                          "inertia_std": np.std(inert), "inertia_min": np.min(inert),
                          "inertia_cv_pct": 100 * np.std(inert) / np.mean(inert),
                          "iter_mean": np.mean(iters), "iter_std": np.std(iters),
-                         "runtime_mean_s": np.mean(times)})
+                         "runtime_mean_s": np.mean(times),
+                         "ari_mean": np.mean(aris), "ari_std": np.std(aris),
+                         "ari_min": np.min(aris), "ari_max": np.max(aris),
+                         "pairwise_ari_mean": np.mean(pair)})
         print(f"  {nm:12s} {label:9s} inertia {np.mean(inert):.4g}"
-              f" +/- {np.std(inert):.3g}  iters {np.mean(iters):.1f}")
+              f" +/- {np.std(inert):.3g}  iters {np.mean(iters):.1f}"
+              f"  ARI {np.mean(aris):.3f} +/- {np.std(aris):.3f}"
+              f"  seed-agreement ARI {np.mean(pair):.3f}")
 
 # ===========================================================================
 # 6. ABLATION B - distance metric on spatial data
@@ -266,6 +283,57 @@ for nd in [2, 3, 4, 5, 7]:
                      "dbscan_clusters": m["n_clusters"], "kmeans_ari": m2["ari"]})
     print(f"  {nd}D  viable-eps={ok/len(grid):.2f}  DBSCAN ARI={m['ari']:.3f}"
           f"  KMeans ARI={m2['ari']:.3f}")
+
+# ===========================================================================
+# 9. FAKE-DATA CHECK - each chosen setting rerun on data with no joint
+#    structure (group protocol, report/03b-protocol.tex). K-Means: columns
+#    shuffled independently. Density methods: uniform points in the bounding
+#    box for coordinates, shuffled columns for tables. 3 fakes, mean reported.
+#    K-Means is also checked at the unconstrained-silhouette k.
+# ===========================================================================
+print("\n[9] fake-data check")
+rows_null = []
+N_FAKE = 3
+
+
+def shuffled(X, rng):
+    return np.column_stack([rng.permutation(X[:, j]) for j in range(X.shape[1])])
+
+
+def uniform_box(X, rng):
+    return rng.uniform(X.min(0), X.max(0), size=X.shape)
+
+
+for ds in [ub, ec]:
+    X, y, nm = ds["X"], ds["y"], ds["name"]
+    rng = np.random.default_rng(SEED)
+    fake_sh = [shuffled(X, rng) for _ in range(N_FAKE)]
+    fake_dn = [uniform_box(X, rng) for _ in range(N_FAKE)] if ds["spatial"] else fake_sh
+    runs = [("KMeans++", f"k={best_k[nm]['silhouette']} (unconstrained silhouette)", fake_sh,
+             lambda Z, k=best_k[nm]["silhouette"]: C.run_kmeans(Z, k, "k-means++", SEED)[0]),
+            ("KMeans++", f"k={best_k[nm]['selected']} (selected)", fake_sh,
+             lambda Z, k=best_k[nm]["selected"]: C.run_kmeans(Z, k, "k-means++", SEED)[0]),
+            ("DBSCAN", json.dumps(dbscan_best[nm]), fake_dn,
+             lambda Z, p=dbscan_best[nm]: C.run_dbscan(Z, p["eps"], p["min_samples"])[0]),
+            ("HDBSCAN", json.dumps(hdb_best[nm]), fake_dn,
+             lambda Z, p=hdb_best[nm]: C.run_hdbscan(Z, p["min_cluster_size"])[0])]
+    for meth, setting, fakes, fit in runs:
+        real = C.evaluate(X, fit(X), y, SEED)
+        fm = [C.evaluate(Z, fit(Z), None, SEED) for Z in fakes]
+        fsil = [f["silhouette"] for f in fm]
+        null_sil = np.nanmean(fsil) if np.isfinite(fsil).any() else np.nan
+        rows_null.append({"dataset": nm, "method": meth, "setting": setting,
+                          "fake": "shuffled" if fakes is fake_sh else "uniform_box",
+                          "real_silhouette": real["silhouette"],
+                          "real_clusters": real["n_clusters"], "real_noise": real["noise_frac"],
+                          "null_silhouette": null_sil,
+                          "null_clusters_mean": np.mean([f["n_clusters"] for f in fm]),
+                          "null_noise_mean": np.mean([f["noise_frac"] for f in fm]),
+                          "gap": real["silhouette"] - null_sil})
+        print(f"  {nm:10s} {meth:9s} {setting:40s} real S={real['silhouette']:.3f}"
+              f"  fake S={null_sil:.3f}  fake clusters={rows_null[-1]['null_clusters_mean']:.1f}")
+pd.DataFrame(rows_null).to_csv(f"{OUT}/fake_data_check.csv", index=False)
+pd.DataFrame(rows_seed).to_csv(f"{OUT}/init_seeds.csv", index=False)
 
 # ===========================================================================
 np.save(f"{OUT}/labels.npy", np.array(
