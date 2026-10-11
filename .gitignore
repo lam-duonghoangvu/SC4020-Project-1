@@ -21,3 +21,7 @@ SC4020-Ky/data/*.arff
 
 # Team datasets downloaded by hoanganh/comparison/team_data.py
 hoanganh/data/team/
+
+# Built submission package (submission/make_code_zip.py)
+submission/group_*_code/
+submission/group_*_code.zip
