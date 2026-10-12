@@ -79,10 +79,10 @@ On D3 and D4 the same library versions ran on Python 3.12.10, on an Intel Core U
 of memory; every random step uses seed 42, and repeated runs use seeds 0 to 29.
 % Versions: lam/uv.lock (scikit-learn 1.9.1, NumPy 2.5.3) and notebook metadata (Python 3.13.15);
 % hoanganh notebook metadata (Python 3.13.7), hoanganh/pyproject.toml (scikit-learn >= 1.9.1);
-% seeds: hoanganh/comparison/run_report_tables.py lines 35-36.
-D1 and D5 ran on Python 3.13.15 with scikit-learn 1.9.1 and NumPy 2.5.3. D6 and D7 ran on Python 3.13.7
+% seeds: hoanganh/comparison/run_report_tables.py lines 35-36; lam/src/sc4020/clustering.py:37 and data.py:65,101.
+D1 and D5 ran on Python 3.13.15 with scikit-learn 1.9.1 and NumPy 2.5.3, with seed 42. D6 and D7 ran on Python 3.13.7
 with scikit-learn 1.9; their models use seed 42 and the column shuffle for the fake-data check uses
 seed 0. Each dataset has its own code, but every pipeline computes the scores with the same
 scikit-learn functions, so the tables in Section~\ref{sec:comparison} share their columns.
-\todo{Lam}{model seed for D1 and D5, and hardware (CPU, memory).}
+\todo{Lam}{hardware (CPU, memory) for D1 and D5.}
 \todo{Hoang Anh}{hardware (CPU, memory) and exact scikit-learn version for D6 and D7.}
