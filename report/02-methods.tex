@@ -75,10 +75,9 @@ $O(n^2)$ memory, and a full eigendecomposition $O(n^3)$; the sparse $k$-NN graph
 eigensolver is much cheaper but still limits $n$ (Section~\ref{sec:runtime}). Spectral clustering
 needs $k$, has no noise label, and is sensitive to the affinity scale.
 \subsection{Agglomerative clustering}
-\habegin
 % Source: hoanganh/src/sc4020/clustering.py (wine_models, breast_cancer_models);
 % ARI from hoanganh/results/{wine,breast_cancer}_results.csv.
-\hatag{}Agglomerative clustering starts with every point as its own cluster and repeatedly merges the two
+Agglomerative clustering starts with every point as its own cluster and repeatedly merges the two
 closest clusters until $k$ remain. The linkage defines which two are closest. We use Ward
 linkage~\cite{ward1963}, which merges the pair whose union raises the total within-cluster variance
 least. This is the K-means objective, searched greedily from the bottom up. The method therefore
@@ -90,7 +89,6 @@ Like K-means, it assumes compact clusters, assigns every point and has no noise 
 weakness is that a merge is never undone, so an early mistake stays in the final partition. On both
 datasets it matched the labels less well than K-means (ARI 0.790 against 0.897 on D6, 0.575 against
 0.654 on D7).
-\haend
 
 \begin{table}[h]\centering\small
 \caption{Structural assumptions of the methods compared.}
@@ -98,7 +96,7 @@ datasets it matched the labels less well than K-means (ARI 0.790 against 0.897 o
 \resizebox{\textwidth}{!}{\begin{tabular}{lccccccc}
 \toprule
 & \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN}
-& \textbf{GMM} & \textbf{Spectral} & \hatag\textbf{Agglom.} \\
+& \textbf{GMM} & \textbf{Spectral} & \textbf{Agglom.} \\
 \midrule
 Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & ellipsoidal & connected (graph) & compact (Ward) \\
 Requires $k$               & yes & yes & no & no & yes & yes & yes \\

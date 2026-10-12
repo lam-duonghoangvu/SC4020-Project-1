@@ -19,13 +19,11 @@ what the data look like and what the analysis needs, and every score should be c
 and against the points it ignores.
 
 \subsection*{Limitations}
-\habegin
 % [Hoang Anh]: my line for D6 and D7. Source: hoanganh/comparison/results/team_results.csv (label_free_choice).
-\hatag{}On D6 and D7, the methods that need $k$ were given the number of classes, which an analyst would not
+On D6 and D7, the methods that need $k$ were given the number of classes, which an analyst would not
 know. The label-free criteria happen to agree here (the silhouette picks $k=3$ on D6 and $k=2$ on D7 for
 K-means), so the cost is small on these two tables, but both are small (178 and 569 points) and their
 density settings were ranked by DBCV, not by the silhouette used elsewhere.
-\haend
 
 % [Ky]: my line for D3 and D4. Sources: SC4020-Ky/results/shared_rule.csv, case_stats.csv.
 D3 has no labels, so its clusters are judged against known geography only, and it is one 15{,}000-point

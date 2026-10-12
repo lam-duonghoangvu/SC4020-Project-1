@@ -184,8 +184,7 @@ Ablation~C); D2 K-means silhouette flat at 0.516 to 0.532 for every $K$ from 4 t
 $K$ (Wei Yew, \nolinkurl{weiyew/sc4020-earthquake/results/kmeans_k_selection.csv});
 D5 HDBSCAN top silhouette with 71\% noise (Lam).}
 
-\habegin
-\paragraph{D7 Breast cancer.} \hatag{}
+\paragraph{D7 Breast cancer.}
 % Sources: hoanganh/results/breast_cancer_results.csv (K-Means, Agglomerative, GMM, Spectral);
 % hoanganh/comparison/results/team_results.csv and team_tuning.csv (DBSCAN, HDBSCAN: 6 and 18 settings).
 Given $k=2$, the four methods that assign every point score almost the same silhouette, 0.314 to
@@ -201,7 +200,7 @@ on what remains they score the two highest silhouettes of any method, 0.356 and 
 lowest ARI, 0.222 and 0.156. Without the noise cap of Section~\ref{sec:protocol}, the silhouette would
 rank the two worst results first.
 
-\paragraph{D6 Wine and the fake-data check.} \hatag{}
+\paragraph{D6 Wine and the fake-data check.}
 % [Hoang Anh]: from my run; Lam's run of D6 gives the same picture with other density settings.
 % Source: hoanganh/comparison/results/report_d6_d7.csv.
 D6 repeats the pattern inside the noise cap. DBSCAN and HDBSCAN pass the cap with about a third of the
@@ -213,11 +212,10 @@ on D7), and the density methods form no cluster at all on shuffled data. So each
 check, including the density results that match the labels worst: what they find, a dense core of one
 class, is real structure, but it is not the class structure. The check shows that a result is not an
 artefact of the marginals. It does not show which of several real structures a method has found.
-\haend
 
 \begin{table}[h]\centering\small
 % Source: hoanganh/comparison/results/report_d6_d7.csv (hoanganh/comparison/run_report_tables.py).
-\caption{\hatag D6 and D7 in the shared columns. S: silhouette; DB: Davies--Bouldin, both on clustered points
+\caption{D6 and D7 in the shared columns. S: silhouette; DB: Davies--Bouldin, both on clustered points
 only; null S: silhouette of the same setting on shuffled columns (``none'': no clusters formed). Every
 fit takes under 0.3\,s. On D7 the two density rows break the 50\% noise cap and are shown for
 comparison only. Bold: best S and best ARI per dataset.}

@@ -71,8 +71,7 @@ images (300 per class, seed 42), and project the 784 pixels onto 50 principal co
 (Section~\ref{sec:runtime}) while keeping the classes balanced. D5 is hard because the space is high
 dimensional, so distances concentrate~\cite{beyer1999}, and because several classes (shirt, T-shirt,
 pullover, coat) overlap heavily with no density gap between them.
-\habegin
-\paragraph{D6 Wine.} \hatag{}
+\paragraph{D6 Wine.}
 % [Hoang Anh]: drafted from my run; Lam to review and merge.
 % Source: hoanganh/notebooks/01_wine.ipynb; hoanganh/results/wine_results.csv; lam/results/wine_results.csv.
 The UCI Wine data~\cite{aeberhard1991}: 178 wines grown in one Italian region, each described by 13
@@ -83,9 +82,7 @@ members ran it independently and both obtained ARI 0.897. The dataset is in the 
 opposite reason. No sparse gap separates the cultivars, so the density methods return 2 clusters with
 about a third or more of the wines as noise, and the silhouette still prefers them
 (Section~\ref{sec:silhouette}).
-\haend
-\habegin
-\paragraph{D7 Breast cancer.} \hatag{}
+\paragraph{D7 Breast cancer.}
 % Source: hoanganh/notebooks/02_breast_cancer.ipynb; hoanganh/src/sc4020/data.py (load_breast_cancer_data).
 % Class spread: root-mean-square distance to the class centre on the 30 standardised features,
 % 4.06 benign and 5.47 malignant (computed on the same data from sklearn.datasets.load_breast_cancer).
@@ -97,7 +94,6 @@ smoothness and symmetry stay below 1. Two properties make the data hard. The cla
 malignant tumours lie 35\% further from their class centre than benign ones (5.47 against 4.06 in
 standardised units), which breaks the equal-size assumption of K-means. And the two classes form one
 connected mass in 30 dimensions, with no sparse gap for a density method to cut along.
-\haend
 \paragraph{D8 HDB resale.}
 % Source: weiyew/sc4020-hdb/notebooks/eda.ipynb, sections 6, 10, 11 and 17;
 % sample size: weiyew/sc4020-hdb/notebooks/clustering.ipynb, section 1;
