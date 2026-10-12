@@ -78,5 +78,9 @@ are straight lines. Spectral clustering replaces Euclidean distance with connect
 not, and the eigenvectors of the graph Laplacian separate them. ARI rises from 0.481 to 1.000. The
 cost is that $k$ and the graph must still be chosen, and the affinity matrix and eigenvectors limit
 how far the method scales (Section~\ref{sec:runtime}).
-\todo{All}{Proposed but not implemented: e.g.\ ground truth for D2 from plate-boundary maps;
-OPTICS; approximate spectral clustering for large $n$.}
+\paragraph{Proposed, not implemented (D2).} D2 could be scored rather than inspected: assigning each
+earthquake to the nearest segment of a published plate-boundary model would give labels for ARI, and
+show directly whether a cluster follows one boundary or joins several. OPTICS~\cite{ankerst1999}, which
+orders points by reachability so that clusters at several densities can be read from one plot, would
+show whether a single ordering explains both the dense and the sparse belts.
+\todo{Lam, Ky}{other proposals, e.g.\ approximate spectral clustering for large $n$.}

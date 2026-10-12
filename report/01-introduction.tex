@@ -57,8 +57,10 @@ gaps, both density methods returned one dominant cluster.
 method with the highest silhouette was not the one that matched the labels best. On D1 it ranks K-means
 first (0.495 against 0.392 for DBSCAN), although DBSCAN recovers the moons (ARI 0.98 against 0.48). On
 Ecoli (D4) it orders the four methods almost exactly opposite to ARI (Spearman $\rho=-0.80$). The
-fake-data check, which we ran on D2 and D8, does better, but only partly. It detects when a method finds nothing real: on D8 both
-density methods score below the same setting on shuffled data. It does not detect the wrong structure:
+fake-data check, which we ran on D2, D3, D4 and D8, does better, but only partly. It detects when a
+method finds nothing real: on D8 both density methods score below the same setting on shuffled data, and
+on D4 the HDBSCAN setting chosen without labels scores no better than on shuffled data (0.559 against
+0.551). It does not detect the wrong structure:
 on D2, K-means scores well above shuffled coordinates (silhouette 0.528 against 0.391) while merging
 unrelated belts. Two failures were found only by checks aimed at a known problem: clusters cut at the
 $180^\circ$ meridian, and clusters that are just one recorded storey band.
@@ -71,7 +73,7 @@ four features: capping the size of the largest cluster only made the rule select
 % [Ky]: D4 confirmed under the shared rule (SC4020-Ky/results/shared_rule.csv): DBSCAN has the top
 % silhouette, 0.560 with ARI 0.039; HDBSCAN is 0.559 with ARI 0.038. Spearman -0.80 holds both under the
 % rule and at each method's best-ARI setting. Fake-data check now also run on D3 and D4
-% (SC4020-Ky/results/fake_data_check.csv), so "ran on D2 and D8" above can widen.
+% (SC4020-Ky/results/fake_data_check.csv, shared_rule.csv: D4 HDBSCAN rule 0.559 vs null 0.551).
 \todo{Lam, Hoang Anh}{confirm the RQ2 numbers above are your settings under the shared selection
 rule (Section~\ref{sec:protocol}); the comment above lists each one.}
 
