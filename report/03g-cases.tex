@@ -15,7 +15,7 @@ diagnosis best of all methods (ARI 0.774). K-means places its boundary too far i
 class (ARI 0.654); the full covariance of each GMM component lets the boundary follow the compact benign
 class. Cause of success: the model allows clusters of different spread.
 \haend
-\paragraph{Spectral and DBSCAN on D1 (Lam).} % lam/results/make_moons_results.csv
+\paragraph{Spectral and DBSCAN on D1.} % lam/results/make_moons_results.csv
 Both follow the curve of each moon (Figure~\ref{fig:lam-d1}): Spectral reaches ARI 1.000 and DBSCAN
 0.982, leaving 9 outlying points as noise. They succeed for the same reason: each moon is a chain of
 close neighbours, and the gap between moons is wider than any link in the chain. K-Means++ and GMM
@@ -79,7 +79,7 @@ density contrast in 30 dimensions.}
 \label{fig:bc_cases}
 \end{figure}
 \haend
-\paragraph{DBSCAN on D5 (Lam).} % lam/results/fashion_mnist_results.csv
+\paragraph{DBSCAN on D5.} % lam/results/fashion_mnist_results.csv
 DBSCAN puts most of the ten classes into one cluster, a second small cluster at the edge, and 33\%
 of images into noise (ARI 0.033; Figure~\ref{fig:lam-d5}). The cause is one global $\varepsilon$ in 50
 dimensions: an $\varepsilon$ large enough to connect points within a class also connects the

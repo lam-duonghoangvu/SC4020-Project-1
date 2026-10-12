@@ -9,18 +9,18 @@
 \begin{table}[h]\centering\small
 \caption{Implemented improvements. Each fix targets a failure observed in Section~\ref{sec:comparison}.}
 \label{tab:improve}
-\resizebox{\textwidth}{!}{\begin{tabular}{llllll}
+\resizebox{\textwidth}{!}{\begin{tabular}{lllll}
 \toprule
-\textbf{Failure} & \textbf{Cause} & \textbf{Fix} & \textbf{Data} & \textbf{Before $\to$ after} & \textbf{Owner} \\
+\textbf{Failure} & \textbf{Cause} & \textbf{Fix} & \textbf{Data} & \textbf{Before $\to$ after} \\
 \midrule
-Clusters split at $180^\circ$ & flat lat/lon & surface distance & D2 & 0 $\to$ 92 of 92 pairs kept & Wei Yew \\
-Poor local optimum & random seeding & K-Means++ & D4 & ARI 0.485 $\to$ 0.561 (30 seeds) & Ky \\
-Sparse belts lost & one global $\varepsilon$ & HDBSCAN & D2 & Americas kept 20\% $\to$ 62\% & Wei Yew \\
-One feature dominates & unequal scales & standardisation & D4 & ARI 0.497 $\to$ 0.731 & Ky \\
-Clusters are storey bands & recorded steps & jitter within step & D8 & band clusters 107 of 124 $\to$ 0 of 23 & Wei Yew \\
-Curved clusters cut & convex assumption & spectral clustering & D1 & ARI 0.481 $\to$ 1.000 & Lam \\
-\ha{Classes of unequal spread} & equal-size assumption & GMM, full covariance & D7 & ARI 0.654 $\to$ 0.774 & Hoang Anh \\
-Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & D2 null gap 0.015 $\to$ 0.144; D3 0.089 $\to$ 0.113 & Ky, Wei Yew \\
+Clusters split at $180^\circ$ & flat lat/lon & surface distance & D2 & 0 $\to$ 92 of 92 pairs kept \\
+Poor local optimum & random seeding & K-Means++ & D4 & ARI 0.485 $\to$ 0.561 (30 seeds) \\
+Sparse belts lost & one global $\varepsilon$ & HDBSCAN & D2 & Americas kept 20\% $\to$ 62\% \\
+One feature dominates & unequal scales & standardisation & D4 & ARI 0.497 $\to$ 0.731 \\
+Clusters are storey bands & recorded steps & jitter within step & D8 & band clusters 107 of 124 $\to$ 0 of 23 \\
+Curved clusters cut & convex assumption & spectral clustering & D1 & ARI 0.481 $\to$ 1.000 \\
+\ha{Classes of unequal spread} & equal-size assumption & GMM, full covariance & D7 & ARI 0.654 $\to$ 0.774 \\
+Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D3 & D2 null gap 0.015 $\to$ 0.144; D3 0.089 $\to$ 0.113 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -71,7 +71,7 @@ before DBSCAN or HDBSCAN is the natural next step; on D7 the first two component
 the variance.
 \haend
 
-\paragraph{Spectral clustering for curved clusters (D1, Lam).} % lam/results/make_moons_results.csv
+\paragraph{Spectral clustering for curved clusters (D1).} % lam/results/make_moons_results.csv
 K-Means++ fails on D1 because it assigns each point to the nearest centroid, so cluster boundaries
 are straight lines. Spectral clustering replaces Euclidean distance with connectivity in a
 10-nearest-neighbour graph: points along one moon are linked by short hops, the two moons are
