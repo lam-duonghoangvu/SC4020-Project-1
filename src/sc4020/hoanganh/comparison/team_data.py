@@ -1,6 +1,6 @@
 """Loaders for every dataset the team uses, with each owner's preprocessing.
 
-Downloads go to data/hoanganh/team/ (gitignored); Kaggle datasets come from the
+Downloads go to data/ (gitignored); Kaggle datasets come from the
 kagglehub cache. Each loader returns a `sc4020.hoanganh.data.Dataset` whose `extra`
 holds the owner and, for map data, (Lat, Lon) in degrees for plotting.
 
@@ -34,7 +34,7 @@ from sc4020.weiyew.quake import usgs
 from sc4020.hoanganh import data
 from sc4020.hoanganh.data import Dataset
 
-DATA_DIR = REPO / "data" / "hoanganh" / "team"
+DATA_DIR = REPO / "data"
 EARTH_RADIUS_KM = 6371.0088
 
 EARTHQUAKES_1965_URL = "https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv"
@@ -140,7 +140,7 @@ def load_fashion_mnist(n_samples: int = 3000, n_pca: int = 50, random_state: int
 
 def load_earthquakes_1965_2016(min_mag: float = 5.5) -> Dataset:
     """Ky's catalogue: global M>=5.5 earthquakes, 1965-2016."""
-    df = pd.read_csv(_download(EARTHQUAKES_1965_URL, "earthquakes_1965_2016.csv"))
+    df = pd.read_csv(_download(EARTHQUAKES_1965_URL, "earthquakes.csv"))
     df = df[df["Magnitude"] >= min_mag].dropna(subset=["Latitude", "Longitude"])
     coords = df[["Latitude", "Longitude"]].to_numpy(dtype=float)
     return Dataset("earthquakes_1965_2016", _unit_vectors(*coords.T), None, ["x", "y", "z"], None,

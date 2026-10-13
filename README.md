@@ -12,7 +12,7 @@ One Python project (`pyproject.toml`), with each member's work split the same wa
 | `src/sc4020/<member>/` | code: `lam`, `hoanganh`, `ky`, `weiyew/quake`, `weiyew/hdb` |
 | `notebooks/<member>/` | notebooks |
 | `results/<member>/` | result CSVs (and figures) cited in the report |
-| `data/<member>/` | dataset instructions; downloaded data is gitignored |
+| `data/` | `README.md` lists every dataset and how to download it; downloads are gitignored |
 | `tests/weiyew/` | unit tests |
 | `docs/ky/` | Ky's individual draft report |
 | `submission/` | builds the code zip: `python submission/make_code_zip.py --group XX` |

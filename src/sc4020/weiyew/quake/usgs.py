@@ -1,4 +1,4 @@
-"""Download earthquake events from the USGS catalogue into data/raw/.
+"""Download earthquake events from the USGS catalogue into data/.
 
 Usage:
     python -m sc4020.weiyew.quake.usgs

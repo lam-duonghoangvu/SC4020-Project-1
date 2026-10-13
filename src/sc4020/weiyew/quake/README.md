@@ -10,8 +10,8 @@ Paths are from the repo root.
 
 ```
 src/sc4020/weiyew/quake/
-  paths.py      data/weiyew/quake/raw/, results/weiyew/quake/, results/weiyew/quake/figures/
-  usgs.py       download the USGS catalogue into data/raw/; load_earthquakes
+  paths.py      data/, results/weiyew/quake/, results/weiyew/quake/figures/
+  usgs.py       download the USGS catalogue into data/; load_earthquakes
   screening.py  Stage 0 tests: shuffled-null silhouette, HDBSCAN vs a null
   features.py   coordinates as radians (haversine) or 3D unit vectors (K-means); great-circle distances
   eda.py        helpers for the EDA notebook (region names, magnitude thresholds, grid-cell counts)
@@ -26,7 +26,7 @@ notebooks/weiyew/quake/
 src/sc4020/weiyew/quake/experiments/
   screening.py  Stage 0 screening of the earthquake locations
 tests/weiyew/quake/          pytest suite
-data/weiyew/quake/raw/       downloaded catalogue (gitignored, never submitted)
+data/                        downloaded catalogue (gitignored, never submitted)
 results/weiyew/quake/        CSVs written by experiments (per-point label files gitignored)
 results/weiyew/quake/figures/  plots written by experiments (gitignored)
 ```
@@ -48,7 +48,7 @@ uv run python -m sc4020.weiyew.quake.usgs                                       
 uv run python -m sc4020.weiyew.quake.usgs --start 2023-01-01 --end 2024-01-01 --min-magnitude 4.5
 ```
 
-The file lands in `data/weiyew/quake/raw/usgs_<start>_<end>_m<magnitude>.csv`. The USGS API refuses queries matching
+The file lands in `data/usgs_<start>_<end>_m<magnitude>.csv`. The USGS API refuses queries matching
 more than 20,000 events; narrow the dates or raise the magnitude if that happens.
 
 ## Running

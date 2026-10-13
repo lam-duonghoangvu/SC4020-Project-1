@@ -1,10 +1,10 @@
-"""Project paths: downloaded data under data/weiyew/quake/raw/, experiment outputs under
+"""Project paths: downloaded data under data/, experiment outputs under
 results/weiyew/quake/ and results/weiyew/quake/figures/."""
 
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
-RAW_DIR = PROJECT_ROOT / "data" / "weiyew" / "quake" / "raw"
+RAW_DIR = PROJECT_ROOT / "data"
 
 
 def results_dir():

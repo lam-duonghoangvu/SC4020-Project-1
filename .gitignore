@@ -16,12 +16,9 @@ wheels/
 # OS
 .DS_Store
 
-# Raw datasets: never committed (each member's loader or data/<member>/README.md says how to get them)
-data/**/*.csv
-data/**/*.arff
-data/**/*.json
-data/hoanganh/team/
-data/weiyew/
+# Raw datasets: never committed (data/README.md says how to get each one)
+data/*
+!data/README.md
 
 # weiyew: per-point label files and figures are not committed (report figures live in report/figures/)
 results/weiyew/*/*_labels.csv

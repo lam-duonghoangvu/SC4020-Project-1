@@ -11,7 +11,7 @@ clustering review. The plan and stage dates are in `../PLAN_HDB.md`; the stage p
 | Resale flat prices based on registration date from Jan-2017 onwards | `d_8b84c4ee58e3cfc0ece0d773c8ca6abc` | One row per transaction, the clustering data |
 | HDB Resale Price Index (1Q2009 = 100), Quarterly | `d_14f63e595975691e7c24a27ae4c07c79` | Adjusts prices to the latest quarter's price level |
 
-No API key is needed. Downloads are saved as `data/weiyew/hdb/raw/<name>_<date>.csv`; the analysis reads the
+No API key is needed. Downloads are saved as `data/<name>_<date>.csv`; the analysis reads the
 latest file, so results stay fixed until a new download is made.
 
 ## Setup
@@ -43,4 +43,4 @@ Paths are from the repo root; `hdb/` is `src/sc4020/weiyew/hdb/`.
 | `notebooks/weiyew/hdb/ablation.ipynb` | Stage 4: largest-cluster cap, success and failure cases, feature ablation, subsample stability, scalability, cross-dataset table (run `sc4020.weiyew.hdb.experiments.scalability` first) |
 | `tests/weiyew/hdb/` | `pytest` tests for every module |
 
-Downloads in `data/weiyew/hdb/` and figures in `results/weiyew/hdb/figures/` are not committed.
+Downloads in `data/` and figures in `results/weiyew/hdb/figures/` are not committed.

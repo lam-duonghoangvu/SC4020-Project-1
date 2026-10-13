@@ -13,7 +13,7 @@ PYTHONUTF8=1 python -m sc4020.hoanganh.comparison.run_team_comparison wine ecoli
 `PYTHONUTF8=1` is needed on Windows: weiyew's USGS downloader writes the
 catalogue with the default encoding.
 
-The data is downloaded on first use into `data/hoanganh/team/` (gitignored).
+The data is downloaded on first use into `data/` (gitignored; see `data/README.md`).
 Kaggle datasets come from the kagglehub cache.
 
 Outputs:

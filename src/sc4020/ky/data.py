@@ -11,7 +11,7 @@ import pandas as pd
 from scipy.io.arff import loadarff
 
 R_EARTH_KM = 6371.0088
-DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "ky"))
+DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data"))
 SEED = 42
 
 

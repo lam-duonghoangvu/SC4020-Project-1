@@ -3,12 +3,8 @@
 ## Reproduce
 ```bash
 pip install scikit-learn pandas scipy matplotlib
-# datasets (from the repo root)
-mkdir -p data/ky
-curl -o data/ky/earthquakes.csv https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv
-curl -o data/ky/uber_apr14.csv  https://raw.githubusercontent.com/plotly/datasets/master/uber-rides-data1.csv
-git clone --depth 1 https://github.com/deric/clustering-benchmark.git
-cp clustering-benchmark/src/main/resources/datasets/real-world/ecoli.arff data/ky/
+# datasets: data/earthquakes.csv, data/uber-raw-data-apr14.csv, data/ecoli.arff
+# (download commands in data/README.md; run everything from the repo root)
 
 python -m sc4020.ky.run && python -m sc4020.ky.figures
 cd docs/ky && pdflatex report.tex && pdflatex report.tex

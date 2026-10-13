@@ -1,4 +1,4 @@
-"""Download HDB datasets from data.gov.sg into data/raw/, one dated CSV per download.
+"""Download HDB datasets from data.gov.sg into data/, one dated CSV per download.
 
 Usage:
     python -m sc4020.weiyew.hdb.datagov            # both datasets
