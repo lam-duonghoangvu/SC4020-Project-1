@@ -9,17 +9,17 @@ Table~\ref{tab:runtime_ari} keeps the fastest method that reaches each accuracy 
 
 \begin{table}[h]\centering\small
 \caption{Fit time in ms per 1{,}000 points. \textbf{Bold}: ARI $>0.9$; \underline{underlined}: ARI
-$>0.7$; --: not run. D2 and D3 have no labels.}
+$>0.7$; \emph{italic}: ARI $>0.5$; --: not run. D2 and D3 have no labels.}
 \label{tab:runtime}
 \begin{tabular}{lrrrrrrr}
 \toprule
 \textbf{Data} & \textbf{$n$} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN} & \textbf{GMM}
 & \textbf{Spectral} & \textbf{Agglom.} \\
 \midrule
-D1 & 1{,}000  & 552  & 3.2  & \underline{36} & 202     & \textbf{244} & 26 \\
+D1 & 1{,}000  & 552  & 3.2  & \underline{36} & \emph{202} & \textbf{244} & \emph{26} \\
 D2 & 7{,}643  & 0.5\textsuperscript{a} & 13 & 265 & -- & -- & -- \\
 D3 & 15{,}000 & 58   & 43   & 77   & --      & --  & -- \\
-D4 & 336      & 255  & 12   & 15   & --      & --  & -- \\
+D4 & 336      & \emph{255} & 12   & 15   & --      & --  & -- \\
 D5 & 3{,}000  & 112  & 6.4  & 128  & 11{,}324 & 467 & 184 \\
 D6 & 178      & \underline{34} & 7.7 & 9.1 & \textbf{37} & 53 & \underline{79} \\
 D8 & 20{,}000 & 72\textsuperscript{a} & 88 & 244 & -- & -- & -- \\
@@ -31,15 +31,15 @@ D8 & 20{,}000 & 72\textsuperscript{a} & 88 & 244 & -- & -- & -- \\
 \begin{table}[h]\centering\small
 \caption{Fastest method reaching each ARI level (ms per 1{,}000 points). Labelled data only.}
 \label{tab:runtime_ari}
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-\textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} \\
+\textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} & \textbf{ARI $>0.5$} \\
 \midrule
-D1 & Spectral (244) & HDBSCAN (36) \\
-D4 & none           & none\textsuperscript{b} \\
-D5 & none           & none \\
-D6 & GMM (37)       & K-Means++ (34) \\
-D8 & none           & none \\
+D1 & Spectral (244) & HDBSCAN (36) & Agglomerative (26) \\
+D4 & none           & none\textsuperscript{b} & K-Means++ (255) \\
+D5 & none           & none & none \\
+D6 & GMM (37)       & K-Means++ (34) & K-Means++ (34) \\
+D8 & none           & none & none \\
 \bottomrule
 \end{tabular}
 \par\raggedright\footnotesize\textsuperscript{b}\,K-Means++ reaches 0.731 at $K=7$, chosen with labels.
