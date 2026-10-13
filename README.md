@@ -28,7 +28,7 @@ One Python project (`pyproject.toml`) with one package, `sc4020`:
     uv sync
     uv run pytest
 
-Every experiment is a notebook in `experiments/`, numbered in the order to run them; each also runs on its own
+Every experiment is a notebook in `experiments/`, numbered in the order to run them (gaps are notebooks that were removed); each also runs on its own
 once the notebooks it reads from have run (only 12 needs 09). Figures are shown in the notebook and saved to
 `results/<topic>/figures/`:
 
@@ -36,10 +36,8 @@ once the notebooks it reads from have run (only 12 needs 09). Figures are shown 
 
 | Notebook | What it does |
 | --- | --- |
-| `01_scikit_learn_wine_clustering.ipynb` | Wine (D6): every method, metrics, cluster plots, and the report's shared-table rows |
-| `02_scikit_learn_breast_cancer_clustering.ipynb` | Breast Cancer (D7): the same, plus `report/figures/bc_cases.png` |
+| `01_scikit_learn_wine_clustering.ipynb` | Wine (D6): every method, metrics, cluster plots, and the report's shared table |
 | `03_scikit_learn_make_moons_clustering.ipynb` | make_moons (D1) |
-| `04_kaggle_mall_customers_clustering.ipynb` | Mall Customers |
 | `05_kaggle_fashion_mnist_clustering.ipynb` | Fashion-MNIST (D5) |
 | `06_kaggle_uber_pickups_clustering.ipynb` | Uber NYC pickups (D3) |
 | `07_usgs_earthquakes_2023_eda.ipynb` | Earthquakes 2023 (D2): exploratory analysis behind each preprocessing choice |
@@ -48,7 +46,6 @@ once the notebooks it reads from have run (only 12 needs 09). Figures are shown 
 | `10_data_gov_hdb_resale_eda.ipynb` | HDB resale (D8): exploratory analysis |
 | `11_data_gov_hdb_resale_clustering.ipynb` | HDB resale: parameter choice and comparison |
 | `12_data_gov_hdb_resale_ablation.ipynb` | HDB resale: largest-cluster cap, cases, feature ablation, stability, scalability (needs 09) |
-| `13_multi_source_hotspot_clustering.ipynb` | Earthquakes 1965-2016, Uber, Ecoli: sweeps, main comparison, ablations A-D, fake-data check, shared-table rows, case statistics, figures |
-| `14_multi_source_hotspot_study.ipynb` | earlier exploratory hotspot study on Ridgecrest 2019, Chicago thefts, Ecoli and make_moons |
+| `13_multi_source_hotspot_clustering.ipynb` | Uber, Ecoli: sweeps, main comparison, ablations A-D, fake-data check, shared-table rows, case statistics, figures |
 
 The command for each part of the report is in `submission/README_code.md`; topic notes are in `docs/`.

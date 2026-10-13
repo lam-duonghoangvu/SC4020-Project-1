@@ -60,7 +60,7 @@ Further rules:
   `assignments` in another.
 - Do not shadow built-ins (`id`, `type`, `list`, `max`, `input`, ...).
 - DataFrame column names and dictionary keys follow the same `snake_case` rule (`"pairs_same_cluster"`).
-- File names for outputs: `snake_case`, prefixed by what produced them (`wine_clusters.png`, `report_d6_d7.csv`).
+- File names for outputs: `snake_case`, prefixed by what produced them (`wine_clusters.png`, `report_d6.csv`).
 
 ## Style
 

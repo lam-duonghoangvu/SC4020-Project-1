@@ -14,7 +14,6 @@ Sources (details in data/README.md):
   GitHub         Ecoli (ARFF copy of the UCI table)
   USGS           Earthquakes 2023
   data.gov.sg    HDB resale prices and price index (no key; rate limited, so calls are retried)
-  Chicago        Thefts in July 2023 (City of Chicago Socrata API, no key)
 """
 
 import argparse

@@ -26,8 +26,8 @@ from sc4020.metrics import dbcv_score, evaluate
 from sc4020.paths import results_dir
 
 TOPIC = "datasets"
-# The report's shared table for Wine (D6) and Breast Cancer (D7), one block of rows per dataset.
-SHARED_TABLE_NAME = "report_d6_d7.csv"
+# The report's shared table for Wine (D6).
+SHARED_TABLE_NAME = "report_d6.csv"
 NULL_SEED = 0  # seed of the column shuffle behind the fake-data silhouette
 SEED = methods.SEED
 
@@ -45,14 +45,13 @@ MAX_POINTS_FOR_QUADRATIC_METHODS = 10_000
 # Global earthquake catalogues have dozens of natural belts, so every method may use up to 50
 # clusters there (a coarse grid keeps GMM's BIC search affordable).
 QUAKE_K_RANGE = (2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 40, 50)
-K_RANGES = {"earthquakes_1965_2016": QUAKE_K_RANGE, "earthquakes_2023": QUAKE_K_RANGE}
+K_RANGES = {"earthquakes_2023": QUAKE_K_RANGE}
 
 # An RBF kernel for roughly globular data and a nearest-neighbour graph for manifold-shaped data
 # (report, Section 2 "Spectral clustering").
-SPECTRAL_AFFINITY_BY_DATASET = {"wine": "rbf", "mall_customers": "rbf"}
+SPECTRAL_AFFINITY_BY_DATASET = {"wine": "rbf"}
 DEFAULT_SPECTRAL_AFFINITY = "nearest_neighbors"
 AFFINITY_PROPAGATION_PARAMS_BY_DATASET = {
-    "breast_cancer": {"damping": 0.9, "preference": -150},
     "wine": {"damping": 0.8},
 }
 DEFAULT_AFFINITY_PROPAGATION_PARAMS = {"damping": 0.9}
@@ -320,7 +319,7 @@ def shared_table_rows(ds) -> tuple[list[dict], dict[str, np.ndarray]]:
 
 
 def save_shared_table_rows(rows: list[dict]) -> pd.DataFrame:
-    """Write `rows` into results/comparison/report_d6_d7.csv, replacing that dataset's old rows."""
+    """Write `rows` into results/comparison/report_d6.csv, replacing that dataset's old rows."""
     path = results_dir("comparison") / SHARED_TABLE_NAME
     new_rows = pd.DataFrame(rows)
     if path.exists():

@@ -1,6 +1,6 @@
 \section{Conclusion}\label{sec:conclusion}
 % [Ky]: draft; every number is quoted from Sections 3.3 to 3.5. Adjust once the title is decided.
-We compared K-means, K-means++, DBSCAN and HDBSCAN on eight datasets, each chosen to test one data
+We compared K-means, K-means++, DBSCAN and HDBSCAN on seven datasets, each chosen to test one data
 property, with GMM, spectral and agglomerative clustering as reference points. Density beats centroids
 when clusters are separated by gaps and have any shape, in few dimensions: on D1 DBSCAN reaches ARI 0.98
 against 0.48 for K-means, and on D2 HDBSCAN follows belts that K-means merges. Centroids win when classes
@@ -9,7 +9,7 @@ while both density methods fall to 0.04, and the ranking reverses between 3 and 
 Where the data have no gaps at all, as in the core of D3 and in D8, neither family finds natural groups.
 Density methods return one dominant cluster, and K-means draws borders where its objective puts them.
 
-The silhouette did not tell us which case we were in. On five of the six labelled datasets the method
+The silhouette did not tell us which case we were in. On four of the five labelled datasets the method
 with the top silhouette was not the one that matched the labels best, and on D4 it ranks the four methods
 almost in reverse (Spearman $\rho=-0.80$). Rerunning each result on fake data helps where a method finds
 nothing real (D4, D8), but not where it finds the wrong structure (D2). Known remedies, namely surface
@@ -20,11 +20,11 @@ and against the points it ignores.
 
 \subsection*{Limitations}
 \habegin
-% [Hoang Anh]: my line for D6 and D7. Source: results/datasets/{wine,breast_cancer}_results.csv (label_free_choice).
-\hatag{}On D6 and D7, the methods that need $k$ were given the number of classes, which an analyst would not
-know. The label-free criteria happen to agree here (the silhouette picks $k=3$ on D6 and $k=2$ on D7 for
-K-means), so the cost is small on these two tables, but both are small (178 and 569 points) and their
-density settings were ranked by DBCV, not by the silhouette used elsewhere.
+% [Hoang Anh]: my line for D6. Source: results/datasets/wine_results.csv (label_free_choice).
+\hatag{}On D6, the methods that need $k$ were given the number of classes, which an analyst would not
+know. The label-free criterion happens to agree here (the silhouette picks $k=3$ for K-means), so the
+cost is small on this table, but it is small (178 points) and its density settings were ranked by DBCV,
+not by the silhouette used elsewhere.
 \haend
 
 % [Ky]: my line for D3 and D4. Sources: results/hotspot/shared_rule.csv, case_stats.csv.

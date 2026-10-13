@@ -54,17 +54,6 @@ def test_plots_return_figures():
         gf.plot_spatial_grid(coords, results, title="t"),
         gf.plot_k_selection(range(2, 5), [0.2, 0.5, 0.3], best_k=3),
         gf.plot_k_distance(np.linspace(0, 1, 10), 5, 0.5),
-        gf.plot_metrics_bar(table, "ari"),
-        gf.plot_case_figure(
-            X,
-            (y > 0).astype(int),
-            {m: r.labels for m, r in results.items()},
-            [
-                {"method": m, **row}
-                for m, row in zip(table["method"], table.to_dict("records"))
-            ],
-            picks=("K-Means", "DBSCAN"),
-        ),
     ]
     assert all(isinstance(f, Figure) for f in figures)
 

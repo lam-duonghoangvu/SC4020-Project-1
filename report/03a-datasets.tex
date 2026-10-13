@@ -3,8 +3,7 @@
 % Rubric: "target challenging datasets". Say why each dataset is hard for at least one method.
 
 \begin{table}[h]\centering\small
-\caption{Datasets, grouped by the data property each one tests. \decide{final list; drop or keep Mall;
-Ky's 1965--2016 earthquakes replaced by the 2023 surface-distance pipeline?}}
+\caption{Datasets, grouped by the data property each one tests.}
 \label{tab:data}
 \resizebox{\textwidth}{!}{\begin{tabular}{llrrll}
 \toprule
@@ -16,7 +15,6 @@ D3 & Uber NYC pickups, Apr 2014       & 15{,}000 & 2 & none      & density contr
 D4 & Ecoli                            & 336      & 7        & 8 classes    & dimensionality, rare classes \\
 D5 & Fashion-MNIST (PCA)              & 3{,}000  & 50       & 10 classes   & high dimensions \\
 D6 & Wine                             & 178      & 13       & 3 classes    & silhouette vs labels \\
-D7 & Breast cancer (Wisconsin)        & 569      & 30       & 2 classes    & silhouette vs labels \\
 D8 & HDB resale flats, 2017--2026     & 20{,}000\textsuperscript{b} & 4 & flat type (7) & no gaps, scale, recorded ties \\
 \bottomrule
 \end{tabular}}
@@ -83,20 +81,6 @@ members ran it independently and both obtained ARI 0.897. The dataset is in the 
 opposite reason. No sparse gap separates the cultivars, so the density methods return 2 clusters with
 about a third or more of the wines as noise, and the silhouette still prefers them
 (Section~\ref{sec:silhouette}).
-\haend
-\habegin
-\paragraph{D7 Breast cancer.} \hatag{}
-% Source: experiments/02_scikit_learn_breast_cancer_clustering.ipynb; src/sc4020/datasets/load_dataset.py (load_breast_cancer_data).
-% Class spread: root-mean-square distance to the class centre on the 30 standardised features,
-% 4.06 benign and 5.47 malignant (computed on the same data from sklearn.datasets.load_breast_cancer).
-The Wisconsin diagnostic breast cancer data~\cite{street1993}: 569 tumours, each described by 30
-measurements of the cell nuclei in an image of a fine-needle aspirate (the mean, standard error and
-largest value of 10 properties such as radius, texture and concavity). The diagnosis, 357 benign and
-212 malignant, is held out as the label. Features are standardised, because areas reach 4{,}254 while
-smoothness and symmetry stay below 1. Two properties make the data hard. The classes differ in spread:
-malignant tumours lie 35\% further from their class centre than benign ones (5.47 against 4.06 in
-standardised units), which breaks the equal-size assumption of K-means. And the two classes form one
-connected mass in 30 dimensions, with no sparse gap for a density method to cut along.
 \haend
 \paragraph{D8 HDB resale.}
 % Source: experiments/10_data_gov_hdb_resale_eda.ipynb, sections 6, 10, 11 and 17;

@@ -30,29 +30,29 @@ any joint structure.
 \end{description}
 
 We compare four methods, K-means with random starts, K-means++~\cite{arthur2007}, DBSCAN and HDBSCAN,
-on eight datasets (Table~\ref{tab:data}). Each dataset was chosen to test one data property, most of
-them a property that breaks at least one method's assumption. Six have class labels, so a method's output can be scored against them with the
+on seven datasets (Table~\ref{tab:data}). Each dataset was chosen to test one data property, most of
+them a property that breaks at least one method's assumption. Five have class labels, so a method's output can be scored against them with the
 Adjusted Rand Index (ARI)~\cite{hubert1985}, and the internal scores can be checked against that
 answer. Two have no labels (earthquakes, Uber pickups); there we judge failures on maps, against known
 geography.
 Gaussian mixtures, spectral clustering and agglomerative clustering appear only as reference points on
-the labelled datasets where we ran them (D1, D5, D6, D7), not as part of the main comparison.
+the labelled datasets where we ran them (D1, D5, D6), not as part of the main comparison.
 
 \subsection{Findings in brief}
-% Sources: results/datasets/{make_moons,fashion_mnist,wine}_results.csv; results/datasets/breast_cancer_results.csv;
+% Sources: results/datasets/{make_moons,fashion_mnist,wine}_results.csv;
 % results/hotspot/{main,shared_rule}.csv (Ecoli); results/earthquakes_2023/{case_density_regions,
 % method_comparison,ablation_distance}.csv; results/hdb_resale/comparison.csv.
 % RQ2 count, method with top silhouette vs method with top ARI, density settings within the 50% noise cap:
 % D1 K-means 0.495 (ARI 0.481) vs Spectral 1.000; D4 DBSCAN 0.560 (0.039) vs K-Means++ 0.731;
 % D5 K-means 0.202 (0.343) vs Spectral 0.398; D6 HDBSCAN 0.359 (0.263) vs K-means 0.897;
-% D7 K-means 0.343 (0.654) vs GMM 0.774; D8 K-means is top on both (not counted).
+% D8 K-means is top on both (not counted).
 \begin{description}\itemsep1pt
 \item[RQ1.] Each method failed where the data broke its assumption. K-means split the two interleaved
 half-moons of D1 wrongly (ARI 0.48) and merged distant belts on D2. With one radius, DBSCAN clustered
 90\% of earthquakes in the dense south-west Pacific but only 20\% in the sparser Americas. In 50
 dimensions (D5) it barely matched the labels (ARI 0.03). On D8, where housing sales form one mass with no
 gaps, both density methods returned one dominant cluster.
-\item[RQ2.] The silhouette did not reveal these failures. On five of the six labelled datasets, the
+\item[RQ2.] The silhouette did not reveal these failures. On four of the five labelled datasets, the
 method with the highest silhouette was not the one that matched the labels best. On D1 it ranks K-means
 first (0.495 against 0.392 for DBSCAN), although DBSCAN recovers the moons (ARI 0.98 against 0.48). On
 Ecoli (D4) it orders the four methods almost exactly opposite to ARI (Spearman $\rho=-0.80$). The

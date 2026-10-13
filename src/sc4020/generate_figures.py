@@ -4,7 +4,7 @@ Experiments and notebooks compute; this module draws and tabulates. Sections:
   style and saving     one dpi, one noise colour, save(fig, topic, name), show_and_save for notebooks
   tables               build_results_table, pivot_by_method, cluster_summary, earthquake EDA tables,
                        to_latex_table
-  generic plots        cluster grids, maps, k selection, k-distance, metric bars, case figure
+  generic plots        cluster grids, maps, k selection, k-distance
   hotspot figures      the 11 figures of the hotspot study, drawn from results/hotspot/
 
 The hotspot figures are drawn from results/hotspot/ by hotspot_figures (notebook 13). Figures that
@@ -24,7 +24,7 @@ from sklearn.decomposition import PCA
 
 from sc4020 import methods
 from sc4020.datasets import load_dataset
-from sc4020.datasets.preprocess_dataset import chord_to_km, region_from_place
+from sc4020.datasets.preprocess_dataset import region_from_place
 from sc4020.metrics import NOISE_LABEL, evaluate, haversine_km, nearest_neighbour_km
 from sc4020.paths import results_dir
 
@@ -330,62 +330,14 @@ def plot_k_distance(curve, knee_idx, eps_at_knee, min_samples=None):
     return fig
 
 
-def plot_metrics_bar(df: pd.DataFrame, metric: str, log_scale=False):
-    pivot = df.pivot_table(index="dataset", columns="method", values=metric)
-    ax = pivot.plot(kind="bar", figsize=(10, 5))
-    if log_scale:
-        ax.set_yscale("log")
-    ax.set_ylabel(metric)
-    ax.set_title(f"{metric} by dataset and method")
-    ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8)
-    ax.figure.tight_layout()
-    return ax.figure
-
-
-def plot_case_figure(X, y, labels_by_method, rows, picks=("K-Means", "GMM", "DBSCAN")):
-    """Two-class success / failure figure on 2 PCs: ground truth, then each picked method with its
-    clusters coloured by the class most of their points belong to."""
-    xy = PCA(n_components=2).fit_transform(X)
-    scores = {r["method"]: r for r in rows}
-    colours = np.array(["#3b6fb6", "#d1602f"])
-    fig, axes = plt.subplots(
-        1,
-        len(picks) + 1,
-        figsize=(3.5 * (len(picks) + 1), 3.6),
-        sharex=True,
-        sharey=True,
-    )
-    axes[0].scatter(*xy.T, c=colours[y], s=9, linewidths=0)
-    axes[0].set_title("Diagnosis (blue: benign, orange: malignant)", fontsize=9)
-    for ax, m in zip(axes[1:], picks):
-        lab = labels_by_method[m]
-        noise = lab == NOISE_LABEL
-        col = np.empty(len(lab), dtype=object)
-        for c in np.unique(lab[~noise]):
-            col[lab == c] = colours[int(round(y[lab == c].mean()))]
-        ax.scatter(*xy[noise].T, c=NOISE_COLOR, s=9, linewidths=0)
-        ax.scatter(*xy[~noise].T, c=list(col[~noise]), s=9, linewidths=0)
-        r = scores[m]
-        ax.set_title(
-            f"{m}\nARI {r['ari']:.3f}, silhouette {r['silhouette']:.3f}, noise {100 * r['noise_fraction']:.1f}%",
-            fontsize=9,
-        )
-    for ax in axes:
-        ax.set_xlabel("PC1")
-        ax.tick_params(labelsize=7)
-    axes[0].set_ylabel("PC2")
-    fig.tight_layout()
-    return fig
-
-
 # --- hotspot figures --------------------------------------------------------------------------
 
 HOTSPOT = "hotspot"
 HOTSPOT_NAMES = {
-    "earthquakes_1965_2016": "Earthquakes",
     "uber_pickups": "UberNYC",
     "ecoli": "Ecoli",
 }
+HOTSPOT_DATASETS = tuple(HOTSPOT_NAMES)
 HOTSPOT_METHODS = ["K-Means (random init)", "K-Means", "DBSCAN", "HDBSCAN"]
 _HOTSPOT_STYLE = {
     "font.size": 8,
@@ -431,11 +383,10 @@ def _hotspot_scatter(ax, ds, labels, title):
 
 
 def _eps_text(ds, eps):
-    """eps as shown in titles: km for coordinates (unit vectors are converted), else plain."""
+    """eps as shown in titles: km for coordinates (projected to km), else plain."""
     if "coords_deg" not in ds:
         return f"{eps:.3g}"
-    km = chord_to_km(eps) if ds.data.shape[1] == 3 else eps
-    return f"{float(km):.3g} km"
+    return f"{float(eps):.3g} km"
 
 
 def _fit(method, params, X):
@@ -464,8 +415,8 @@ def load_hotspot_results():
 
 
 def fig_datasets(ds_by_name, res):
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.3))
-    for ax, (name, ds) in zip(axes, ds_by_name.items()):
+    fig, axes = plt.subplots(1, len(ds_by_name), figsize=(7.4, 2.3), squeeze=False)
+    for ax, (name, ds) in zip(axes[0], ds_by_name.items()):
         _hotspot_scatter(
             ax,
             ds,
@@ -477,7 +428,9 @@ def fig_datasets(ds_by_name, res):
 
 def fig_qualitative(ds_by_name, res):
     main = res["main"]
-    fig, axes = plt.subplots(3, 5, figsize=(9.6, 5.6))
+    fig, axes = plt.subplots(
+        len(ds_by_name), 5, figsize=(9.6, 1.9 * len(ds_by_name)), squeeze=False
+    )
     for r, (name, ds) in enumerate(ds_by_name.items()):
         for c, method in enumerate(HOTSPOT_METHODS):
             row = main[(main.dataset == name) & (main.method == method)].iloc[0]
@@ -509,8 +462,8 @@ def fig_qualitative(ds_by_name, res):
 
 def fig_k_sweep(ds_by_name, res):
     sweep, chosen = res["sweep"], res["chosen"]["k"]
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.3))
-    for ax, name in zip(axes, ds_by_name):
+    fig, axes = plt.subplots(1, len(ds_by_name), figsize=(7.4, 2.3), squeeze=False)
+    for ax, name in zip(axes[0], ds_by_name):
         s = sweep[(sweep.dataset == name) & (sweep.method == "K-Means")].copy()
         s["k"] = s["params"].map(lambda p: json.loads(p)["n_clusters"])
         s = s.sort_values("k")
@@ -542,8 +495,8 @@ def fig_k_sweep(ds_by_name, res):
 def fig_k_distance(ds_by_name, res):
     from sc4020.tuning import find_knee
 
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.2))
-    for ax, (name, ds) in zip(axes, ds_by_name.items()):
+    fig, axes = plt.subplots(1, len(ds_by_name), figsize=(7.4, 2.2), squeeze=False)
+    for ax, (name, ds) in zip(axes[0], ds_by_name.items()):
         curve = np.array(res["curves"][name])
         i, e = find_knee(curve)
         ax.plot(curve, lw=1.1, color="#333")
@@ -560,7 +513,7 @@ def fig_k_distance(ds_by_name, res):
 
 def fig_dbscan_grid(ds_by_name, res):
     sweep = res["sweep"]
-    fig, axes = plt.subplots(2, 3, figsize=(7.8, 4.0))
+    fig, axes = plt.subplots(2, len(ds_by_name), figsize=(7.8, 4.0), squeeze=False)
     for c, (name, ds) in enumerate(ds_by_name.items()):
         s = sweep[(sweep.dataset == name) & (sweep.method == "DBSCAN")].copy()
         s["eps"] = s["params"].map(lambda p: round(json.loads(p)["eps"], 4))
@@ -590,8 +543,8 @@ def fig_dbscan_grid(ds_by_name, res):
 
 def fig_init(ds_by_name, res):
     a = res["ablation"][res["ablation"].ablation == "init"]
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.2))
-    for ax, name in zip(axes, ds_by_name):
+    fig, axes = plt.subplots(1, len(ds_by_name), figsize=(7.4, 2.2), squeeze=False)
+    for ax, name in zip(axes[0], ds_by_name):
         s = a[a.dataset == name]
         xs = np.arange(len(s))
         norm = s.inertia_mean.max()
@@ -737,8 +690,11 @@ def fig_runtime(ds_by_name, res):
 def fig_operating_point(ds_by_name, res):
     """Heuristic operating points (elbow, k-distance knee) against the shared rule's DBSCAN."""
     chosen, main = res["chosen"], res["main"]
-    fig, axes = plt.subplots(2, 3, figsize=(8.0, 4.2))
-    for r, name in enumerate(["earthquakes_1965_2016", "uber_pickups"]):
+    spatial_names = [name for name, ds in ds_by_name.items() if "coords_deg" in ds]
+    fig, axes = plt.subplots(
+        len(spatial_names), 3, figsize=(8.0, 2.1 * len(spatial_names)), squeeze=False
+    )
+    for r, name in enumerate(spatial_names):
         ds = ds_by_name[name]
         k_elbow = chosen["k"][name]["elbow"]
         labels = _fit("K-Means", {"n_clusters": k_elbow}, ds.data)
@@ -797,10 +753,7 @@ HOTSPOT_FIGURES = {
 def hotspot_figures(show=False):
     """Draw and save every hotspot figure from results/hotspot/; `show` also displays each one."""
     res = load_hotspot_results()
-    ds_by_name = {
-        name: load_dataset(name)
-        for name in ("earthquakes_1965_2016", "uber_pickups", "ecoli")
-    }
+    ds_by_name = {name: load_dataset(name) for name in HOTSPOT_DATASETS}
     with plt.rc_context(_HOTSPOT_STYLE):
         for name, draw in HOTSPOT_FIGURES.items():
             fig = draw(ds_by_name, res)

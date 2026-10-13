@@ -1,11 +1,5 @@
 {
   "k": {
-    "earthquakes_1965_2016": {
-      "elbow": 6,
-      "silhouette": 24,
-      "null_gap": 2,
-      "selected": 2
-    },
     "uber_pickups": {
       "elbow": 6,
       "silhouette": 2,
@@ -21,14 +15,6 @@
     }
   },
   "dbscan": {
-    "earthquakes_1965_2016": {
-      "rule": {
-        "eps": 0.0027967507448815776,
-        "min_samples": 4
-      },
-      "valid": true,
-      "best_ari": null
-    },
     "uber_pickups": {
       "rule": {
         "eps": 1.5269790907096634,
@@ -50,14 +36,6 @@
     }
   },
   "hdbscan": {
-    "earthquakes_1965_2016": {
-      "rule": {
-        "min_cluster_size": 250,
-        "min_samples": null
-      },
-      "valid": true,
-      "best_ari": null
-    },
     "uber_pickups": {
       "rule": {
         "min_cluster_size": 250,
@@ -79,10 +57,6 @@
     }
   },
   "kdist": {
-    "earthquakes_1965_2016": {
-      "min_samples": 6,
-      "knee": 0.02726270172691949
-    },
     "uber_pickups": {
       "min_samples": 4,
       "knee": 0.3630327125606998

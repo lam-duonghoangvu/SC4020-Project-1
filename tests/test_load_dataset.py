@@ -24,37 +24,26 @@ def test_return_X_y_and_as_frame():
     assert isinstance(frame, pd.DataFrame) and frame.shape == (178, 14)
 
 
-def test_breast_cancer_codes_malignant_as_one():
-    bc = load_dataset("breast_cancer")
-
-    assert bc.target_names == ["benign", "malignant"]
-    assert int(bc.target.sum()) == 212  # malignant tumours in the UCI table
-
-
-def test_digits_keep_pixel_scale_and_moons_are_standardized():
-    assert load_dataset("digits").data.max() == 16.0
+def test_moons_are_standardized():
     moons = load_dataset("make_moons")
     assert moons.data.shape == (1000, 2) and moons.data.std(axis=0) == pytest.approx(
         [1.0, 1.0]
     )
 
 
-def test_varied_density_counts_classes_without_noise():
-    ds = load_dataset("varied_density")
-
-    assert ds.n_true_clusters == 3
-    assert n_true_clusters(ds.target) == 3
+def test_n_true_clusters_counts_classes_without_noise():
+    assert n_true_clusters(np.array([0, 1, 1, 2, -1])) == 3
     assert n_true_clusters(None) is None
 
 
 def test_missing_file_without_download_names_the_command(tmp_path):
-    with pytest.raises(FileNotFoundError, match="download_dataset mall_customers"):
-        load_dataset("mall_customers", data_home=tmp_path, download_if_missing=False)
+    with pytest.raises(FileNotFoundError, match="download_dataset uber_pickups"):
+        load_dataset("uber_pickups", data_home=tmp_path, download_if_missing=False)
 
 
 def test_load_dataset_by_name_and_unknown_name():
     assert load_dataset("wine").name == "wine"
-    assert list(DATASETS)[:3] == ["wine", "breast_cancer", "uber_pickups"]
+    assert list(DATASETS)[:3] == ["wine", "uber_pickups", "make_moons"]
     with pytest.raises(KeyError, match="unknown dataset"):
         load_dataset("iris")
 

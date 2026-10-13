@@ -6,10 +6,8 @@ from sc4020.datasets.preprocess_dataset import (
     EARTH_RADIUS_KM,
     HDB_FEATURES,
     check_resale,
-    chord_to_km,
     hdb_features,
     jitter_ties,
-    km_to_chord,
     nyc_pickups,
     price_index_series,
     project_km,
@@ -22,7 +20,6 @@ from sc4020.datasets.preprocess_dataset import (
     to_radians,
     to_unit_vectors,
     usgs_earthquakes,
-    varied_density_blobs,
 )
 
 INDEX = pd.Series({"2017-Q1": 100.0, "2017-Q2": 125.0, "2017-Q3": 200.0})
@@ -178,17 +175,6 @@ def test_project_km_one_degree_of_latitude():
     assert xy[0, 0] == pytest.approx(xy[1, 0])
 
 
-def test_chord_and_km_round_trip():
-    km = np.array([0.0, 10.0, 1000.0, 5000.0])
-
-    assert chord_to_km(km_to_chord(km)) == pytest.approx(km)
-    # the chord between two unit vectors equals the great-circle distance's chord
-    v = to_unit_vectors([0, 0], [0, 10])
-    assert chord_to_km(np.linalg.norm(v[0] - v[1])) == pytest.approx(
-        np.radians(10) * EARTH_RADIUS_KM
-    )
-
-
 def test_region_strips_distance_and_direction_but_keeps_names_with_of():
     places = pd.Series(
         [
@@ -254,11 +240,3 @@ def test_nyc_pickups_strip_column_names_and_keep_the_city_box():
 
     assert list(kept.columns) == ["Lat", "Lon"]
     assert kept["Lat"].tolist() == [40.75]
-
-
-def test_varied_density_blobs_have_three_clusters_and_noise():
-    X, y = varied_density_blobs(n_noise=50, random_state=0)
-
-    assert X.shape == (1250, 2)
-    assert sorted(set(y.tolist())) == [-1, 0, 1, 2]
-    assert (y == -1).sum() == 50

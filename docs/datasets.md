@@ -1,4 +1,4 @@
-# Per-dataset notebooks (`experiments/01` to `06`)
+# Per-dataset notebooks (`experiments/01`, `03`, `05`, `06`)
 
 One notebook per dataset, with the same sections in each: dataset loading, one section per method
 (K-Means with random starts, K-Means++, DBSCAN, HDBSCAN, GMM, then Spectral, Agglomerative and
@@ -8,10 +8,8 @@ every fit with `score_methods` and saves it with `save_dataset_run`.
 
 | Notebook | Dataset |
 | --- | --- |
-| `01_scikit_learn_wine_clustering.ipynb` | `wine`, plus the report's shared table rows (`results/comparison/report_d6_d7.csv`) |
-| `02_scikit_learn_breast_cancer_clustering.ipynb` | `breast_cancer`, plus the shared table rows and `report/figures/bc_cases.png` |
+| `01_scikit_learn_wine_clustering.ipynb` | `wine`, plus the report's shared table (`results/comparison/report_d6.csv`) |
 | `03_scikit_learn_make_moons_clustering.ipynb` | `make_moons` |
-| `04_kaggle_mall_customers_clustering.ipynb` | `mall_customers` |
 | `05_kaggle_fashion_mnist_clustering.ipynb` | `fashion_mnist` |
 | `06_kaggle_uber_pickups_clustering.ipynb` | `uber_pickups` |
 
@@ -40,9 +38,9 @@ Outputs, per dataset:
 | K-Means, K-Means (random init) | the true k on labelled data, else the k with the largest silhouette gap over fake data among seed-stable k (`tuning`) |
 | GMM                  | k and covariance type by BIC (k fixed to the true k on labelled data)                         |
 | DBSCAN, HDBSCAN      | the shared rule: best silhouette among settings with >= 2 clusters and <= 50% noise           |
-| Spectral             | the K-Means k; RBF affinity on Wine and Mall, a nearest-neighbour graph elsewhere             |
+| Spectral             | the K-Means k; RBF affinity on Wine, a nearest-neighbour graph elsewhere             |
 | Agglomerative        | the K-Means k, Ward linkage                                                                   |
-| Affinity Propagation | damping 0.9 and preference -150 on Breast Cancer, damping 0.8 on Wine, damping 0.9 elsewhere |
+| Affinity Propagation | damping 0.8 on Wine, damping 0.9 elsewhere |
 
 Spectral, Agglomerative and Affinity Propagation need memory quadratic in the number of points, so
 they are skipped above 10,000 points (e.g. `uber_pickups`, 15,000 pickups). Silhouette and DBCV are
@@ -52,20 +50,6 @@ The two earlier Wine notebooks became one. Spectral uses the RBF affinity there,
 (ARI 0.445); the old model-zoo notebook used a nearest-neighbour graph (ARI 0.880).
 
 ## Notes carried over from the notebooks
-
-### Breast Cancer Wisconsin (Diagnostic)
-
-569 tumours, 30 standardized features, target 0 benign (357) and 1 malignant (212).
-
-- **GMM (ARI 0.77) and Spectral (0.76) are best:** benign and malignant cells form two distributions
-  with different spreads, which GMM's per-cluster covariance and the nearest-neighbour graph capture
-  better than K-Means (0.65).
-- **Agglomerative (Ward, 0.58):** minimizing within-cluster variance mirrors K-Means but is less
-  accurate here.
-- **DBSCAN in 30-D:** pairwise distances become sparse, so a single global eps either collapses
-  everything into one cluster or discards the dispersed malignant points as noise.
-- **Affinity Propagation:** without a fixed cluster count it finds many local sub-densities and
-  over-fragments the two classes (16 clusters).
 
 ### Fashion-MNIST
 
@@ -91,16 +75,6 @@ results describe this sample, not the full 70,000 images.
   boundary (ARI about 0.5).
 - Internal metrics can favour K-Means and GMM here although their ARI is worse: the silhouette also
   assumes convex, well-separated clusters, so it rewards the convex but wrong answer.
-
-### Mall Customers
-
-200 shoppers; age, annual income and spending score, standardized. No labels, so only internal
-metrics apply, and k comes from the silhouette (6).
-
-- The well-known five or six segments (e.g. high income and low spending) are clearest in the raw
-  income-versus-spending plane.
-- Density methods may merge or split segments differently from the globular assumption of K-Means,
-  GMM and Spectral.
 
 ### Uber pickups (NYC, April 2014)
 

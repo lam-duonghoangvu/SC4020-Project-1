@@ -1,4 +1,4 @@
-# Hotspot study: K-Means vs the DBSCAN family on Earthquakes 1965-2016, Uber NYC and Ecoli
+# Hotspot study: K-Means vs the DBSCAN family on Uber NYC and Ecoli
 
 ## Reproduce
 
@@ -16,21 +16,19 @@ cd docs/hotspot_draft_report && pdflatex report.tex && pdflatex report.tex
 |---|---|
 | `experiments/13_multi_source_hotspot_clustering.ipynb` | every experiment, in order -> `results/hotspot/*.csv` (incl. `shared_rule.csv`, `case_stats.csv`), `chosen_params.json`, `kdist_curves.json`, and the figures |
 | `src/sc4020/generate_figures.py` | `fig_*` functions, drawn by `hotspot_figures` -> `results/hotspot/figures/f1..f10*.png` |
-| `results/hotspot/main.csv` | main comparison, 3 datasets x 4 methods |
+| `results/hotspot/main.csv` | main comparison, 2 datasets x 4 methods |
 | `results/hotspot/sweep.csv` | every parameter-grid run |
 | `results/hotspot/ablation.csv` | 4 ablations (initialisation, distance metric, scaling, dimensionality) |
-| `experiments/14_multi_source_hotspot_study.ipynb` | earlier exploratory version on Ridgecrest 2019, Chicago thefts, Ecoli and make_moons |
-| `docs/hotspot_draft_report/report.tex` | individual 13-page draft report, 11pt |
+| `docs/hotspot_draft_report/report.tex` | individual 13-page draft report, 11pt (written when the study also covered Earthquakes 1965-2016) |
 
 ## Datasets
 
-- **D1 Earthquakes** 23,412 events, global M>=5.5, 1965-2016, as 3D unit vectors. No labels.
 - **D2 UberNYC** 15,000 pickups in NYC, April 2014, projected to km. No labels.
 - **D3 Ecoli** 336 x 7, 8 classes, UCI (Horton & Nakai 1996), standardized.
 
 ## Selection
 
-K-Means k is the number of classes on Ecoli and the silhouette's k on the coordinates (the elbow
+K-Means k is the number of classes on Ecoli and the silhouette's k on Uber (the elbow
 is recorded too). DBSCAN and HDBSCAN use the shared rule (`tuning.select_dbscan_by_shared_rule` /
 `select_hdbscan_by_shared_rule`): the highest silhouette among settings with at least 2 clusters and at most 50%
 noise, on the grids in the report (minPts {4, 8, 16, 32} or {3, 5, 8, 12}, eps at 0.1 to 3 times the

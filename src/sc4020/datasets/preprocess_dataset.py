@@ -8,7 +8,7 @@ and a degree of longitude shrinks towards the poles. Three representations are u
                 is the chord length, which grows with great-circle distance, so every method can
                 use it, worldwide. Used for the global earthquake catalogues.
   km            equirectangular projection around the mean latitude. Accurate over a city, so it
-                is used for Uber, Chicago and Ridgecrest, where it keeps eps in kilometres.
+                is used for Uber, where it keeps eps in kilometres.
   radians       [latitude, longitude] in radians, for methods run with metric="haversine".
 """
 
@@ -18,7 +18,6 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy.io.arff import loadarff
-from sklearn.datasets import make_blobs
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -64,20 +63,6 @@ def project_km(lat, lon) -> np.ndarray:
     )
 
 
-def chord_to_km(chord):
-    """Great-circle distance in km for a chord length between unit vectors."""
-    return (
-        2
-        * np.arcsin(np.clip(np.asarray(chord, dtype=float) / 2, 0, 1))
-        * EARTH_RADIUS_KM
-    )
-
-
-def km_to_chord(km):
-    """Chord length between unit vectors for a great-circle distance in km."""
-    return 2 * np.sin(np.asarray(km, dtype=float) / EARTH_RADIUS_KM / 2)
-
-
 # "82 km WNW of Hihifo, Tonga" and "south of the Fiji Islands" start with a position relative to a place.
 _RELATIVE_POSITION = (
     r"^(?:\d+(?:\.\d+)? km [NSEW]{1,3} of |(?:north|south|east|west)\w* of )"
@@ -91,25 +76,6 @@ def region_from_place(place: pd.Series) -> pd.Series:
     "Gulf of Alaska" stays "Gulf of Alaska".
     """
     return place.str.split(", ").str[-1].str.replace(_RELATIVE_POSITION, "", regex=True)
-
-
-# --- synthetic --------------------------------------------------------------------------------
-
-
-def varied_density_blobs(
-    n_noise: int = 120, random_state: int = 0
-) -> tuple[np.ndarray, np.ndarray]:
-    """Two tight, dense blobs next to each other, one wide sparse blob, and uniform background
-    noise (label -1). The dense pair sit closer together than the spread of the sparse blob, so
-    no single density threshold separates the pair and still keeps the sparse blob."""
-    blobs, y = make_blobs(
-        n_samples=[400, 400, 400],
-        centers=[[0.0, 0.0], [3.0, 0.0], [10.0, 8.0]],
-        cluster_std=[0.3, 0.3, 2.0],
-        random_state=random_state,
-    )
-    noise = np.random.default_rng(random_state).uniform(-6, 16, size=(n_noise, 2))
-    return np.vstack([blobs, noise]), np.concatenate([y, np.full(n_noise, -1)])
 
 
 # --- Fashion-MNIST ----------------------------------------------------------------------------

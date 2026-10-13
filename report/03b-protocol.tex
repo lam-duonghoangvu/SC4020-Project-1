@@ -50,18 +50,18 @@ and \texttt{min\_samples} in \{default, 5, 10\}.
 \habegin
 % Source: src/sc4020/tuning.py; every setting tried is in
 % results/datasets/<dataset>_tuning.csv.
-\hatag{}On D6 and D7, K-means is searched over $K=2$ to 10 with 10 starts and reported at the number of
+\hatag{}On D6, K-means is searched over $K=2$ to 10 with 10 starts and reported at the number of
 classes. GMM takes 2 to 10 components and four covariance types (full, tied, diagonal, spherical),
 chosen by BIC. DBSCAN takes \texttt{minPts} in $\{10, 20, 40, 80\}$ and $\varepsilon$ at 0.5 to 4
 times the knee of the k-distance curve. HDBSCAN takes \texttt{min\_cluster\_size} from 5 up to
-$n/10$ (15 on D6, 50 on D7) and \texttt{min\_samples} in \{default, 5, 10\}. On these two datasets the
+$n/10$ (15 on D6) and \texttt{min\_samples} in \{default, 5, 10\}. On this dataset the
 density settings that pass the constraints (at least 2 clusters, at most 50\% noise, and at most 10
 clusters) are ranked by DBCV~\cite{moulavi2014}, a score built for density clusters, instead of the
 silhouette. Agglomerative clustering uses Ward linkage at the number of classes.
 \haend
 % Lam: src/sc4020/tuning.py
 GMM and Spectral on D1 and D5: $k$ set to the number of classes on labelled data, else the silhouette-best
-K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) for D6 and Mall,
+K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) for D6,
 10-nearest-neighbour graph for D1 and D5. DBSCAN and HDBSCAN on D1 and D5: \texttt{minPts} from
 $\{\lfloor m/2\rfloor, m, 2m\}$ with $m=\mathrm{clip}(2d,4,20)$, $\varepsilon$ from $\{0.5,0.75,1,1.5,2\}\times$
 the k-distance knee; \texttt{min\_cluster\_size} from $\{5,10,20,30,50,n/20\}$; the setting with the
@@ -80,5 +80,5 @@ On D2 and D8 every random step uses seed 0, and repeated runs use seeds 0 to 19.
 On D3 and D4 the same library versions ran on Python 3.12.10, on an Intel Core Ultra 5 225 with 32\,GB
 of memory; every random step uses seed 42, and repeated runs use seeds 0 to 29.
 \todo{Lam}{versions and hardware if different.}
-\todo{Hoang Anh}{D6, D7 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
+\todo{Hoang Anh}{D6 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
 \decide{shared code: now src/sc4020/metrics.py (one evaluate for every table), so every table has the same columns.}
