@@ -4,19 +4,19 @@
 
 % Sources: experiments/01 (D6), 03 (D1), 05 (D5), 06 and 13 (D3, D4), 07 (D2), 10 and 11 (D8).
 \begin{table}[h]\centering\footnotesize
-\caption{Datasets and the difficulty each one poses.}
+\caption{Datasets and why each was chosen.}
 \label{tab:data}
 \begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}Xrrl>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{ID} & \textbf{Dataset} & \textbf{$n$} & \textbf{$d$} & \textbf{Labels} & \textbf{Preparation} & \textbf{Difficulty} \\
+\textbf{ID} & \textbf{Dataset} & \textbf{$n$} & \textbf{$d$} & \textbf{Labels} & \textbf{Preparation} & \textbf{Why chosen} \\
 \midrule
-D1 & make\_moons~\cite{pedregosa2011} & 1{,}000 & 2 & 2 classes & noise 0.07; standardised & non-convex shapes \\
-D2 & Earthquakes 2023, M$\geq$4.5~\cite{usgs2017} & 7{,}643 & 2 & none & 8 eruptions dropped; epicentre only & long belts; uneven density; $180^\circ$ meridian \\
-D3 & Uber NYC, Apr 2014~\cite{fivethirtyeight2014} & 15{,}000 & 2 & none & sampled from 558{,}019 in NYC box; km & 71\% in Manhattan; no gaps \\
-D4 & Ecoli~\cite{horton1996} & 336 & 7 & 8 sites & standardised & classes of 2 to 143 \\
-D5 & Fashion-MNIST~\cite{xiao2017} & 3{,}000 & 50 & 10 classes & stratified; PCA 784$\to$50 (86.5\% var.) & high dimensions; overlapping classes \\
-D6 & Wine~\cite{aeberhard1991} & 178 & 13 & 3 cultivars & standardised & compact classes, no gaps \\
-D8 & HDB resale 2017--2026~\cite{hdb2026} & 20{,}000\textsuperscript{a} & 4 & flat type (7) & price index-adjusted & no gaps; 77.7\% tied (3-storey bands) \\
+D1 & make\_moons~\cite{pedregosa2011} & 1{,}000 & 2 & 2 classes & noise 0.07; standardised & Non-convex moons: shows where density and spectral methods beat K-means. \\
+D2 & Earthquakes 2023, M$\geq$4.5~\cite{usgs2017} & 7{,}643 & 2 & none & 8 eruptions dropped; epicentre only & Long belts of uneven density: exposes K-means (compact clusters) and DBSCAN (one radius). \\
+D3 & Uber NYC, Apr 2014~\cite{fivethirtyeight2014} & 15{,}000 & 2 & none & sampled from 558{,}019 in NYC box; km & Dense city with no gaps: shows density methods collapse into one cluster. \\
+D4 & Ecoli~\cite{horton1996} & 336 & 7 & 8 sites & standardised & Seven dimensions, tiny classes: favours K-means; density methods lose rare classes. \\
+D5 & Fashion-MNIST~\cite{xiao2017} & 3{,}000 & 50 & 10 classes & stratified; PCA 784$\to$50 (86.5\% var.) & 50 dimensions, overlapping classes: exposes density methods in high dimensions. \\
+D6 & Wine~\cite{aeberhard1991} & 178 & 13 & 3 cultivars & standardised & Compact classes, no gaps: favours K-means; shows the silhouette misleads. \\
+D8 & HDB resale 2017--2026~\cite{hdb2026} & 20{,}000\textsuperscript{a} & 4 & flat type (7) & price index-adjusted & No gaps, stepped values, 234k sales: exposes density methods (ties, runtime) and K-means without scaling. \\
 \bottomrule
 \end{tabularx}
 \par\raggedright\footnotesize\textsuperscript{a}\,Sample of 234{,}294 sales; all used for runtime (Section~\ref{sec:runtime}).
