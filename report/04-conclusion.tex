@@ -20,7 +20,7 @@ and against the points it ignores.
 
 \subsection*{Limitations}
 \habegin
-% [Hoang Anh]: my line for D6 and D7. Source: results/comparison/team_results.csv (label_free_choice).
+% [Hoang Anh]: my line for D6 and D7. Source: results/datasets/{wine,breast_cancer}_results.csv (label_free_choice).
 \hatag{}On D6 and D7, the methods that need $k$ were given the number of classes, which an analyst would not
 know. The label-free criteria happen to agree here (the silhouette picks $k=3$ on D6 and $k=2$ on D7 for
 K-means), so the cost is small on these two tables, but both are small (178 and 569 points) and their
@@ -33,7 +33,7 @@ sample of one month. The D4 settings with the best ARI use the labels and overst
 reach without them; D4 is also small (336 proteins), so a single protein moves a rare class's share by up to 50\%.
 
 % [Wei Yew]: my line for D2 and D8. Sources: results/earthquakes_2023/ablation_time_window.csv;
-% results/hdb_resale/screening_labels.csv.
+% floor-area ARI 0.601: from the removed Stage 0 screening (screening_labels.csv); not regenerated.
 D2 has no labels, so its failures are judged against plate-boundary geography and cannot be scored.
 Its density parameters are counts of points, so the clusters change with the size of the catalogue: a
 random half of the year agrees with the full year at ARI 0.51 to 0.55 only for the density methods

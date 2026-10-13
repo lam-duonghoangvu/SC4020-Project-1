@@ -33,7 +33,10 @@ def test_cross_line_pairs_same_cluster():
 
 
 def test_cross_line_pairs_split_by_clustering_or_noise():
-    assert cross_line_pairs(LAT, LON, [0, 1, 1, 2, 2], max_km=50)["pairs_same_cluster"] == 0
+    assert (
+        cross_line_pairs(LAT, LON, [0, 1, 1, 2, 2], max_km=50)["pairs_same_cluster"]
+        == 0
+    )
     assert cross_line_pairs(LAT, LON, [0, -1, 1, 2, 2], max_km=50) == {
         "cross_line_pairs": 1,
         "pairs_both_clustered": 0,
@@ -42,5 +45,8 @@ def test_cross_line_pairs_split_by_clustering_or_noise():
 
 
 def test_cross_line_pairs_respects_distance_and_empty_sides():
-    assert cross_line_pairs(LAT, LON, [0, 0, 0, 0, 0], max_km=2000)["cross_line_pairs"] == 2
+    assert (
+        cross_line_pairs(LAT, LON, [0, 0, 0, 0, 0], max_km=2000)["cross_line_pairs"]
+        == 2
+    )
     assert cross_line_pairs([0, 0], [10, 20], [0, 0])["cross_line_pairs"] == 0

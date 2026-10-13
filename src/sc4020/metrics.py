@@ -4,11 +4,22 @@ Internal scores (silhouette, Davies-Bouldin, Calinski-Harabasz) are computed on 
 only, so they say nothing about points a density method calls noise; the noise fraction and the
 largest cluster's share are reported next to them. External scores (ARI, NMI, AMI, Fowlkes-Mallows)
 use every point, with noise as one more cluster, so discarding hard points cannot raise them.
+
+DBCV (Density-Based Clustering Validation, Moulavi et al., SDM 2014). Silhouette rewards compact,
+convex clusters, so it is the wrong yardstick for density-based methods whose clusters can be any
+shape. DBCV instead compares, for every cluster, its sparsest internal region (the longest edge
+inside its minimum spanning tree under mutual reachability distance) with its densest connection to
+any other cluster. It ranges from -1 to 1 and noise points count against the score, because each
+cluster is weighted by |C| / n with n including noise.
 """
 
 import itertools
 
 import numpy as np
+import pandas as pd
+from scipy.sparse.csgraph import minimum_spanning_tree
+from scipy.spatial.distance import cdist
+from scipy.special import logsumexp
 from sklearn.metrics import (
     adjusted_mutual_info_score,
     adjusted_rand_score,
@@ -26,12 +37,16 @@ NOISE_LABEL = -1
 SILHOUETTE_SAMPLE = 5000
 
 
-def silhouette(X, labels, sample_size=SILHOUETTE_SAMPLE, seed=0, metric="euclidean") -> float:
+def silhouette(
+    X, labels, sample_size=SILHOUETTE_SAMPLE, seed=0, metric="euclidean"
+) -> float:
     """Silhouette on a random subsample of `sample_size` points, or on all points when the data is
     smaller or the subsample would miss every cluster but one (one large cluster plus tiny ones)."""
     X, labels = np.asarray(X), np.asarray(labels)
     if sample_size and len(labels) > sample_size:
-        rows = np.random.default_rng(seed).choice(len(labels), size=sample_size, replace=False)
+        rows = np.random.default_rng(seed).choice(
+            len(labels), size=sample_size, replace=False
+        )
         if len(np.unique(labels[rows])) >= 2:
             X, labels = X[rows], labels[rows]
     return float(silhouette_score(X, labels, metric=metric))
@@ -44,8 +59,24 @@ def cluster_shares(labels) -> dict:
     return {
         "n_clusters": int(len(np.unique(clustered))),
         "noise_fraction": float((labels == NOISE_LABEL).mean()),
-        "largest_cluster_share": float(np.bincount(clustered - clustered.min()).max() / len(labels)) if len(clustered) else 0.0,
+        "largest_cluster_share": float(
+            np.bincount(clustered - clustered.min()).max() / len(labels)
+        )
+        if len(clustered)
+        else 0.0,
     }
+
+
+def single_value_share(labels, values) -> pd.Series:
+    """For each cluster, the share of its members holding the cluster's most common value.
+
+    A share of 1.0 means the cluster is a single discrete value (e.g. one storey band), which
+    suggests a density method found a tie in the data rather than a group of similar entities."""
+    frame = pd.DataFrame({"label": np.asarray(labels), "value": np.asarray(values)})
+    frame = frame[frame["label"] != NOISE_LABEL]
+    return frame.groupby("label")["value"].agg(
+        lambda v: v.value_counts(normalize=True).iloc[0]
+    )
 
 
 def evaluate(
@@ -66,14 +97,23 @@ def evaluate(
     (e.g. unit vectors for points on the sphere)."""
     X, labels = np.asarray(X), np.asarray(labels)
     X_db = X if X_davies_bouldin is None else np.asarray(X_davies_bouldin)
-    result = {**cluster_shares(labels), "silhouette": np.nan, "davies_bouldin": np.nan, "calinski_harabasz": np.nan}
+    result = {
+        **cluster_shares(labels),
+        "silhouette": np.nan,
+        "davies_bouldin": np.nan,
+        "calinski_harabasz": np.nan,
+    }
     clustered = labels != NOISE_LABEL
     n_clusters = result["n_clusters"]
     if n_clusters >= 2 and clustered.sum() > n_clusters:
         lab = labels[clustered]
-        result["silhouette"] = silhouette(X[clustered], lab, silhouette_sample, seed, metric)
+        result["silhouette"] = silhouette(
+            X[clustered], lab, silhouette_sample, seed, metric
+        )
         result["davies_bouldin"] = float(davies_bouldin_score(X_db[clustered], lab))
-        result["calinski_harabasz"] = float(calinski_harabasz_score(X_db[clustered], lab))
+        result["calinski_harabasz"] = float(
+            calinski_harabasz_score(X_db[clustered], lab)
+        )
     if y_true is not None:
         result.update(
             ari=float(adjusted_rand_score(y_true, labels)),
@@ -94,8 +134,13 @@ def pairwise_ari(label_runs) -> np.ndarray:
 
 def haversine_km(lat1, lon1, lat2, lon2):
     """Great-circle distance in km between points given in degrees."""
-    lat1, lon1, lat2, lon2 = (np.radians(np.asarray(v, dtype=float)) for v in (lat1, lon1, lat2, lon2))
-    a = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
+    lat1, lon1, lat2, lon2 = (
+        np.radians(np.asarray(v, dtype=float)) for v in (lat1, lon1, lat2, lon2)
+    )
+    a = (
+        np.sin((lat2 - lat1) / 2) ** 2
+        + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
+    )
     return 2 * EARTH_RADIUS_KM * np.arcsin(np.sqrt(a))
 
 
@@ -104,3 +149,78 @@ def nearest_neighbour_km(lat, lon, k=1):
     X = to_radians(lat, lon)
     distances, _ = BallTree(X, metric="haversine").query(X, k=k + 1)
     return distances[:, k] * EARTH_RADIUS_KM
+
+
+def _core_distances(D: np.ndarray, n_features: int) -> np.ndarray:
+    """All-points core distance of each point from its within-cluster distances D.
+
+    core(o) = (mean_j (1 / d(o, j)) ** d) ** (-1 / d), computed in log space
+    because (1 / d) ** d overflows for tens of features.
+    """
+    n = len(D)
+    D = np.maximum(D, np.finfo(float).tiny)  # duplicate points
+    log_inv = -n_features * np.log(D)
+    np.fill_diagonal(log_inv, -np.inf)
+    log_mean = logsumexp(log_inv, axis=1) - np.log(n - 1)
+    return np.exp(-log_mean / n_features)
+
+
+def _mutual_reachability(
+    D: np.ndarray, core_a: np.ndarray, core_b: np.ndarray
+) -> np.ndarray:
+    return np.maximum(D, np.maximum(core_a[:, None], core_b[None, :]))
+
+
+def dbcv_score(
+    X: np.ndarray,
+    labels: np.ndarray,
+    sample_size: int | None = None,
+    random_state: int = 42,
+) -> float:
+    """DBCV of a labelling; -1 when fewer than 2 clusters have 2+ points.
+
+    Memory grows with the square of the largest cluster, so for large data the
+    score is estimated on a random `sample_size` of the points (noise included).
+    """
+    if sample_size is not None and sample_size < len(X):
+        idx = np.random.default_rng(random_state).choice(
+            len(X), sample_size, replace=False
+        )
+        X, labels = X[idx], labels[idx]
+    clusters = [
+        c for c in np.unique(labels) if c != NOISE_LABEL and (labels == c).sum() > 1
+    ]
+    if len(clusters) < 2:
+        return -1.0
+
+    d = X.shape[1]
+    members, cores, internal, sparseness = {}, {}, {}, {}
+    for c in clusters:
+        idx = np.flatnonzero(labels == c)
+        D = cdist(X[idx], X[idx])
+        core = _core_distances(D, d)
+        mst = minimum_spanning_tree(_mutual_reachability(D, core, core)).toarray()
+        mst = np.maximum(mst, mst.T)
+        degree = (mst > 0).sum(axis=1)
+        inner = degree > 1
+        if inner.sum() < 2:  # tiny or star-shaped cluster: fall back to all nodes
+            inner = np.ones(len(idx), dtype=bool)
+        inner_edges = mst[np.ix_(inner, inner)]
+        members[c], cores[c], internal[c] = idx, core, inner
+        sparseness[c] = inner_edges.max() if inner_edges.any() else mst.max()
+
+    score = 0.0
+    for c in clusters:
+        a = members[c][internal[c]]
+        separation = min(
+            _mutual_reachability(
+                cdist(X[a], X[members[o][internal[o]]]),
+                cores[c][internal[c]],
+                cores[o][internal[o]],
+            ).min()
+            for o in clusters
+            if o != c
+        )
+        validity = (separation - sparseness[c]) / max(separation, sparseness[c])
+        score += len(members[c]) / len(labels) * validity
+    return float(score)

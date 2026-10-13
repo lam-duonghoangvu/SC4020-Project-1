@@ -70,7 +70,10 @@ def test_usgs_download_keeps_existing_file_unless_forced(tmp_path):
 
 def test_usgs_download_over_search_limit_raises_with_api_message(tmp_path):
     def get(url, params, timeout):
-        return FakeResponse("Error 400: 166725 matching events exceeds search limit of 20000.", status_code=400)
+        return FakeResponse(
+            "Error 400: 166725 matching events exceeds search limit of 20000.",
+            status_code=400,
+        )
 
     with pytest.raises(RuntimeError, match="exceeds search limit"):
         download_earthquakes_2023(tmp_path, start="2000-01-01", get=get)
@@ -103,16 +106,26 @@ def test_datagov_initiates_polls_and_saves_dated_file(tmp_path):
     get, calls = fake_api(
         {
             f"{base}/initiate-download": [ok({"message": "initiated"})],
-            f"{base}/poll-download": [ok({"status": "DOWNLOAD_IN_PROGRESS"}), ok({"status": "DOWNLOAD_SUCCESS", "url": FILE_URL})],
+            f"{base}/poll-download": [
+                ok({"status": "DOWNLOAD_IN_PROGRESS"}),
+                ok({"status": "DOWNLOAD_SUCCESS", "url": FILE_URL}),
+            ],
             FILE_URL: [FakeResponse(content=DATAGOV_CSV)],
         }
     )
 
-    target = download_datagov("resale", tmp_path, today="2026-09-14", get=get, sleep=lambda s: None)
+    target = download_datagov(
+        "resale", tmp_path, today="2026-09-14", get=get, sleep=lambda s: None
+    )
 
     assert target == tmp_path / "resale_2026-09-14.csv"
     assert target.read_bytes() == DATAGOV_CSV
-    assert calls == [f"{base}/initiate-download", f"{base}/poll-download", f"{base}/poll-download", FILE_URL]
+    assert calls == [
+        f"{base}/initiate-download",
+        f"{base}/poll-download",
+        f"{base}/poll-download",
+        FILE_URL,
+    ]
 
 
 def test_datagov_retries_rate_limited_calls(tmp_path):
@@ -126,7 +139,9 @@ def test_datagov_retries_rate_limited_calls(tmp_path):
         }
     )
 
-    download_datagov("price_index", tmp_path, today="2026-09-14", get=get, sleep=pauses.append)
+    download_datagov(
+        "price_index", tmp_path, today="2026-09-14", get=get, sleep=pauses.append
+    )
 
     assert len(pauses) == 2
 
@@ -136,13 +151,21 @@ def test_datagov_gives_up_when_always_rate_limited(tmp_path):
     get, _ = fake_api({f"{base}/initiate-download": [RATE_LIMITED] * 3})
 
     with pytest.raises(RuntimeError, match="still rate limited after 3 attempts"):
-        download_datagov("resale", tmp_path, get=get, sleep=lambda s: None, max_attempts=3)
+        download_datagov(
+            "resale", tmp_path, get=get, sleep=lambda s: None, max_attempts=3
+        )
     assert not list(tmp_path.iterdir())
 
 
 def test_datagov_raises_api_error_message(tmp_path):
     base = f"{DATAGOV_URL}/{DATAGOV_IDS['resale']}"
-    get, _ = fake_api({f"{base}/initiate-download": [FakeResponse(body={"code": 5, "errorMsg": "Dataset not found"})]})
+    get, _ = fake_api(
+        {
+            f"{base}/initiate-download": [
+                FakeResponse(body={"code": 5, "errorMsg": "Dataset not found"})
+            ]
+        }
+    )
 
     with pytest.raises(RuntimeError, match="Dataset not found"):
         download_datagov("resale", tmp_path, get=get, sleep=lambda s: None)
@@ -157,5 +180,7 @@ def test_latest_datagov_picks_most_recent_date(tmp_path):
 
 
 def test_latest_datagov_without_files_says_how_to_download(tmp_path):
-    with pytest.raises(FileNotFoundError, match="python -m sc4020.datasets.download_dataset hdb_resale"):
+    with pytest.raises(
+        FileNotFoundError, match="python -m sc4020.datasets.download_dataset hdb_resale"
+    ):
         latest_datagov("resale", tmp_path)

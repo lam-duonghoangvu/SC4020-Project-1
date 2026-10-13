@@ -40,7 +40,12 @@ def resale_rows():
             "floor_area_sqm": [67.0, 92.0, 110.0, 91.0],
             "flat_model": ["New Generation"] * 4,
             "lease_commence_date": [1978, 1980, 1990, 1985],
-            "remaining_lease": ["61 years 04 months", "62 years", "72 years 01 month", "67 years 11 months"],
+            "remaining_lease": [
+                "61 years 04 months",
+                "62 years",
+                "72 years 01 month",
+                "67 years 11 months",
+            ],
             "resale_price": [300000.0, 400000.0, 500000.0, 450000.0],
         }
     )
@@ -51,7 +56,11 @@ def resale_rows():
 
 @pytest.mark.parametrize(
     "text, years",
-    [("61 years 04 months", 61 + 4 / 12), ("62 years", 62.0), ("72 years 01 month", 72 + 1 / 12)],
+    [
+        ("61 years 04 months", 61 + 4 / 12),
+        ("62 years", 62.0),
+        ("72 years 01 month", 72 + 1 / 12),
+    ],
 )
 def test_remaining_lease_years(text, years):
     assert remaining_lease_years(text) == pytest.approx(years)
@@ -69,7 +78,15 @@ def test_storey_midpoint():
         storey_midpoint("10-12")
 
 
-@pytest.mark.parametrize("month, quarter", [("2017-01", "2017-Q1"), ("2017-03", "2017-Q1"), ("2017-04", "2017-Q2"), ("2017-12", "2017-Q4")])
+@pytest.mark.parametrize(
+    "month, quarter",
+    [
+        ("2017-01", "2017-Q1"),
+        ("2017-03", "2017-Q1"),
+        ("2017-04", "2017-Q2"),
+        ("2017-12", "2017-Q4"),
+    ],
+)
 def test_sale_quarter(month, quarter):
     assert sale_quarter(month) == quarter
 
@@ -83,12 +100,17 @@ def test_real_prices_use_latest_index_quarter_as_price_level():
 
 
 def test_hdb_features_drop_sales_without_index_with_warning():
-    with pytest.warns(UserWarning, match=r"Dropped 1 sales without a price index value \(months 2017-10 to 2017-10\)"):
+    with pytest.warns(
+        UserWarning,
+        match=r"Dropped 1 sales without a price index value \(months 2017-10 to 2017-10\)",
+    ):
         features = hdb_features(resale_rows(), INDEX)
 
     assert list(features.columns) == HDB_FEATURES
     assert features.index.tolist() == [0, 1, 2]
-    assert features.loc[0].tolist() == pytest.approx([67.0, 61 + 4 / 12, 11.0, 600000.0])
+    assert features.loc[0].tolist() == pytest.approx(
+        [67.0, 61 + 4 / 12, 11.0, 600000.0]
+    )
 
 
 def test_checks_reject_missing_columns():
@@ -108,7 +130,12 @@ def test_price_index_is_indexed_by_quarter():
 
 def test_jitter_ties_separates_identical_rows_within_half_step():
     features = pd.DataFrame(
-        {"floor_area_sqm": [93.0] * 200, "remaining_lease_years": [94.75] * 200, "storey_mid": [5.0] * 200, "real_price": [600000.0] * 200}
+        {
+            "floor_area_sqm": [93.0] * 200,
+            "remaining_lease_years": [94.75] * 200,
+            "storey_mid": [5.0] * 200,
+            "real_price": [600000.0] * 200,
+        }
     )
 
     jittered = jitter_ties(features, np.random.default_rng(0))
@@ -135,7 +162,9 @@ def test_unit_vectors_lie_on_sphere_and_meet_across_180_degree_line():
     vectors = to_unit_vectors([0, 45, -90, 0], [179.9, 10, 0, -179.9])
 
     assert np.linalg.norm(vectors, axis=1) == pytest.approx(np.ones(4))
-    assert np.linalg.norm(vectors[0] - vectors[3]) == pytest.approx(np.radians(0.2), rel=1e-4)
+    assert np.linalg.norm(vectors[0] - vectors[3]) == pytest.approx(
+        np.radians(0.2), rel=1e-4
+    )
 
 
 def test_to_radians_keeps_latitude_first():
@@ -155,7 +184,9 @@ def test_chord_and_km_round_trip():
     assert chord_to_km(km_to_chord(km)) == pytest.approx(km)
     # the chord between two unit vectors equals the great-circle distance's chord
     v = to_unit_vectors([0, 0], [0, 10])
-    assert chord_to_km(np.linalg.norm(v[0] - v[1])) == pytest.approx(np.radians(10) * EARTH_RADIUS_KM)
+    assert chord_to_km(np.linalg.norm(v[0] - v[1])) == pytest.approx(
+        np.radians(10) * EARTH_RADIUS_KM
+    )
 
 
 def test_region_strips_distance_and_direction_but_keeps_names_with_of():
@@ -190,7 +221,11 @@ USGS = pd.DataFrame(
         "depth": [30.1, 516.5, 1.0],
         "mag": [4.6, 4.7, 4.5],
         "type": ["earthquake", "earthquake", "volcanic eruption"],
-        "place": ["180 km SW of Merizo Village, Guam", "south of the Fiji Islands", "Hawaii"],
+        "place": [
+            "180 km SW of Merizo Village, Guam",
+            "south of the Fiji Islands",
+            "Hawaii",
+        ],
         "id": ["a", "b", "c"],
     }
 )
@@ -211,7 +246,9 @@ def test_usgs_rejects_missing_columns_and_bad_coordinates():
 
 
 def test_nyc_pickups_strip_column_names_and_keep_the_city_box():
-    raw = pd.DataFrame({'"Lat"': [40.75, 41.5, 40.70, np.nan], "Lon ": [-73.98, -73.98, -80.0, -73.9]})
+    raw = pd.DataFrame(
+        {'"Lat"': [40.75, 41.5, 40.70, np.nan], "Lon ": [-73.98, -73.98, -80.0, -73.9]}
+    )
 
     kept = nyc_pickups(raw)
 

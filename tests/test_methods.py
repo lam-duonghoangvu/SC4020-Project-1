@@ -7,7 +7,12 @@ from sc4020.datasets.preprocess_dataset import EARTH_RADIUS_KM, to_radians
 
 
 def two_blobs():
-    X, _ = make_blobs(n_samples=120, centers=[[0, 0, 0, 0], [10, 10, 10, 10]], cluster_std=0.3, random_state=0)
+    X, _ = make_blobs(
+        n_samples=120,
+        centers=[[0, 0, 0, 0], [10, 10, 10, 10]],
+        cluster_std=0.3,
+        random_state=0,
+    )
     return X
 
 
@@ -15,14 +20,21 @@ def test_kmeans_factory_initialisation_options():
     random_init = methods.kmeans(3, init="random", n_init=1, random_state=7)
     plus_plus = methods.kmeans(3)
 
-    assert (random_init.init, random_init.n_init, random_init.random_state) == ("random", 1, 7)
+    assert (random_init.init, random_init.n_init, random_init.random_state) == (
+        "random",
+        1,
+        7,
+    )
     assert (plus_plus.init, plus_plus.n_init) == ("k-means++", 10)
 
 
 def test_density_methods_separate_two_blobs():
     X = two_blobs()
 
-    for model in [methods.dbscan(eps=1.0, min_samples=5), methods.hdbscan(min_cluster_size=20, min_samples=5)]:
+    for model in [
+        methods.dbscan(eps=1.0, min_samples=5),
+        methods.hdbscan(min_cluster_size=20, min_samples=5),
+    ]:
         assert len(set(model.fit_predict(X)) - {-1}) == 2
 
 
@@ -48,7 +60,11 @@ def test_haversine_dbscan_keeps_a_group_across_180_degree_line_together():
 
 def test_build_and_run_models_record_params_and_time():
     X = two_blobs()
-    params = {"K-Means": {"n_clusters": 2}, "GMM": {"n_components": 2}, "Agglomerative": {"n_clusters": 2}}
+    params = {
+        "K-Means": {"n_clusters": 2},
+        "GMM": {"n_components": 2},
+        "Agglomerative": {"n_clusters": 2},
+    }
 
     results = methods.run_models(methods.build_models(params), X, params=params)
 

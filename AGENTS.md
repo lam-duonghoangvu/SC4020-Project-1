@@ -5,8 +5,17 @@ Rules for any coding agent (and human) editing this repository. They are mandato
 ## Project layout
 
 - Library code lives in `src/sc4020/` (one package, no per-member folders).
-- Dataset loading and preprocessing: `src/sc4020/datasets/`. Experiment scripts: `src/sc4020/experiments/`.
-- Notebooks in `notebooks/`, generated outputs in `results/` and `report/figures/`, tests in `tests/`.
+- Dataset loading and preprocessing: `src/sc4020/datasets/`. Per-dataset helpers: `src/sc4020/run.py`.
+- Every experiment is a notebook in `experiments/` (flat, no subfolders), named
+  `NN_<source>_<dataset>_<step>.ipynb`: `NN` is the run order, `<source>` where the data comes from
+  (`scikit_learn`, `kaggle`, `usgs`, `data_gov`, `multi_source`). Notebooks that depend on each other get
+  consecutive numbers; steps that run in sequence or share a purpose go in one notebook, not separate
+  scripts. Notebooks import from `sc4020`; nothing in `sc4020` imports them.
+- Every figure in a notebook is shown, then saved, through `show_and_save(fig, topic, name)` (to
+  `results/<topic>/figures/`) or `show_and_save_to(fig, path)`; never `fig.savefig` or `plt.show()`.
+- In notebooks, import from `sc4020.generate_figures` by name, at the top of the cell that uses it, and only
+  what that cell uses (`from sc4020.generate_figures import plot_k_distance, show_and_save`); no `gf` alias.
+- Generated outputs in `results/` and `report/figures/`, tests in `tests/`.
 - Python `>=3.13`, managed with `uv`. Run tests with `uv run pytest`.
 
 ## Imports
@@ -25,7 +34,7 @@ Names must say what the thing is. A reader should understand a name without read
 
 | Kind                                       | Style                                                         | Examples                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Modules and packages                       | `snake_case`, a noun for what they hold                       | `clusters.py`, `preprocess_dataset.py`, `hdb_screening.py`                |
+| Modules and packages                       | `snake_case`, a noun for what they hold                       | `clusters.py`, `preprocess_dataset.py`, `hdb_scalability.py`                |
 | Functions                                  | `snake_case`, a verb phrase or the name of the value returned | `relabel_by_size`, `load_dataset`, `spherical_centre`, `cross_line_pairs` |
 | Variables and parameters                   | `snake_case`, full words                                      | `labels`, `neighbours`, `max_km`, `min_cluster_size`                      |
 | Constants (module level, never reassigned) | `UPPER_SNAKE_CASE`                                            | `NOISE_LABEL`, `EARTH_RADIUS_KM`, `K_RANGE`, `SEED`                       |
@@ -51,7 +60,7 @@ Further rules:
   `assignments` in another.
 - Do not shadow built-ins (`id`, `type`, `list`, `max`, `input`, ...).
 - DataFrame column names and dictionary keys follow the same `snake_case` rule (`"pairs_same_cluster"`).
-- File names for outputs: `snake_case`, prefixed by what produced them (`team_wine.png`, `showcase_results.csv`).
+- File names for outputs: `snake_case`, prefixed by what produced them (`wine_clusters.png`, `report_d6_d7.csv`).
 
 ## Style
 

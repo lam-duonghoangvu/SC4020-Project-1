@@ -1,0 +1,4 @@
+dataset,by_silhouette,by_davies_bouldin,by_calinski,by_ari,agrees
+chicago,HDBSCAN > KMeans > KMeans++ > DBSCAN,HDBSCAN > DBSCAN > KMeans++ > KMeans,KMeans > KMeans++ > HDBSCAN > DBSCAN,KMeans > KMeans++ > DBSCAN > HDBSCAN,False
+ecoli,HDBSCAN > KMeans > KMeans++ > DBSCAN,HDBSCAN > KMeans > KMeans++ > DBSCAN,KMeans++ > KMeans > DBSCAN > HDBSCAN,KMeans++ > KMeans > DBSCAN > HDBSCAN,False
+moons,KMeans > KMeans++ > HDBSCAN > DBSCAN,KMeans > KMeans++ > DBSCAN > HDBSCAN,KMeans > KMeans++ > HDBSCAN > DBSCAN,HDBSCAN > DBSCAN > KMeans++ > KMeans,False

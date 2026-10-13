@@ -38,13 +38,17 @@ def standardize(X) -> np.ndarray:
 
 
 def to_radians(lat, lon) -> np.ndarray:
-    return np.radians(np.column_stack([np.asarray(lat, dtype=float), np.asarray(lon, dtype=float)]))
+    return np.radians(
+        np.column_stack([np.asarray(lat, dtype=float), np.asarray(lon, dtype=float)])
+    )
 
 
 def to_unit_vectors(lat, lon) -> np.ndarray:
     lat = np.radians(np.asarray(lat, dtype=float))
     lon = np.radians(np.asarray(lon, dtype=float))
-    return np.column_stack([np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)])
+    return np.column_stack(
+        [np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)]
+    )
 
 
 def project_km(lat, lon) -> np.ndarray:
@@ -52,12 +56,21 @@ def project_km(lat, lon) -> np.ndarray:
     lat = np.asarray(lat, dtype=float)
     lon = np.asarray(lon, dtype=float)
     lat0 = np.radians(lat.mean())
-    return np.column_stack([EARTH_RADIUS_KM * np.radians(lon) * np.cos(lat0), EARTH_RADIUS_KM * np.radians(lat)])
+    return np.column_stack(
+        [
+            EARTH_RADIUS_KM * np.radians(lon) * np.cos(lat0),
+            EARTH_RADIUS_KM * np.radians(lat),
+        ]
+    )
 
 
 def chord_to_km(chord):
     """Great-circle distance in km for a chord length between unit vectors."""
-    return 2 * np.arcsin(np.clip(np.asarray(chord, dtype=float) / 2, 0, 1)) * EARTH_RADIUS_KM
+    return (
+        2
+        * np.arcsin(np.clip(np.asarray(chord, dtype=float) / 2, 0, 1))
+        * EARTH_RADIUS_KM
+    )
 
 
 def km_to_chord(km):
@@ -66,7 +79,9 @@ def km_to_chord(km):
 
 
 # "82 km WNW of Hihifo, Tonga" and "south of the Fiji Islands" start with a position relative to a place.
-_RELATIVE_POSITION = r"^(?:\d+(?:\.\d+)? km [NSEW]{1,3} of |(?:north|south|east|west)\w* of )"
+_RELATIVE_POSITION = (
+    r"^(?:\d+(?:\.\d+)? km [NSEW]{1,3} of |(?:north|south|east|west)\w* of )"
+)
 
 
 def region_from_place(place: pd.Series) -> pd.Series:
@@ -81,7 +96,9 @@ def region_from_place(place: pd.Series) -> pd.Series:
 # --- synthetic --------------------------------------------------------------------------------
 
 
-def varied_density_blobs(n_noise: int = 120, random_state: int = 0) -> tuple[np.ndarray, np.ndarray]:
+def varied_density_blobs(
+    n_noise: int = 120, random_state: int = 0
+) -> tuple[np.ndarray, np.ndarray]:
     """Two tight, dense blobs next to each other, one wide sparse blob, and uniform background
     noise (label -1). The dense pair sit closer together than the spread of the sparse blob, so
     no single density threshold separates the pair and still keeps the sparse blob."""
@@ -98,14 +115,20 @@ def varied_density_blobs(n_noise: int = 120, random_state: int = 0) -> tuple[np.
 # --- Fashion-MNIST ----------------------------------------------------------------------------
 
 
-def fashion_mnist_sample(full: pd.DataFrame, n_samples: int = 3000, n_pca: int = 50, random_state: int = 42):
+def fashion_mnist_sample(
+    full: pd.DataFrame, n_samples: int = 3000, n_pca: int = 50, random_state: int = 42
+):
     """Stratified `n_samples` images from train+test, pixels / 255, then PCA to `n_pca` components.
 
     Returns (X_pca, y, pixels, pca)."""
     y_full = full["label"].to_numpy()
     pixels_full = full.drop(columns=["label"]).to_numpy(dtype=np.float32) / 255.0
     _, pixels, _, y = train_test_split(
-        pixels_full, y_full, test_size=n_samples / len(full), stratify=y_full, random_state=random_state
+        pixels_full,
+        y_full,
+        test_size=n_samples / len(full),
+        stratify=y_full,
+        random_state=random_state,
     )
     pca = PCA(n_components=n_pca, random_state=random_state)
     return pca.fit_transform(pixels).astype(float), y, pixels, pca
@@ -137,10 +160,16 @@ def usgs_earthquakes(events: pd.DataFrame) -> pd.DataFrame:
     dropped with a warning that names how many of each type."""
     missing = set(USGS_COLUMNS) - set(events.columns)
     if missing:
-        raise ValueError(f"Earthquake catalogue is missing columns {sorted(missing)}; got {list(events.columns)}")
-    out_of_range = ~events["latitude"].between(-90, 90) | ~events["longitude"].between(-180, 180)
+        raise ValueError(
+            f"Earthquake catalogue is missing columns {sorted(missing)}; got {list(events.columns)}"
+        )
+    out_of_range = ~events["latitude"].between(-90, 90) | ~events["longitude"].between(
+        -180, 180
+    )
     if out_of_range.any():
-        raise ValueError(f"{int(out_of_range.sum())} events have coordinates outside the valid range")
+        raise ValueError(
+            f"{int(out_of_range.sum())} events have coordinates outside the valid range"
+        )
     other = events["type"] != "earthquake"
     if other.any():
         warnings.warn(
@@ -160,7 +189,11 @@ def ecoli_table(path) -> tuple[pd.DataFrame, np.ndarray, list[str]]:
     df = pd.DataFrame(raw)
     label = df.columns[-1]
     sites = df[label].astype(str).astype("category")
-    return df.drop(columns=[label]).astype(float), sites.cat.codes.to_numpy(), list(sites.cat.categories)
+    return (
+        df.drop(columns=[label]).astype(float),
+        sites.cat.codes.to_numpy(),
+        list(sites.cat.categories),
+    )
 
 
 # --- HDB resale -------------------------------------------------------------------------------
@@ -179,7 +212,11 @@ RESALE_COLUMNS = [
     "resale_price",
 ]
 HDB_FEATURES = ["floor_area_sqm", "remaining_lease_years", "storey_mid", "real_price"]
-TIE_WIDTHS = {"floor_area_sqm": 0.5, "remaining_lease_years": 0.5 / 12, "storey_mid": 1.5}
+TIE_WIDTHS = {
+    "floor_area_sqm": 0.5,
+    "remaining_lease_years": 0.5 / 12,
+    "storey_mid": 1.5,
+}
 
 _LEASE = re.compile(r"^(\d+) years?(?: (\d+) months?)?$")
 _STOREY = re.compile(r"^(\d+) TO (\d+)$")
@@ -188,7 +225,9 @@ _STOREY = re.compile(r"^(\d+) TO (\d+)$")
 def check_resale(resale: pd.DataFrame) -> pd.DataFrame:
     missing = set(RESALE_COLUMNS) - set(resale.columns)
     if missing:
-        raise ValueError(f"Resale file is missing columns {sorted(missing)}; got {list(resale.columns)}")
+        raise ValueError(
+            f"Resale file is missing columns {sorted(missing)}; got {list(resale.columns)}"
+        )
     return resale
 
 
@@ -196,7 +235,9 @@ def price_index_series(index: pd.DataFrame) -> pd.Series:
     """Price index as a Series indexed by quarter label, e.g. '2017-Q1'."""
     missing = {"quarter", "index"} - set(index.columns)
     if missing:
-        raise ValueError(f"Price index file is missing columns {sorted(missing)}; got {list(index.columns)}")
+        raise ValueError(
+            f"Price index file is missing columns {sorted(missing)}; got {list(index.columns)}"
+        )
     return index.set_index("quarter")["index"].astype(float)
 
 
@@ -236,7 +277,9 @@ def hdb_features(resale: pd.DataFrame, price_index: pd.Series) -> pd.DataFrame:
     features = pd.DataFrame(
         {
             "floor_area_sqm": resale["floor_area_sqm"].astype(float),
-            "remaining_lease_years": resale["remaining_lease"].map(remaining_lease_years),
+            "remaining_lease_years": resale["remaining_lease"].map(
+                remaining_lease_years
+            ),
             "storey_mid": resale["storey_range"].map(storey_midpoint),
             "real_price": real_prices(resale, price_index),
         },

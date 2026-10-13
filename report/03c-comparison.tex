@@ -73,7 +73,7 @@ less (0.947, 2.7\% noise, mostly the sparse moon tips). Silhouette ranks the met
 round: K-Means++ and GMM score 0.495 against 0.387 for Spectral, because silhouette rewards compact,
 convex groups, which is exactly the wrong assumption here.
 
-% Source: notebooks/earthquakes_2023_ablation.ipynb, section 5 (K-means belt case, printed
+% Source: experiments/09_usgs_earthquakes_2023_ablation.ipynb, section 5 (K-means belt case, printed
 % centre distances); figure from the same cell.
 K-means assumes compact clusters, and D2 breaks that assumption at planetary scale. Earthquakes follow
 plate boundaries, so a cluster is a long,
@@ -96,7 +96,7 @@ thousands of kilometres apart are joined because K-means can only draw compact r
 
 \subsubsection{Uneven density}\label{sec:density}
 % Sources: results/earthquakes_2023/case_density_regions.csv, method_comparison.csv;
-% k-distance spread from notebooks/earthquakes_2023_eda.ipynb, section 12.
+% k-distance spread from experiments/07_usgs_earthquakes_2023_eda.ipynb, section 12.
 On D2 the distance to the nearest earthquake runs from 1.2\,km to 100.5\,km (5th to 95th percentile), and
 the k-distance curve rises smoothly with no knee. Any single $\varepsilon$ is therefore too small for some
 belts and too large for others. At the chosen $\varepsilon=101.8$\,km, DBSCAN clusters 90\% of the
@@ -146,7 +146,7 @@ the k-distances of all points are similar and there is no density gap between th
 classes for one threshold to find.
 
 \subsubsection{No gaps between groups}\label{sec:nogaps}
-% Sources: results/hdb_resale/comparison.csv, kmeans_k_sweep.csv, screening.csv.
+% Sources: results/hdb_resale/comparison.csv, kmeans_k_sweep.csv.
 D8 is one continuous mass: flats come in every combination of size, lease, storey and price, with no empty
 space between groups. Table~\ref{tab:cmp_d2d8} shows what each method does with it. K-means still finds a
 weak partition, four market segments (newer mid-size, older small, large older, newer high-floor), with a
@@ -169,7 +169,7 @@ no gaps between groups.}
 \end{figure}
 
 \subsubsection{Silhouette versus ground truth}\label{sec:silhouette}
-% Lam: results/datasets/wine_tuned_methods_results.csv, results/datasets/fashion_mnist_results.csv
+% Lam: results/datasets/wine_results.csv, results/datasets/fashion_mnist_results.csv
 On D6, DBSCAN has the best silhouette (0.42 against 0.28 for K-Means++) but a far worse ARI (0.31
 against 0.90): it scores only the 35\% of points it keeps and drops the other 65\% as noise. On D5,
 HDBSCAN also has the top silhouette (0.228), computed on the 29\% of points it does not call noise,
@@ -187,7 +187,7 @@ D5 HDBSCAN top silhouette with 71\% noise (Lam).}
 \habegin
 \paragraph{D7 Breast cancer.} \hatag{}
 % Sources: results/datasets/breast_cancer_results.csv (K-Means, Agglomerative, GMM, Spectral);
-% results/comparison/team_results.csv and team_tuning.csv (DBSCAN, HDBSCAN: 6 and 18 settings).
+% results/datasets/breast_cancer_results.csv and breast_cancer_tuning.csv (DBSCAN, HDBSCAN: 6 and 18 settings).
 Given $k=2$, the four methods that assign every point score almost the same silhouette, 0.314 to
 0.343, yet their ARI runs from 0.575 to 0.774 (Table~\ref{tab:d7}). The two scores disagree at the
 top: K-means has the highest silhouette of the four and GMM the lowest, while GMM matches the
@@ -216,7 +216,7 @@ artefact of the marginals. It does not show which of several real structures a m
 \haend
 
 \begin{table}[h]\centering\small
-% Source: results/comparison/report_d6_d7.csv (src/sc4020/experiments/report_tables.py).
+% Source: results/comparison/report_d6_d7.csv (experiments/01 and 02, section 8).
 \caption{\hatag D6 and D7 in the shared columns. S: silhouette; DB: Davies--Bouldin, both on clustered points
 only; null S: silhouette of the same setting on shuffled columns (``none'': no clusters formed). Every
 fit takes under 0.3\,s. On D7 the two density rows break the 50\% noise cap and are shown for

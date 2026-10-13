@@ -1,0 +1,9 @@
+dataset,method,noise_fraction,n_noise,worst_class,worst_class_noise_rate,worst_class_size
+earthquakes,DBSCAN,0.031233362910381545,176,,,
+earthquakes,HDBSCAN,0.029281277728482696,165,,,
+chicago,DBSCAN,0.0279491133384734,145,22.0,1.0,1.0
+chicago,HDBSCAN,0.7669622205088666,3979,3.0,1.0,219.0
+ecoli,DBSCAN,0.20833333333333334,70,2.0,1.0,2.0
+ecoli,HDBSCAN,0.002976190476190476,1,2.0,0.5,2.0
+moons,DBSCAN,0.048,48,1.0,0.056,500.0
+moons,HDBSCAN,0.0,0,,,

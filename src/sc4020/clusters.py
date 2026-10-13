@@ -4,7 +4,11 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import BallTree
 
-from sc4020.datasets.preprocess_dataset import EARTH_RADIUS_KM, to_radians, to_unit_vectors
+from sc4020.datasets.preprocess_dataset import (
+    EARTH_RADIUS_KM,
+    to_radians,
+    to_unit_vectors,
+)
 from sc4020.metrics import NOISE_LABEL
 
 
@@ -17,9 +21,15 @@ def cross_line_pairs(lat, lon, labels, max_km=50):
     lat, lon, labels = (np.asarray(v) for v in (lat, lon, labels))
     east, west = np.flatnonzero(lon > 90), np.flatnonzero(lon < -90)
     if len(east) == 0 or len(west) == 0:
-        return {"cross_line_pairs": 0, "pairs_both_clustered": 0, "pairs_same_cluster": 0}
+        return {
+            "cross_line_pairs": 0,
+            "pairs_both_clustered": 0,
+            "pairs_same_cluster": 0,
+        }
     tree = BallTree(to_radians(lat[west], lon[west]), metric="haversine")
-    neighbours = tree.query_radius(to_radians(lat[east], lon[east]), r=max_km / EARTH_RADIUS_KM)
+    neighbours = tree.query_radius(
+        to_radians(lat[east], lon[east]), r=max_km / EARTH_RADIUS_KM
+    )
     pairs = [(e, west[w]) for e, found in zip(east, neighbours) for w in found]
     left = np.array([labels[e] for e, _ in pairs], dtype=int)
     right = np.array([labels[w] for _, w in pairs], dtype=int)
@@ -45,5 +55,6 @@ def spherical_centre(lat, lon):
     """Latitude and longitude (degrees) of the normalised mean unit vector: the centre on the sphere."""
     mean = to_unit_vectors(lat, lon).mean(axis=0)
     mean = mean / np.linalg.norm(mean)
-    return float(np.degrees(np.arcsin(mean[2]))), float(np.degrees(np.arctan2(mean[1], mean[0])))
-
+    return float(np.degrees(np.arcsin(mean[2]))), float(
+        np.degrees(np.arctan2(mean[1], mean[0]))
+    )

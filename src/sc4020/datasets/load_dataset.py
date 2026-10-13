@@ -1,19 +1,16 @@
-"""Load every dataset by name, the way `sklearn.datasets` does.
+"""Load every dataset by name with `load_dataset`, the way `sklearn.datasets` does.
 
-    from sc4020.datasets import load_wine, load_uber_pickups
-    wine = load_wine()                      # Bunch: data, target, feature_names, target_names, DESCR
-    X, y = load_wine(return_X_y=True)
-    uber = load_uber_pickups()              # downloads into data/ on first use
+    from sc4020.datasets import load_dataset
+    wine = load_dataset("wine")             # Bunch: data, target, feature_names, target_names, DESCR
+    X, y = load_dataset("wine", return_X_y=True)
+    uber = load_dataset("uber_pickups")     # downloads into data/ on first use
 
-Every loader takes the same keywords:
+Every dataset takes the same keywords:
   data_home            folder holding downloaded files (default: the repo's data/ folder)
   download_if_missing  download a missing file (True), or raise FileNotFoundError (False)
   return_X_y           return (data, target) instead of the Bunch
   as_frame             data as a DataFrame, target as a Series, and `frame` holding both
 plus the dataset's own preprocessing options, whose defaults are the settings used in the report.
-
-`data` is always the matrix the methods cluster. Other views (coordinates in degrees, radians or
-km, raw features, the source table) are extra attributes of the Bunch.
 """
 
 from pathlib import Path
@@ -43,7 +40,9 @@ def _require(path: Path, name: str, download, data_home, download_if_missing):
     if Path(path).exists():
         return
     if not download_if_missing:
-        raise FileNotFoundError(f"{path} not found; run: python -m sc4020.datasets.download_dataset {name}")
+        raise FileNotFoundError(
+            f"{path} not found; run: python -m sc4020.datasets.download_dataset {name}"
+        )
     download(data_home=data_home)
 
 
@@ -57,7 +56,11 @@ def _finish(bunch: Bunch, return_X_y: bool, as_frame: bool):
         bunch.data = pd.DataFrame(bunch.data, columns=bunch.feature_names)
         if bunch.target is not None:
             bunch.target = pd.Series(bunch.target, name="target")
-        bunch.frame = bunch.data if bunch.target is None else pd.concat([bunch.data, bunch.target], axis=1)
+        bunch.frame = (
+            bunch.data
+            if bunch.target is None
+            else pd.concat([bunch.data, bunch.target], axis=1)
+        )
     if return_X_y:
         return bunch.data, bunch.target
     return bunch
@@ -79,7 +82,14 @@ def _bunch(name, data, target, feature_names, target_names, descr, **extra) -> B
 # --- built into scikit-learn ------------------------------------------------------------------
 
 
-def load_wine(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, scale=True):
+def _load_wine(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    scale=True,
+):
     """UCI Wine: 178 wines x 13 chemical measurements, 3 cultivars. Standardized when `scale`."""
     raw = skd.load_wine()
     bunch = _bunch(
@@ -94,13 +104,21 @@ def load_wine(*, data_home=None, download_if_missing=True, return_X_y=False, as_
     return _finish(bunch, return_X_y, as_frame)
 
 
-def load_breast_cancer(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, scale=True):
+def _load_breast_cancer(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    scale=True,
+):
     """UCI Breast Cancer Wisconsin (Diagnostic): 569 tumours x 30 features. Target 0 benign, 1 malignant."""
     raw = skd.load_breast_cancer()
     bunch = _bunch(
         "breast_cancer",
         pp.standardize(raw.data) if scale else raw.data.astype(float),
-        1 - raw.target,  # scikit-learn codes malignant as 0; here 0 = benign, 1 = malignant
+        1
+        - raw.target,  # scikit-learn codes malignant as 0; here 0 = benign, 1 = malignant
         raw.feature_names,
         ["benign", "malignant"],
         "UCI Breast Cancer Wisconsin (scikit-learn copy): 569 x 30, benign / malignant. Features standardized.",
@@ -109,7 +127,9 @@ def load_breast_cancer(*, data_home=None, download_if_missing=True, return_X_y=F
     return _finish(bunch, return_X_y, as_frame)
 
 
-def load_digits(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False):
+def _load_digits(
+    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False
+):
     """8x8 handwritten digits: 1,797 images x 64 pixels, 10 classes.
 
     Pixels keep their shared 0-16 scale: standardizing would blow up the near-constant border
@@ -126,9 +146,16 @@ def load_digits(*, data_home=None, download_if_missing=True, return_X_y=False, a
     return _finish(bunch, return_X_y, as_frame)
 
 
-def make_moons(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False,
-    n_samples=1000, noise=0.07, random_state=42, scale=True,
+def _make_moons(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    n_samples=1000,
+    noise=0.07,
+    random_state=42,
+    scale=True,
 ):
     """Two interleaving half-moons: non-convex clusters with known labels."""
     X, y = skd.make_moons(n_samples=n_samples, noise=noise, random_state=random_state)
@@ -144,8 +171,14 @@ def make_moons(
     return _finish(bunch, return_X_y, as_frame)
 
 
-def make_varied_density(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, n_noise=120, random_state=0
+def _make_varied_density(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    n_noise=120,
+    random_state=0,
 ):
     """Two dense blobs, one sparse blob and uniform noise (target -1), standardized."""
     X, y = pp.varied_density_blobs(n_noise, random_state)
@@ -165,10 +198,23 @@ def make_varied_density(
 # --- Kaggle -----------------------------------------------------------------------------------
 
 
-def load_mall_customers(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, scale=True):
+def _load_mall_customers(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    scale=True,
+):
     """Mall Customers: 200 shoppers x (age, annual income, spending score). No labels."""
     path = _home(data_home) / dl.MALL_FILE
-    _require(path, "mall_customers", dl.download_mall_customers, data_home, download_if_missing)
+    _require(
+        path,
+        "mall_customers",
+        dl.download_mall_customers,
+        data_home,
+        download_if_missing,
+    )
     df = pd.read_csv(path)
     features = ["Age", "Annual Income (k$)", "Spending Score (1-100)"]
     raw = df[features].to_numpy(dtype=float)
@@ -185,15 +231,27 @@ def load_mall_customers(*, data_home=None, download_if_missing=True, return_X_y=
     return _finish(bunch, return_X_y, as_frame)
 
 
-def load_fashion_mnist(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False,
-    n_samples=3000, n_pca=50, random_state=42,
+def _load_fashion_mnist(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    n_samples=3000,
+    n_pca=50,
+    random_state=42,
 ):
     """Fashion-MNIST: stratified sample of train+test, pixels / 255, PCA to `n_pca` components."""
     home = _home(data_home)
     paths = [home / name for name in dl.FASHION_FILES]
     for path in paths:
-        _require(path, "fashion_mnist", dl.download_fashion_mnist, data_home, download_if_missing)
+        _require(
+            path,
+            "fashion_mnist",
+            dl.download_fashion_mnist,
+            data_home,
+            download_if_missing,
+        )
     full = pd.concat([pd.read_csv(p) for p in paths], ignore_index=True)
     X, y, pixels, pca = pp.fashion_mnist_sample(full, n_samples, n_pca, random_state)
     bunch = _bunch(
@@ -201,7 +259,18 @@ def load_fashion_mnist(
         X,
         y,
         [f"pca_{i}" for i in range(n_pca)],
-        ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"],
+        [
+            "T-shirt/top",
+            "Trouser",
+            "Pullover",
+            "Dress",
+            "Coat",
+            "Sandal",
+            "Shirt",
+            "Sneaker",
+            "Bag",
+            "Ankle boot",
+        ],
         f"Kaggle Fashion-MNIST: stratified {n_samples:,} of 70,000 images, pixels / 255, PCA to {n_pca}.",
         pixels=pixels,
         pca_model=pca,
@@ -210,12 +279,20 @@ def load_fashion_mnist(
     return _finish(bunch, return_X_y, as_frame)
 
 
-def load_uber_pickups(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, n_samples=15000, random_state=42,
+def _load_uber_pickups(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    n_samples=15000,
+    random_state=42,
 ):
     """Uber pickups in NYC, April 2014: `n_samples` pickups inside the city, projected to km."""
     path = _home(data_home) / dl.UBER_FILE
-    _require(path, "uber_pickups", dl.download_uber_pickups, data_home, download_if_missing)
+    _require(
+        path, "uber_pickups", dl.download_uber_pickups, data_home, download_if_missing
+    )
     raw = pd.read_csv(path)
     inside = pp.nyc_pickups(raw)
     sample = inside.sample(n=min(n_samples, len(inside)), random_state=random_state)
@@ -255,14 +332,29 @@ def _earthquake_bunch(name, events, descr, lat_col="latitude", lon_col="longitud
     )
 
 
-def load_earthquakes_1965_2016(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, min_magnitude=5.5,
+def _load_earthquakes_1965_2016(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    min_magnitude=5.5,
 ):
     """Global earthquakes 1965-2016 (plotly sample data), magnitude >= `min_magnitude`, as unit vectors."""
     path = _home(data_home) / dl.EARTHQUAKES_1965_FILE
-    _require(path, "earthquakes_1965_2016", dl.download_earthquakes_1965_2016, data_home, download_if_missing)
+    _require(
+        path,
+        "earthquakes_1965_2016",
+        dl.download_earthquakes_1965_2016,
+        data_home,
+        download_if_missing,
+    )
     df = pd.read_csv(path)
-    df = df[df["Magnitude"] >= min_magnitude].dropna(subset=["Latitude", "Longitude"]).reset_index(drop=True)
+    df = (
+        df[df["Magnitude"] >= min_magnitude]
+        .dropna(subset=["Latitude", "Longitude"])
+        .reset_index(drop=True)
+    )
     bunch = _earthquake_bunch(
         "earthquakes_1965_2016",
         df,
@@ -273,7 +365,14 @@ def load_earthquakes_1965_2016(
     return _finish(bunch, return_X_y, as_frame)
 
 
-def load_ecoli(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, scale=True):
+def _load_ecoli(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    scale=True,
+):
     """UCI Ecoli: 336 proteins x 7 scores, 8 localisation sites (codes in alphabetical order)."""
     path = _home(data_home) / dl.ECOLI_FILE
     _require(path, "ecoli", dl.download_ecoli, data_home, download_if_missing)
@@ -294,18 +393,28 @@ def load_ecoli(*, data_home=None, download_if_missing=True, return_X_y=False, as
 # --- USGS -------------------------------------------------------------------------------------
 
 
-def load_earthquakes_2023(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False,
-    start=dl.USGS_START, end=dl.USGS_END, min_magnitude=dl.USGS_MIN_MAGNITUDE,
+def _load_earthquakes_2023(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    start=dl.USGS_START,
+    end=dl.USGS_END,
+    min_magnitude=dl.USGS_MIN_MAGNITUDE,
 ):
     """USGS earthquakes in [start, end) with magnitude >= `min_magnitude`, as unit vectors.
 
     Non-earthquake events (explosions, eruptions) are dropped with a warning."""
     path = dl.usgs_catalogue_path(start, end, min_magnitude, data_home)
     _require(
-        path, "earthquakes_2023",
-        lambda data_home: dl.download_earthquakes_2023(data_home, start=start, end=end, min_magnitude=min_magnitude),
-        data_home, download_if_missing,
+        path,
+        "earthquakes_2023",
+        lambda data_home: dl.download_earthquakes_2023(
+            data_home, start=start, end=end, min_magnitude=min_magnitude
+        ),
+        data_home,
+        download_if_missing,
     )
     events = pp.usgs_earthquakes(pd.read_csv(path))
     bunch = _earthquake_bunch(
@@ -316,11 +425,23 @@ def load_earthquakes_2023(
     return _finish(bunch, return_X_y, as_frame)
 
 
-def load_ridgecrest_2019(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False):
+def _load_ridgecrest_2019(
+    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False
+):
     """USGS Ridgecrest 2019 sequence (M >= 2, 4 July to 4 August 2019), projected to km."""
     path = _home(data_home) / dl.RIDGECREST_FILE
-    _require(path, "ridgecrest_2019", dl.download_ridgecrest_2019, data_home, download_if_missing)
-    events = pd.read_csv(path).dropna(subset=["latitude", "longitude"]).reset_index(drop=True)
+    _require(
+        path,
+        "ridgecrest_2019",
+        dl.download_ridgecrest_2019,
+        data_home,
+        download_if_missing,
+    )
+    events = (
+        pd.read_csv(path)
+        .dropna(subset=["latitude", "longitude"])
+        .reset_index(drop=True)
+    )
     deg = events[["latitude", "longitude"]].to_numpy(dtype=float)
     bunch = _bunch(
         "ridgecrest_2019",
@@ -339,14 +460,27 @@ def load_ridgecrest_2019(*, data_home=None, download_if_missing=True, return_X_y
 # --- City of Chicago --------------------------------------------------------------------------
 
 
-def load_chicago_theft(*, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False, random_state=42):
+def _load_chicago_theft(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    random_state=42,
+):
     """Chicago thefts in July 2023, projected to km; target is the police district (a weak proxy).
 
     Block-level rounding creates exact duplicate coordinates, so points are jittered by about 5 m
     to keep duplicates from inflating local density."""
     path = _home(data_home) / dl.CHICAGO_FILE
-    _require(path, "chicago_theft", dl.download_chicago_theft, data_home, download_if_missing)
-    events = pd.read_csv(path).dropna(subset=["latitude", "longitude", "district"]).reset_index(drop=True)
+    _require(
+        path, "chicago_theft", dl.download_chicago_theft, data_home, download_if_missing
+    )
+    events = (
+        pd.read_csv(path)
+        .dropna(subset=["latitude", "longitude", "district"])
+        .reset_index(drop=True)
+    )
     jitter = np.random.default_rng(random_state).normal(0, 5e-5, size=(len(events), 2))
     deg = events[["latitude", "longitude"]].to_numpy(dtype=float) + jitter
     districts = events["district"].astype(int)
@@ -368,9 +502,16 @@ def load_chicago_theft(*, data_home=None, download_if_missing=True, return_X_y=F
 # --- data.gov.sg ------------------------------------------------------------------------------
 
 
-def load_hdb_resale(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False,
-    n_samples=20_000, random_state=0, jitter=True, scale=True,
+def _load_hdb_resale(
+    *,
+    data_home=None,
+    download_if_missing=True,
+    return_X_y=False,
+    as_frame=False,
+    n_samples=20_000,
+    random_state=0,
+    jitter=True,
+    scale=True,
 ):
     """HDB resale sales from Jan 2017: floor area, remaining lease, storey and index-adjusted price.
 
@@ -389,7 +530,11 @@ def load_hdb_resale(
     features = pp.hdb_features(sales, price_index)
     if n_samples is not None:
         features = features.sample(n=n_samples, random_state=random_state)
-    values = pp.jitter_ties(features, np.random.default_rng(random_state)) if jitter else features
+    values = (
+        pp.jitter_ties(features, np.random.default_rng(random_state))
+        if jitter
+        else features
+    )
     bunch = _bunch(
         "hdb_resale",
         pp.standardize(values) if scale else values.to_numpy(dtype=float),
@@ -409,20 +554,20 @@ def load_hdb_resale(
 
 # Reported datasets first, in the order of the report's comparison table.
 DATASETS = {
-    "wine": load_wine,
-    "breast_cancer": load_breast_cancer,
-    "uber_pickups": load_uber_pickups,
-    "make_moons": make_moons,
-    "mall_customers": load_mall_customers,
-    "fashion_mnist": load_fashion_mnist,
-    "earthquakes_1965_2016": load_earthquakes_1965_2016,
-    "ecoli": load_ecoli,
-    "earthquakes_2023": load_earthquakes_2023,
-    "hdb_resale": load_hdb_resale,
-    "digits": load_digits,
-    "varied_density": make_varied_density,
-    "ridgecrest_2019": load_ridgecrest_2019,
-    "chicago_theft": load_chicago_theft,
+    "wine": _load_wine,
+    "breast_cancer": _load_breast_cancer,
+    "uber_pickups": _load_uber_pickups,
+    "make_moons": _make_moons,
+    "mall_customers": _load_mall_customers,
+    "fashion_mnist": _load_fashion_mnist,
+    "earthquakes_1965_2016": _load_earthquakes_1965_2016,
+    "ecoli": _load_ecoli,
+    "earthquakes_2023": _load_earthquakes_2023,
+    "hdb_resale": _load_hdb_resale,
+    "digits": _load_digits,
+    "varied_density": _make_varied_density,
+    "ridgecrest_2019": _load_ridgecrest_2019,
+    "chicago_theft": _load_chicago_theft,
 }
 
 

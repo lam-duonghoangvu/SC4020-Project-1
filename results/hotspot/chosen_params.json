@@ -1,58 +1,95 @@
 {
-  "best_k": {
-    "Earthquakes": {
-      "elbow": 8,
-      "silhouette": 2,
-      "selected": 3
+  "k": {
+    "earthquakes_1965_2016": {
+      "elbow": 6,
+      "silhouette": 24,
+      "null_gap": 2,
+      "selected": 2
     },
-    "UberNYC": {
+    "uber_pickups": {
       "elbow": 6,
       "silhouette": 2,
+      "null_gap": 5,
       "selected": 5
     },
-    "Ecoli": {
+    "ecoli": {
       "elbow": 7,
       "silhouette": 5,
-      "selected": 7
+      "null_gap": 5,
+      "selected": 8,
+      "best_ari": 7
     }
   },
   "dbscan": {
-    "Earthquakes": {
-      "eps": 123.27849470598646,
-      "min_samples": 32
+    "earthquakes_1965_2016": {
+      "rule": {
+        "eps": 0.0027967507448815776,
+        "min_samples": 4
+      },
+      "valid": true,
+      "best_ari": null
     },
-    "UberNYC": {
-      "eps": 1.5760776468670477,
-      "min_samples": 4
+    "uber_pickups": {
+      "rule": {
+        "eps": 1.5269790907096634,
+        "min_samples": 32
+      },
+      "valid": true,
+      "best_ari": null
     },
-    "Ecoli": {
-      "eps": 0.9652759723805757,
-      "min_samples": 8
+    "ecoli": {
+      "rule": {
+        "eps": 2.4955745947374472,
+        "min_samples": 3
+      },
+      "valid": true,
+      "best_ari": {
+        "eps": 0.9801691202327611,
+        "min_samples": 12
+      }
     }
   },
   "hdbscan": {
-    "Earthquakes": {
-      "min_cluster_size": 250
+    "earthquakes_1965_2016": {
+      "rule": {
+        "min_cluster_size": 250,
+        "min_samples": null
+      },
+      "valid": true,
+      "best_ari": null
     },
-    "UberNYC": {
-      "min_cluster_size": 250
+    "uber_pickups": {
+      "rule": {
+        "min_cluster_size": 250,
+        "min_samples": null
+      },
+      "valid": true,
+      "best_ari": null
     },
-    "Ecoli": {
-      "min_cluster_size": 12
+    "ecoli": {
+      "rule": {
+        "min_cluster_size": 5,
+        "min_samples": null
+      },
+      "valid": true,
+      "best_ari": {
+        "min_cluster_size": 12,
+        "min_samples": null
+      }
     }
   },
   "kdist": {
-    "Earthquakes": {
-      "knee": 273.9522104577477,
-      "min_samples": 8
+    "earthquakes_1965_2016": {
+      "min_samples": 6,
+      "knee": 0.02726270172691949
     },
-    "UberNYC": {
-      "knee": 0.5253592156223492,
-      "min_samples": 8
+    "uber_pickups": {
+      "min_samples": 4,
+      "knee": 0.3630327125606998
     },
-    "Ecoli": {
-      "knee": 1.6087932873009596,
-      "min_samples": 5
+    "ecoli": {
+      "min_samples": 14,
+      "knee": 2.348280878080536
     }
   }
 }

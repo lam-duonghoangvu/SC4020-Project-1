@@ -1,8 +1,7 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 
 % Sources: results/hdb_resale/scalability_summary.csv (median of runs per size);
-% src/sc4020/experiments/hdb_scalability.py; memory estimate from
-% notebooks/hdb_resale_ablation.ipynb, scalability section.
+% experiments/12_data_gov_hdb_resale_ablation.ipynb, section 6 (runtimes and memory estimate).
 D8 is large enough to measure how each method grows. Each method ran at its chosen setting on random
 subsets of 1{,}000 to 234{,}294 sales (K-means from one start). Figure~\ref{fig:runtime} plots the median
 time against size on log scales, where the slope of a line estimates the exponent $b$ in

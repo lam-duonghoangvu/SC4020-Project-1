@@ -1,24 +1,11 @@
-# Team comparison: K-Means, DBSCAN, HDBSCAN, GMM on every dataset
+# Cross-dataset comparison: K-Means, DBSCAN, HDBSCAN, GMM on every dataset (archived)
 
-`sc4020.experiments.team_comparison` runs the four methods on all 10 datasets in the report, with
-one shared tuning and evaluation protocol, so every number can be compared across datasets.
-
-```bash
-# from the repo root; about 12 minutes, mostly the two earthquake catalogues and HDB
-PYTHONUTF8=1 uv run python -m sc4020.experiments.team_comparison
-PYTHONUTF8=1 uv run python -m sc4020.experiments.team_comparison wine ecoli     # a subset
-```
-
-`PYTHONUTF8=1` is needed on Windows: the USGS catalogue is written with the default encoding.
-
-Every dataset is loaded with `sc4020.datasets.load_dataset(name)`, which downloads missing files into
-`data/` (see `data/README.md`).
-
-Outputs:
-- `results/comparison/team_results.csv`: one row per dataset and method (params, metrics, runtimes)
-- `results/comparison/team_tuning.csv`: every setting tried during tuning
-- `results/comparison/team_params.json`: the chosen settings, read by `hdb_scalability`
-- `results/comparison/figures/team_<dataset>.png`: cluster plots (PCA 2D, or maps for spatial data)
+These notes record the protocol and findings of the earlier all-datasets run (`team_comparison`), which
+ran the four methods on all 10 report datasets with the density methods capped at `max(k_range)`
+clusters. That run has been removed: each dataset is now run by its own notebook in `experiments/`
+(see the table in `README.md`), with numbers in `results/datasets/`, `results/earthquakes_2023/`,
+`results/hdb_resale/` and `results/hotspot/`. The Wine and Breast Cancer rows of the report's shared
+table come from notebooks 01 and 02 (`results/comparison/report_d6_d7.csv`).
 
 ## Datasets
 
@@ -59,7 +46,7 @@ Labels are used only to compute ARI afterwards.
 - **Known k:** on labelled datasets, K-Means and GMM are given the true k. What
   they would pick on their own is in `label_free_choice`; the best-ARI setting is in
   `best_ari_choice`.
-- **DBCV** (Moulavi et al. 2014, `src/sc4020/dbcv.py`) is reported for every result as a
+- **DBCV** (Moulavi et al. 2014, `src/sc4020/metrics.py`) is reported for every result as a
   density-aware check on the silhouette, but no longer chooses settings: one rule chooses on every
   dataset. The implementation matches the `hdbscan` package's `validity_index` on 5 test cases.
 - **Same cluster budget:** every method may use at most 10 clusters (50 for the
@@ -74,7 +61,7 @@ Labels are used only to compute ARI afterwards.
 ## Results
 
 > These tables come from the run before the code was merged, when density settings were ranked
-> by DBCV. Current numbers are in `results/comparison/team_results.csv`.
+> by DBCV. Current per-dataset numbers are in the `results/` files named above.
 
 ### Labelled datasets: ARI (1 = perfect match with the true classes)
 
@@ -154,11 +141,3 @@ The small datasets all fit in under 0.3 s.
   scores, the noise %, and the maps.
 - **GMM hits the 50-component limit on both earthquake catalogues.** BIC keeps
   improving, so GMM has no natural stopping point there.
-
-## `sc4020.experiments.method_showcase` (earlier showcase attempt, not a team comparison)
-
-Runs one "showcase" dataset per method: digits for K-Means, make_moons for
-DBSCAN, varied_density for HDBSCAN, breast_cancer for GMM. digits and
-varied_density were added for that experiment and are not team datasets. With
-the earlier DBCV tuning, only the K-Means and GMM showcases held. Its outputs are
-`results/comparison/showcase_*.csv` and `results/comparison/figures/showcase_*.png`.

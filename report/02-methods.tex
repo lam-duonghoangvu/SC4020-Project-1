@@ -60,7 +60,7 @@ GMM generalises K-Means: full covariances allow ellipsoidal clusters of differen
 and weight, but each cluster must still be a single convex blob. It fails on curved or nested shapes,
 has no noise label, and with full covariances it needs many points per component when $d$ is large.
 \subsection{Spectral clustering}
-% Lam. Code: src/sc4020/methods.py; affinity per dataset in notebooks/{wine_tuned_methods,mall_customers,fashion_mnist,make_moons}.ipynb
+% Lam. Code: src/sc4020/methods.py; affinity per dataset in src/sc4020/run.py (SPECTRAL_AFFINITY_BY_DATASET)
 Spectral clustering~\cite{ng2002} turns clustering into graph partitioning. It (i) builds an affinity
 matrix $W$ whose entry $w_{ij}$ measures how similar points $i$ and $j$ are; (ii) forms the normalised
 graph Laplacian and takes its $k$ leading eigenvectors, giving each point a $k$-dimensional embedding;
@@ -76,8 +76,8 @@ eigensolver is much cheaper but still limits $n$ (Section~\ref{sec:runtime}). Sp
 needs $k$, has no noise label, and is sensitive to the affinity scale.
 \subsection{Agglomerative clustering}
 \habegin
-% Source: notebooks/wine_model_zoo.ipynb, notebooks/breast_cancer.ipynb;
-% ARI from results/datasets/{wine_model_zoo,breast_cancer}_results.csv.
+% Source: experiments/01_scikit_learn_wine_clustering.ipynb and 02_scikit_learn_breast_cancer_clustering.ipynb;
+% ARI from results/datasets/{wine,breast_cancer}_results.csv.
 \hatag{}Agglomerative clustering starts with every point as its own cluster and repeatedly merges the two
 closest clusters until $k$ remain. The linkage defines which two are closest. We use Ward
 linkage~\cite{ward1963}, which merges the pair whose union raises the total within-cluster variance

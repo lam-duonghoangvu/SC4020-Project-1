@@ -60,7 +60,7 @@ many local optima of different quality; on D8 every start reaches practically th
 
 \subsubsection{B: Distance on geographic coordinates}
 % Source: results/earthquakes_2023/ablation_distance.csv; figure from
-% notebooks/earthquakes_2023_ablation.ipynb, section 2.
+% experiments/09_usgs_earthquakes_2023_ablation.ipynb, section 2.
 Every method ran at its chosen setting twice on D2: once on the sphere (Section~\ref{sec:prep}) and once
 on latitude and longitude as flat numbers (DBSCAN's $\varepsilon$ converted at 111.2\,km per degree). To
 isolate the effect of the $180^\circ$ meridian we count \emph{cross-line pairs}: the 92 pairs of
@@ -111,7 +111,7 @@ the widest range decide the partition. DBSCAN only counts neighbours within $\va
 $\varepsilon$ absorbs most of a change of scale.
 
 % Source: results/hdb_resale/kmeans_sensitivity.csv; price share from
-% notebooks/hdb_resale_eda.ipynb, section 9.
+% experiments/10_data_gov_hdb_resale_eda.ipynb, section 9.
 On D8, K-means ($K=4$) on raw units scores a silhouette of 0.540, well above the 0.317 of the standardised
 run. The higher score is not a better clustering. In dollars, price makes up 100.0\% of the squared
 distance between sales, so the four clusters are price bands and floor area, lease and storey play no part.
@@ -159,7 +159,7 @@ Cause: K-means depends on feature scale, and a density threshold weakens as dime
 
 \subsubsection{E: Values recorded in steps}
 % Sources: results/hdb_resale/ablation_largest_cluster_cap.csv, ablation_capped_contents.csv,
-% agreement.csv; figure from notebooks/hdb_resale_ablation.ipynb.
+% agreement.csv; figure from experiments/12_data_gov_hdb_resale_ablation.ipynb.
 On D8 the selection rule picks density settings dominated by one cluster: it holds 97.1\% of sales for
 DBSCAN, and 68.6\% for HDBSCAN, which calls another 28.5\% noise (Section~\ref{sec:nogaps}). A natural repair is to add a cap on the largest
 cluster. We tested caps from 90\% down to 50\% on the data as recorded and on jittered data

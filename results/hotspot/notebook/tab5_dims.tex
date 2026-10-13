@@ -1,0 +1,22 @@
+\begin{table}[t]
+\caption{Dimensionality ablation on Ecoli.}
+\label{tab:dims}
+\begin{tabular}{rlrrrrr}
+\toprule
+dims & method & eps\_knee & n\_clusters & noise\_fraction & silhouette & ari \\
+\midrule
+2 & KMeans++ & 0.578 & 5 & 0.000 & 0.448 & 0.472 \\
+2 & DBSCAN & 0.578 & 1 & 0.036 & NaN & 0.033 \\
+2 & HDBSCAN & 0.578 & 4 & 0.214 & 0.495 & 0.540 \\
+3 & KMeans++ & 0.718 & 5 & 0.000 & 0.576 & 0.697 \\
+3 & DBSCAN & 0.718 & 1 & 0.030 & NaN & 0.038 \\
+3 & HDBSCAN & 0.718 & 2 & 0.003 & 0.518 & 0.038 \\
+5 & KMeans++ & 1.652 & 5 & 0.000 & 0.469 & 0.697 \\
+5 & DBSCAN & 1.652 & 2 & 0.009 & 0.587 & 0.039 \\
+5 & HDBSCAN & 1.652 & 2 & 0.003 & 0.587 & 0.038 \\
+7 & KMeans++ & 1.609 & 5 & 0.000 & 0.405 & 0.697 \\
+7 & DBSCAN & 1.609 & 1 & 0.039 & NaN & 0.040 \\
+7 & HDBSCAN & 1.609 & 2 & 0.003 & 0.559 & 0.038 \\
+\bottomrule
+\end{tabular}
+\end{table}

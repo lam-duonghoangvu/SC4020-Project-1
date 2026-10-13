@@ -20,7 +20,15 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 HERE = REPO / "submission"
 
-INCLUDE = ("pyproject.toml", ".python-version", "src/", "notebooks/", "results/", "data/", "tests/")
+INCLUDE = (
+    "pyproject.toml",
+    ".python-version",
+    "src/",
+    "experiments/",
+    "results/",
+    "data/",
+    # "tests/",
+)
 
 EXCLUDE = [
     "*.bak",
@@ -37,7 +45,9 @@ URL = re.compile(r"https?://[^\s\"'<>)\]\\]+")
 
 
 def tracked_files():
-    out = subprocess.run(["git", "ls-files"], cwd=REPO, capture_output=True, text=True, check=True)
+    out = subprocess.run(
+        ["git", "ls-files"], cwd=REPO, capture_output=True, text=True, check=True
+    )
     return out.stdout.splitlines()
 
 
@@ -61,13 +71,17 @@ def strip_md_links(text):
 def copy(src, dst):
     dst.parent.mkdir(parents=True, exist_ok=True)
     if src.suffix == ".md":
-        dst.write_text(strip_md_links(src.read_text(encoding="utf-8")), encoding="utf-8")
+        dst.write_text(
+            strip_md_links(src.read_text(encoding="utf-8")), encoding="utf-8"
+        )
     elif src.suffix == ".ipynb":
         nb = json.loads(src.read_text(encoding="utf-8"))
         for cell in nb.get("cells", []):
             if cell.get("cell_type") == "markdown":
                 cell["source"] = [strip_md_links(line) for line in cell["source"]]
-        dst.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+        dst.write_text(
+            json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
     else:
         shutil.copy2(src, dst)
 

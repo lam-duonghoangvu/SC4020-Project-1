@@ -30,7 +30,7 @@ separated by a gap, but neither is convex: each moon wraps around the end of the
 straight boundary a centroid method draws must cut both. With the true labels known and no other
 difficulty present, D1 isolates cluster shape as the single property under test.
 \paragraph{D2 Earthquakes.}
-% Source: notebooks/earthquakes_2023_eda.ipynb, sections 1, 4, 8 and 12.
+% Source: experiments/07_usgs_earthquakes_2023_eda.ipynb, sections 1, 4, 8 and 12.
 Every event of magnitude 4.5 or more in 2023 from the USGS ComCat catalogue~\cite{usgs2017}: 7{,}651 events, of which
 8 volcanic eruptions near Saipan are removed, leaving 7{,}643 earthquakes. We cluster the epicentre only.
 Depth is left out because 44.2\% of events carry the default depth of 10\,km. Each method meets a
@@ -42,7 +42,7 @@ cut the map. There are no labels.
 \paragraph{D3 Uber NYC.}
 % [Hoang Anh]: my setup, for the merged paragraph. April 2014 file, 564,516 rows; 558,019 inside the
 % box lat 40.57 to 40.92, lon -74.15 to -73.70; random sample of 15,000 (seed 42).
-% Source: notebooks/uber_pickups.ipynb; src/sc4020/datasets/load_dataset.py (load_uber_pickups).
+% Source: experiments/06_kaggle_uber_pickups_clustering.ipynb; src/sc4020/datasets/load_dataset.py (load_uber_pickups).
 % [Ky]: setup agreed with Hoang Anh. Same file, box, sample size and seed, so both pipelines cluster the
 % same 15,000 points (K-means k=5 silhouette 0.475 in both). Ky projects to km; Hoang Anh uses haversine.
 % Source: src/sc4020/datasets/load_dataset.py (load_uber).
@@ -63,7 +63,7 @@ is found. Features are standardised. The classes are very unequal: the five larg
 and 20 proteins, the three smallest 5, 2 and 2. D4 is hard for density methods in two ways. Seven
 dimensions already spread the points so that a density threshold separates less well, and the rare
 classes are too small to form a dense region of their own, so a density method tends to call them noise.
-\paragraph{D5 Fashion-MNIST.} % Lam. src/sc4020/datasets/load_dataset.py (load_fashion_mnist), notebooks/fashion_mnist.ipynb
+\paragraph{D5 Fashion-MNIST.} % Lam. src/sc4020/datasets/load_dataset.py (load_fashion_mnist), experiments/05_kaggle_fashion_mnist_clustering.ipynb
 Fashion-MNIST~\cite{xiao2017} holds 70{,}000 $28\times28$ greyscale images of 10 clothing classes.
 We pool the train and test files, scale pixels to $[0,1]$, draw a class-stratified sample of 3{,}000
 images (300 per class, seed 42), and project the 784 pixels onto 50 principal components, which keep
@@ -74,7 +74,7 @@ pullover, coat) overlap heavily with no density gap between them.
 \habegin
 \paragraph{D6 Wine.} \hatag{}
 % [Hoang Anh]: drafted from my run; Lam to review and merge.
-% Source: notebooks/wine_model_zoo.ipynb; results/datasets/wine_model_zoo_results.csv; results/datasets/wine_tuned_methods_results.csv.
+% Source: experiments/01_scikit_learn_wine_clustering.ipynb; results/datasets/wine_results.csv.
 The UCI Wine data~\cite{aeberhard1991}: 178 wines grown in one Italian region, each described by 13
 chemical measurements such as alcohol, malic acid, flavanoids and proline. The cultivar (3 classes of
 59, 71 and 48 wines) is held out as the label. Features are standardised, because proline runs from
@@ -86,7 +86,7 @@ about a third or more of the wines as noise, and the silhouette still prefers th
 \haend
 \habegin
 \paragraph{D7 Breast cancer.} \hatag{}
-% Source: notebooks/breast_cancer.ipynb; src/sc4020/datasets/load_dataset.py (load_breast_cancer_data).
+% Source: experiments/02_scikit_learn_breast_cancer_clustering.ipynb; src/sc4020/datasets/load_dataset.py (load_breast_cancer_data).
 % Class spread: root-mean-square distance to the class centre on the 30 standardised features,
 % 4.06 benign and 5.47 malignant (computed on the same data from sklearn.datasets.load_breast_cancer).
 The Wisconsin diagnostic breast cancer data~\cite{street1993}: 569 tumours, each described by 30
@@ -99,9 +99,9 @@ standardised units), which breaks the equal-size assumption of K-means. And the 
 connected mass in 30 dimensions, with no sparse gap for a density method to cut along.
 \haend
 \paragraph{D8 HDB resale.}
-% Source: notebooks/hdb_resale_eda.ipynb, sections 6, 10, 11 and 17;
-% sample size: notebooks/hdb_resale_clustering.ipynb, section 1;
-% floor-area ARI: results/hdb_resale/screening_labels.csv.
+% Source: experiments/10_data_gov_hdb_resale_eda.ipynb, sections 6, 10, 11 and 17;
+% sample size: experiments/11_data_gov_hdb_resale_clustering.ipynb, section 1;
+% floor-area ARI: from the removed Stage 0 screening (screening_labels.csv); not regenerated.
 Every resale of a public housing flat in Singapore from January 2017, from data.gov.sg~\cite{hdb2026}. The 6{,}051
 sales after June 2026 (2.5\%) have no price index value yet and are dropped, leaving 234{,}294. Methods
 are compared on a random sample of 20{,}000 (seed 0); all 234{,}294 are used for runtime. There are four
@@ -116,7 +116,7 @@ Three rules apply wherever a dataset has the property they address. Each is test
 Section~\ref{sec:ablation}.
 
 \paragraph{Coordinates on the sphere.}
-% Source: notebooks/earthquakes_2023_eda.ipynb, section 12.
+% Source: experiments/07_usgs_earthquakes_2023_eda.ipynb, section 12.
 Latitude and longitude treated as flat numbers put two earthquakes 6.07\,km apart at $359.94^\circ$ of
 longitude from each other, because they lie on either side of the $180^\circ$ meridian. Density methods
 therefore use the haversine (great-circle) distance on coordinates in radians. K-means needs a vector
@@ -125,7 +125,7 @@ between two such points grows with their great-circle distance, so the clusterin
 (Ablation~B).
 
 \paragraph{Standardised features.}
-% Source: notebooks/hdb_resale_eda.ipynb, section 9.
+% Source: experiments/10_data_gov_hdb_resale_eda.ipynb, section 9.
 Features in their raw units are not comparable. On D8, price (in dollars) accounts for 100.0\% of the
 squared distance between sales, so the other three features are ignored. Every feature is scaled to mean
 0 and standard deviation 1 (Ablation~C).

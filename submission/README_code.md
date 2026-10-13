@@ -17,18 +17,17 @@ On Windows, set `PYTHONUTF8=1` before running.
 
 All code is one package, `sc4020`, organised by what it does:
 
-| Module | Contents |
-|---|---|
-| `sc4020.datasets` | every dataset by name, like `sklearn.datasets`: `load_dataset.py` (`load_wine()`, `load_hdb_resale()`, ...), `download_dataset.py`, `preprocess_dataset.py` |
-| `sc4020.methods` | the clustering methods (K-Means, DBSCAN, HDBSCAN, GMM, Spectral, Agglomerative, Affinity Propagation) and a timed runner |
-| `sc4020.tuning` | the shared selection rule: k-distance knee, K-Means / GMM / DBSCAN / HDBSCAN selection |
-| `sc4020.metrics`, `sc4020.dbcv` | internal and external validity scores, DBCV, distances on the sphere |
-| `sc4020.screening` | fake-data (null model) checks |
-| `sc4020.clusters` | cluster renumbering and centres on the sphere |
-| `sc4020.generate_figures` | every figure and output table |
-| `sc4020.experiments` | the scripts behind the report's tables |
+| Module                          | Contents                                                                                                                                                    |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sc4020.datasets`               | every dataset by name, like `sklearn.datasets`: `load_dataset.py` (`load_dataset("wine")`, `load_dataset("hdb_resale")`, ...), `download_dataset.py`, `preprocess_dataset.py` |
+| `sc4020.methods`                | the clustering methods (K-Means, DBSCAN, HDBSCAN, GMM, Spectral, Agglomerative, Affinity Propagation) and a timed runner                                    |
+| `sc4020.tuning`                 | the shared selection rule: k-distance knee, K by the gap over fake data, GMM / DBSCAN / HDBSCAN selection, fake data                                        |
+| `sc4020.metrics`                | internal and external validity scores, DBCV, distances on the sphere                                                                                        |
+| `sc4020.clusters`               | cluster renumbering and centres on the sphere                                                                                                               |
+| `sc4020.generate_figures`       | every figure and output table                                                                                                                               |
+| `sc4020.run`                    | per-dataset helpers: select, fit and score one method at a time                                                                                             |
 
-`notebooks/` holds one notebook per dataset and topic, `results/<topic>/` the CSVs cited in the
+`experiments/` holds every experiment as a notebook numbered in run order, `results/<topic>/` the CSVs and figures cited in the
 report (comparison, datasets, hotspot, earthquakes_2023, hdb_resale), `tests/` the unit tests, and
 `data/README.md` every dataset with its source and download command.
 
@@ -36,26 +35,28 @@ report (comparison, datasets, hotspot, earthquakes_2023, hdb_resale), `tests/` t
 
 Run every command from this folder. Missing datasets download into `data/` on first use.
 
-| Report part | Command |
-|---|---|
-| Cross-dataset comparison (3.3), runtime (3.6) | `python -m sc4020.experiments.team_comparison`, then `python -m sc4020.experiments.report_tables` |
-| Per-dataset analyses | `notebooks/wine_*.ipynb`, `breast_cancer`, `uber_pickups`, `mall_customers`, `fashion_mnist`, `make_moons`, then `summary` |
-| Earthquakes 1965-2016, Uber, Ecoli: k sweep, k-distance, ablations | `python -m sc4020.experiments.hotspot`, `python -m sc4020.experiments.shared_rule`, `python -m sc4020.experiments.case_stats`, then `python -m sc4020.generate_figures hotspot` |
-| Earthquakes 2023: screening, clustering, ablations | `python -m sc4020.experiments.earthquakes_screening`, then `notebooks/earthquakes_2023_*.ipynb` |
-| HDB resale: screening, ablations, scalability | `python -m sc4020.experiments.hdb_screening`, `python -m sc4020.experiments.hdb_scalability`, then `notebooks/hdb_resale_*.ipynb` |
+| Report part | Notebook (in `experiments/`) |
+| --- | --- |
+| Wine (D6) and Breast Cancer (D7), shared table, `bc_cases.png` | `01_scikit_learn_wine_clustering.ipynb`, `02_scikit_learn_breast_cancer_clustering.ipynb` |
+| make_moons (D1), Fashion-MNIST (D5), Mall Customers, Uber (D3) per-dataset runs | `03` to `06` |
+| Earthquakes 2023 (D2): EDA, clustering, ablations | `07` to `09` |
+| HDB resale (D8): EDA, clustering, ablations, scalability | `10` to `12` (12 reads 09's cross-dataset table) |
+| Earthquakes 1965-2016, Uber, Ecoli (D3, D4): k sweep, k-distance, ablations, shared rule, case statistics, figures | `13_multi_source_hotspot_clustering.ipynb` |
+
+Run one with `jupyter nbconvert --to notebook --execute --inplace experiments/<notebook>.ipynb`, or open it in Jupyter.
 
 Unit tests: `python -m pytest`.
 
 ## Datasets (not included)
 
-| Dataset | Source |
-|---|---|
-| Uber NYC pickups (Apr 2014), Mall Customers, Fashion-MNIST | Kaggle, fetched with `kagglehub` into `data/` |
-| Wine, Breast Cancer Wisconsin, Digits, make_moons, varied-density blobs | built into or generated by scikit-learn |
-| Earthquakes 1965-2016 (M >= 5.5) | plotly sample datasets |
-| Ecoli | UCI Machine Learning Repository |
-| Earthquakes 2023 (M >= 4.5) | USGS FDSN event API |
-| HDB resale prices, HDB resale price index | data.gov.sg API |
-| Ridgecrest 2019 earthquakes, Chicago thefts Jul 2023 (notebooks/hotspot_study.ipynb only) | USGS FDSN event API, City of Chicago data portal |
+| Dataset                                                                                   | Source                                           |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Uber NYC pickups (Apr 2014), Mall Customers, Fashion-MNIST                                | Kaggle, fetched with `kagglehub` into `data/`    |
+| Wine, Breast Cancer Wisconsin, Digits, make_moons, varied-density blobs                   | built into or generated by scikit-learn          |
+| Earthquakes 1965-2016 (M >= 5.5)                                                          | plotly sample datasets                           |
+| Ecoli                                                                                     | UCI Machine Learning Repository                  |
+| Earthquakes 2023 (M >= 4.5)                                                               | USGS FDSN event API                              |
+| HDB resale prices, HDB resale price index                                                 | data.gov.sg API                                  |
+| Ridgecrest 2019 earthquakes, Chicago thefts Jul 2023 (experiments/14_multi_source_hotspot_study.ipynb only) | USGS FDSN event API, City of Chicago data portal |
 
 Download commands and file names for every dataset are in `data/README.md`.
