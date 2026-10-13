@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // .tool_input.notebook_path // empty'); case \"$f\" in *.py|*.pyi|*.ipynb) ruff format --quiet \"$f\" || true ;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}
