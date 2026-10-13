@@ -131,7 +131,7 @@ on shuffled coordinates, so the split is not random, but nothing in the data mar
 % [Ky] Sources: results/hotspot/ablation.csv (dimensionality), shared_rule.csv.
 D4 has only seven dimensions, but it already shows the effect. Given its best $\varepsilon$ in each case,
 DBSCAN beats K-Means++ on the first two and three principal components (ARI 0.575 and 0.618 against 0.468
-and 0.466) and loses from four components on, by 0.276 on all seven (0.455 against 0.731; Ablation~D).
+and 0.466) and loses from four components on, by 0.276 on all seven (0.455 against 0.731).
 Without labels the density methods do far worse. On all seven features the rule picks settings where one
 cluster holds 97\% of proteins, with ARI 0.04 (Table~\ref{tab:cmp_d3d4}), and their silhouettes (0.560
 and 0.559) are barely above the same settings on shuffled columns (0.548 and 0.551). The fake-data check
@@ -178,8 +178,7 @@ discarding the hard points.
 \todo{All}{One paragraph, one line per dataset:
 D4 under the rule DBSCAN has the top silhouette (0.560) but ARI 0.039, against 0.731 for K-Means++; Spearman $-0.80$ (Ky);
 D6 DBSCAN silhouette 0.42 vs K-Means++ 0.28, ARI 0.31 vs 0.90 (Lam);
-D8 unscaled K-means silhouette 0.540 from price bands, against 0.317 standardised (Wei Yew, written in
-Ablation~C); D2 K-means silhouette flat at 0.516 to 0.532 for every $K$ from 4 to 12, so it cannot choose
+D8 unscaled K-means silhouette 0.540 from price bands, against 0.317 standardised (Wei Yew); D2 K-means silhouette flat at 0.516 to 0.532 for every $K$ from 4 to 12, so it cannot choose
 $K$ (Wei Yew, \nolinkurl{results/earthquakes_2023/kmeans_k_selection.csv});
 D5 HDBSCAN top silhouette with 71\% noise (Lam).}
 

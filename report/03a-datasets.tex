@@ -96,8 +96,7 @@ between groups of flats, and storeys are recorded in 3-storey bands, so 77.7\% o
 floor area, lease and storey with at least one other sale.
 
 \subsection{Preprocessing}\label{sec:prep}
-Three rules apply wherever a dataset has the property they address. Each is tested by an ablation in
-Section~\ref{sec:ablation}.
+Three rules apply wherever a dataset has the property they address.
 
 \paragraph{Coordinates on the sphere.}
 % Source: experiments/07_usgs_earthquakes_2023_eda.ipynb, section 12.
@@ -105,14 +104,13 @@ Latitude and longitude treated as flat numbers put two earthquakes 6.07\,km apar
 longitude from each other, because they lie on either side of the $180^\circ$ meridian. Density methods
 therefore use the haversine (great-circle) distance on coordinates in radians. K-means needs a vector
 space to average in, so each epicentre becomes a 3D point on the unit sphere. The straight-line distance
-between two such points grows with their great-circle distance, so the clustering follows surface distance
-(Ablation~B).
+between two such points grows with their great-circle distance, so the clustering follows surface distance.
 
 \paragraph{Standardised features.}
 % Source: experiments/10_data_gov_hdb_resale_eda.ipynb, section 9.
 Features in their raw units are not comparable. On D8, price (in dollars) accounts for 100.0\% of the
 squared distance between sales, so the other three features are ignored. Every feature is scaled to mean
-0 and standard deviation 1 (Ablation~C).
+0 and standard deviation 1.
 
 \paragraph{Values recorded in steps.}
 % Source: src/sc4020/datasets/preprocess_dataset.py, jitter_ties.
@@ -120,4 +118,4 @@ When a feature is recorded in steps, many points share exact values, and density
 value as a dense spot. Before running a density method on D8, each stepped value is moved by a uniform
 random amount of up to half its step: $\pm1.5$ storeys, $\pm0.5$\,m$^2$ of floor area and
 $\pm\frac{1}{24}$ year of lease. Price is continuous and is left unchanged. Results are reported with and
-without this jitter (Ablation~E).
+without this jitter.

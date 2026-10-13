@@ -25,7 +25,7 @@ localisation sites best of all methods on D4 (ARI 0.731; with the $K=5$ the silh
 keeps 96\% of the largest class (cytoplasm, 143 proteins) in one cluster, 86 to 91\% of the three
 mid-sized classes, and all 5 proteins of the outer-membrane lipoproteins together. It succeeds because the
 classes are compact groups in seven dimensions that touch, with no density gap between them: the case
-K-means is built for, and the case where a density threshold fails (Ablation~D). The inner-membrane
+K-means is built for, and the case where a density threshold fails. The inner-membrane
 proteins (77) are its weak spot: they overlap the related inner-membrane classes, and only 52\% end up in
 one cluster.
 % Sources: results/hdb_resale/ablation_features.csv, ablation_flat_design_clusters.csv
@@ -52,8 +52,7 @@ Cause of success: fixed building plans create real dense spots in these two feat
 \paragraph{K-Means++ on D2: unrelated belts merged.} Shown in Figure~\ref{fig:kmeans_belts}. One
 cluster joins five belts whose centres are 2{,}932 to 11{,}449\,km apart, from Iceland to the
 Mid-Indian Ridge. Cause: cluster shape. Compact regions cannot follow long belts.
-\paragraph{Density methods on D8: one mass, or storey bands.} Shown in Figures~\ref{fig:hdb_cmp}
-and~\ref{fig:abl_ties}. At the chosen settings DBSCAN puts 97.1\% of sales in one cluster. Under a cap on
+\paragraph{Density methods on D8: one mass, or storey bands.} Shown in Figure~\ref{fig:hdb_cmp}. At the chosen settings DBSCAN puts 97.1\% of sales in one cluster. Under a cap on
 the largest cluster, the clusters become single storey bands. Causes: no gaps between groups, and values
 recorded in steps.
 \paragraph{DBSCAN on D5.} % results/datasets/fashion_mnist_results.csv

@@ -12,10 +12,10 @@ $J$ never rises, so the method stops at a local optimum that depends on the star
 iteration costs $O(nkd)$. Random starts pick $k$ data points uniformly. K-means++~\cite{arthur2007} picks
 the first centre at random and each next one with probability proportional to its squared distance from
 the nearest centre already chosen. Only the start differs, so we treat the two as one method with two
-initialisations (Ablation~A). We use scikit-learn's \texttt{KMeans} with 10 starts; the only parameter is
+initialisations. We use scikit-learn's \texttt{KMeans} with 10 starts; the only parameter is
 $k$. Because $J$ sums squared Euclidean distances, K-means suits compact, roughly round clusters of
 similar spread. It cuts curved or elongated clusters, gives every point a cluster, so outliers pull the
-centres, and depends on the scale of each feature (Ablation~C).
+centres, and depends on the scale of each feature.
 \subsection{DBSCAN}
 % Ky. Code: src/sc4020/methods.py (dbscan), src/sc4020/tuning.py (k_distance_curve, knee)
 DBSCAN~\cite{ester1996} takes a radius $\varepsilon$ and a count \texttt{minPts}. A point is a core point
