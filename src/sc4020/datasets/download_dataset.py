@@ -10,9 +10,9 @@ Each `download_<name>(data_home=None, force=False)` saves the raw file(s) under 
 only needed to fetch everything ahead of time.
 
 Sources (details in data/README.md):
-  Kaggle         Mall Customers, Fashion-MNIST, Uber NYC pickups (needs a Kaggle API token)
-  GitHub         Earthquakes 1965-2016 (plotly sample data), Ecoli (ARFF copy of the UCI table)
-  USGS           Earthquakes 2023 and the Ridgecrest 2019 sequence (FDSN event API, no key)
+  Kaggle         Fashion-MNIST, Uber NYC pickups (needs a Kaggle API token)
+  GitHub         Ecoli (ARFF copy of the UCI table)
+  USGS           Earthquakes 2023
   data.gov.sg    HDB resale prices and price index (no key; rate limited, so calls are retried)
   Chicago        Thefts in July 2023 (City of Chicago Socrata API, no key)
 """
@@ -75,17 +75,11 @@ def _fetch_kaggle(slug: str, names: list[str], data_home, force: bool) -> list[P
 
 # --- Kaggle ---------------------------------------------------------------------------------
 
-MALL_SLUG = "vjchoudhary7/customer-segmentation-tutorial-in-python"
 FASHION_SLUG = "zalando-research/fashionmnist"
 UBER_SLUG = "fivethirtyeight/uber-pickups-in-new-york-city"
 
-MALL_FILE = "Mall_Customers.csv"
 FASHION_FILES = ["fashion-mnist_train.csv", "fashion-mnist_test.csv"]
 UBER_FILE = "uber-raw-data-apr14.csv"
-
-
-def download_mall_customers(data_home=None, force=False) -> Path:
-    return _fetch_kaggle(MALL_SLUG, [MALL_FILE], data_home, force)[0]
 
 
 def download_fashion_mnist(data_home=None, force=False) -> list[Path]:
@@ -98,26 +92,11 @@ def download_uber_pickups(data_home=None, force=False) -> Path:
 
 # --- GitHub ---------------------------------------------------------------------------------
 
-EARTHQUAKES_1965_URL = (
-    "https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv"
-)
-EARTHQUAKES_1965_FILE = "earthquakes.csv"
 ECOLI_URL = (
     "https://raw.githubusercontent.com/deric/clustering-benchmark/master/"
     "src/main/resources/datasets/real-world/ecoli.arff"
 )
 ECOLI_FILE = "ecoli.arff"
-
-
-def download_earthquakes_1965_2016(
-    data_home=None, force=False, get=requests.get
-) -> Path:
-    target = _home(data_home) / EARTHQUAKES_1965_FILE
-    return (
-        target
-        if target.exists() and not force
-        else _fetch_url(EARTHQUAKES_1965_URL, target, get=get)
-    )
 
 
 def download_ecoli(data_home=None, force=False, get=requests.get) -> Path:
@@ -137,19 +116,6 @@ USGS_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
 USGS_START = "2023-01-01"
 USGS_END = "2024-01-01"
 USGS_MIN_MAGNITUDE = 4.5
-
-RIDGECREST_PARAMS = {
-    "format": "csv",
-    "starttime": "2019-07-04",
-    "endtime": "2019-08-04",
-    "minlatitude": 35.0,
-    "maxlatitude": 36.3,
-    "minlongitude": -118.2,
-    "maxlongitude": -117.0,
-    "minmagnitude": 2.0,
-    "orderby": "time",
-}
-RIDGECREST_FILE = "ridgecrest_2019.csv"
 
 
 def usgs_query_params(start, end, min_magnitude):
@@ -182,36 +148,6 @@ def download_earthquakes_2023(
         return target
     return _fetch_url(
         USGS_URL, target, params=usgs_query_params(start, end, min_magnitude), get=get
-    )
-
-
-def download_ridgecrest_2019(data_home=None, force=False, get=requests.get) -> Path:
-    target = _home(data_home) / RIDGECREST_FILE
-    return (
-        target
-        if target.exists() and not force
-        else _fetch_url(USGS_URL, target, params=RIDGECREST_PARAMS, get=get)
-    )
-
-
-# --- City of Chicago ------------------------------------------------------------------------
-
-CHICAGO_URL = "https://data.cityofchicago.org/resource/ijzp-q8t2.csv"
-CHICAGO_PARAMS = {
-    "$where": "date between '2023-07-01T00:00:00' and '2023-07-31T23:59:59'",
-    "primary_type": "THEFT",
-    "$select": "id,date,primary_type,latitude,longitude,district,community_area,beat",
-    "$limit": 6000,
-}
-CHICAGO_FILE = "chicago_theft_2023_07.csv"
-
-
-def download_chicago_theft(data_home=None, force=False, get=requests.get) -> Path:
-    target = _home(data_home) / CHICAGO_FILE
-    return (
-        target
-        if target.exists() and not force
-        else _fetch_url(CHICAGO_URL, target, params=CHICAGO_PARAMS, get=get)
     )
 
 
@@ -309,15 +245,11 @@ def download_hdb_resale(data_home=None, force=False, **kwargs) -> list[Path]:
 
 
 DOWNLOADERS = {
-    "mall_customers": download_mall_customers,
     "fashion_mnist": download_fashion_mnist,
     "uber_pickups": download_uber_pickups,
-    "earthquakes_1965_2016": download_earthquakes_1965_2016,
     "ecoli": download_ecoli,
     "earthquakes_2023": download_earthquakes_2023,
     "hdb_resale": download_hdb_resale,
-    "ridgecrest_2019": download_ridgecrest_2019,
-    "chicago_theft": download_chicago_theft,
 }
 
 

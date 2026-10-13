@@ -104,48 +104,6 @@ def _load_wine(
     return _finish(bunch, return_X_y, as_frame)
 
 
-def _load_breast_cancer(
-    *,
-    data_home=None,
-    download_if_missing=True,
-    return_X_y=False,
-    as_frame=False,
-    scale=True,
-):
-    """UCI Breast Cancer Wisconsin (Diagnostic): 569 tumours x 30 features. Target 0 benign, 1 malignant."""
-    raw = skd.load_breast_cancer()
-    bunch = _bunch(
-        "breast_cancer",
-        pp.standardize(raw.data) if scale else raw.data.astype(float),
-        1
-        - raw.target,  # scikit-learn codes malignant as 0; here 0 = benign, 1 = malignant
-        raw.feature_names,
-        ["benign", "malignant"],
-        "UCI Breast Cancer Wisconsin (scikit-learn copy): 569 x 30, benign / malignant. Features standardized.",
-        data_raw=raw.data,
-    )
-    return _finish(bunch, return_X_y, as_frame)
-
-
-def _load_digits(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False
-):
-    """8x8 handwritten digits: 1,797 images x 64 pixels, 10 classes.
-
-    Pixels keep their shared 0-16 scale: standardizing would blow up the near-constant border
-    pixels into noise dimensions."""
-    raw = skd.load_digits()
-    bunch = _bunch(
-        "digits",
-        raw.data.astype(float),
-        raw.target,
-        raw.feature_names,
-        [str(c) for c in raw.target_names],
-        "UCI optical digits (scikit-learn copy): 1,797 x 64 pixels on a 0-16 scale, 10 classes.",
-    )
-    return _finish(bunch, return_X_y, as_frame)
-
-
 def _make_moons(
     *,
     data_home=None,
@@ -171,64 +129,7 @@ def _make_moons(
     return _finish(bunch, return_X_y, as_frame)
 
 
-def _make_varied_density(
-    *,
-    data_home=None,
-    download_if_missing=True,
-    return_X_y=False,
-    as_frame=False,
-    n_noise=120,
-    random_state=0,
-):
-    """Two dense blobs, one sparse blob and uniform noise (target -1), standardized."""
-    X, y = pp.varied_density_blobs(n_noise, random_state)
-    bunch = _bunch(
-        "varied_density",
-        pp.standardize(X),
-        y,
-        ["x1", "x2"],
-        ["dense_0", "dense_1", "sparse"],
-        "Three make_blobs clusters of very different density plus uniform background noise (target -1).",
-        data_raw=X,
-        n_noise=n_noise,
-    )
-    return _finish(bunch, return_X_y, as_frame)
-
-
 # --- Kaggle -----------------------------------------------------------------------------------
-
-
-def _load_mall_customers(
-    *,
-    data_home=None,
-    download_if_missing=True,
-    return_X_y=False,
-    as_frame=False,
-    scale=True,
-):
-    """Mall Customers: 200 shoppers x (age, annual income, spending score). No labels."""
-    path = _home(data_home) / dl.MALL_FILE
-    _require(
-        path,
-        "mall_customers",
-        dl.download_mall_customers,
-        data_home,
-        download_if_missing,
-    )
-    df = pd.read_csv(path)
-    features = ["Age", "Annual Income (k$)", "Spending Score (1-100)"]
-    raw = df[features].to_numpy(dtype=float)
-    bunch = _bunch(
-        "mall_customers",
-        pp.standardize(raw) if scale else raw,
-        None,
-        features,
-        None,
-        "Kaggle Mall Customers: 200 x 3 (age, income, spending score), no labels. Standardized.",
-        data_raw=raw,
-        gender=df["Gender"].to_numpy(),
-    )
-    return _finish(bunch, return_X_y, as_frame)
 
 
 def _load_fashion_mnist(
@@ -316,55 +217,6 @@ def _load_uber_pickups(
 # --- GitHub -----------------------------------------------------------------------------------
 
 
-def _earthquake_bunch(name, events, descr, lat_col="latitude", lon_col="longitude"):
-    deg = events[[lat_col, lon_col]].to_numpy(dtype=float)
-    return _bunch(
-        name,
-        pp.to_unit_vectors(deg[:, 0], deg[:, 1]),
-        None,
-        ["x", "y", "z"],
-        None,
-        descr,
-        coords_deg=deg,
-        coords_rad=pp.to_radians(deg[:, 0], deg[:, 1]),
-        coords_km=pp.project_km(deg[:, 0], deg[:, 1]),
-        events=events,
-    )
-
-
-def _load_earthquakes_1965_2016(
-    *,
-    data_home=None,
-    download_if_missing=True,
-    return_X_y=False,
-    as_frame=False,
-    min_magnitude=5.5,
-):
-    """Global earthquakes 1965-2016 (plotly sample data), magnitude >= `min_magnitude`, as unit vectors."""
-    path = _home(data_home) / dl.EARTHQUAKES_1965_FILE
-    _require(
-        path,
-        "earthquakes_1965_2016",
-        dl.download_earthquakes_1965_2016,
-        data_home,
-        download_if_missing,
-    )
-    df = pd.read_csv(path)
-    df = (
-        df[df["Magnitude"] >= min_magnitude]
-        .dropna(subset=["Latitude", "Longitude"])
-        .reset_index(drop=True)
-    )
-    bunch = _earthquake_bunch(
-        "earthquakes_1965_2016",
-        df,
-        f"Global earthquakes 1965-2016, M >= {min_magnitude}: {len(df):,} events as 3D unit vectors. No labels.",
-        lat_col="Latitude",
-        lon_col="Longitude",
-    )
-    return _finish(bunch, return_X_y, as_frame)
-
-
 def _load_ecoli(
     *,
     data_home=None,
@@ -391,6 +243,22 @@ def _load_ecoli(
 
 
 # --- USGS -------------------------------------------------------------------------------------
+
+
+def _earthquake_bunch(name, events, descr, lat_col="latitude", lon_col="longitude"):
+    deg = events[[lat_col, lon_col]].to_numpy(dtype=float)
+    return _bunch(
+        name,
+        pp.to_unit_vectors(deg[:, 0], deg[:, 1]),
+        None,
+        ["x", "y", "z"],
+        None,
+        descr,
+        coords_deg=deg,
+        coords_rad=pp.to_radians(deg[:, 0], deg[:, 1]),
+        coords_km=pp.project_km(deg[:, 0], deg[:, 1]),
+        events=events,
+    )
 
 
 def _load_earthquakes_2023(
@@ -421,80 +289,6 @@ def _load_earthquakes_2023(
         "earthquakes_2023",
         events,
         f"USGS earthquakes {start} to {end}, M >= {min_magnitude}: {len(events):,} events as 3D unit vectors.",
-    )
-    return _finish(bunch, return_X_y, as_frame)
-
-
-def _load_ridgecrest_2019(
-    *, data_home=None, download_if_missing=True, return_X_y=False, as_frame=False
-):
-    """USGS Ridgecrest 2019 sequence (M >= 2, 4 July to 4 August 2019), projected to km."""
-    path = _home(data_home) / dl.RIDGECREST_FILE
-    _require(
-        path,
-        "ridgecrest_2019",
-        dl.download_ridgecrest_2019,
-        data_home,
-        download_if_missing,
-    )
-    events = (
-        pd.read_csv(path)
-        .dropna(subset=["latitude", "longitude"])
-        .reset_index(drop=True)
-    )
-    deg = events[["latitude", "longitude"]].to_numpy(dtype=float)
-    bunch = _bunch(
-        "ridgecrest_2019",
-        pp.project_km(deg[:, 0], deg[:, 1]),
-        None,
-        ["x_km", "y_km"],
-        None,
-        f"USGS Ridgecrest 2019 aftershock sequence: {len(events):,} events, projected to km.",
-        coords_deg=deg,
-        coords_rad=pp.to_radians(deg[:, 0], deg[:, 1]),
-        events=events,
-    )
-    return _finish(bunch, return_X_y, as_frame)
-
-
-# --- City of Chicago --------------------------------------------------------------------------
-
-
-def _load_chicago_theft(
-    *,
-    data_home=None,
-    download_if_missing=True,
-    return_X_y=False,
-    as_frame=False,
-    random_state=42,
-):
-    """Chicago thefts in July 2023, projected to km; target is the police district (a weak proxy).
-
-    Block-level rounding creates exact duplicate coordinates, so points are jittered by about 5 m
-    to keep duplicates from inflating local density."""
-    path = _home(data_home) / dl.CHICAGO_FILE
-    _require(
-        path, "chicago_theft", dl.download_chicago_theft, data_home, download_if_missing
-    )
-    events = (
-        pd.read_csv(path)
-        .dropna(subset=["latitude", "longitude", "district"])
-        .reset_index(drop=True)
-    )
-    jitter = np.random.default_rng(random_state).normal(0, 5e-5, size=(len(events), 2))
-    deg = events[["latitude", "longitude"]].to_numpy(dtype=float) + jitter
-    districts = events["district"].astype(int)
-    bunch = _bunch(
-        "chicago_theft",
-        pp.project_km(deg[:, 0], deg[:, 1]),
-        pd.Categorical(districts).codes.astype(int),
-        ["x_km", "y_km"],
-        [str(d) for d in sorted(districts.unique())],
-        f"City of Chicago thefts, July 2023: {len(events):,} incidents, projected to km. "
-        "Target: police district, an administrative boundary used only as a weak reference.",
-        coords_deg=deg,
-        coords_rad=pp.to_radians(deg[:, 0], deg[:, 1]),
-        events=events,
     )
     return _finish(bunch, return_X_y, as_frame)
 
@@ -555,19 +349,12 @@ def _load_hdb_resale(
 # Reported datasets first, in the order of the report's comparison table.
 DATASETS = {
     "wine": _load_wine,
-    "breast_cancer": _load_breast_cancer,
     "uber_pickups": _load_uber_pickups,
     "make_moons": _make_moons,
-    "mall_customers": _load_mall_customers,
     "fashion_mnist": _load_fashion_mnist,
-    "earthquakes_1965_2016": _load_earthquakes_1965_2016,
     "ecoli": _load_ecoli,
     "earthquakes_2023": _load_earthquakes_2023,
     "hdb_resale": _load_hdb_resale,
-    "digits": _load_digits,
-    "varied_density": _make_varied_density,
-    "ridgecrest_2019": _load_ridgecrest_2019,
-    "chicago_theft": _load_chicago_theft,
 }
 
 
