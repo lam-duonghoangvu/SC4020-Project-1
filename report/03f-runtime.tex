@@ -1,38 +1,51 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 
-% Sources: results/hdb_resale/scalability_summary.csv (median of runs per size);
-% experiments/12_data_gov_hdb_resale_ablation.ipynb, section 6 (runtimes and memory estimate).
-D8 is large enough to measure how each method grows. Each method ran at its chosen setting on random
-subsets of 1{,}000 to 234{,}294 sales (K-means from one start). Figure~\ref{fig:runtime} plots the median
-time against size on log scales, where the slope of a line estimates the exponent $b$ in
-$t \propto n^{b}$. K-means is far cheaper than either density method at every size: under 0.06\,s on all
-234{,}294 sales. Its fitted slopes (0.57 and 0.67) are below 1 only because a fixed start-up cost
-dominates at these sizes; each iteration is linear in $n$. HDBSCAN grows with slope 1.79, from 0.02\,s at
-1{,}000 sales to 212\,s at 234{,}294. DBSCAN grows with slope 1.65, but at full size it was not run at
-all, because of memory rather than time. With a fixed $\varepsilon$, every sale has more neighbours as
-the data grow. Estimated from 2{,}000 probe points, the full data would hold about 742 million neighbour
-pairs, about 6\,GB for the neighbour indices alone, which scikit-learn's DBSCAN stores in full. HDBSCAN,
-slower at every size, did run on all sales within 16\,GB.
+% Sources: one fit at the rule's setting, tuning excluded. D1, D5, D6: results/datasets/{make_moons,
+% fashion_mnist,wine}_results.csv (fit_seconds); D2: results/earthquakes_2023/method_comparison.csv;
+% D3, D4: results/hotspot/shared_rule.csv (choice=rule); D8: results/hdb_resale/comparison.csv (data=real).
+% ms per 1,000 points = fit seconds / n x 10^6.
+Table~\ref{tab:runtime} gives one fit's time per 1{,}000 points at the rule's setting; accuracy is ARI.
+Table~\ref{tab:runtime_ari} keeps the fastest method that reaches each accuracy level.
 
-% Lam: results/datasets/fashion_mnist_results.csv (fit_seconds; single fit at the chosen parameters, tuning excluded)
-D5 was sampled down from 70{,}000 to 3{,}000 images because three methods scale badly with $n$ in
-50 dimensions. Spectral clustering needs an $n\times n$ affinity matrix: dense, at $n=70{,}000$ it
-takes about 39\,GB in double precision, and the eigenvector step grows faster than linearly even with
-a sparse graph. DBSCAN and HDBSCAN rely on neighbour queries, and in 50 dimensions spatial indexes
-prune little, so these queries approach the $O(n^2)$ brute-force cost. On the 3{,}000-point sample
-one fit takes 0.011\,s for DBSCAN, 0.079\,s for K-Means++, 0.18\,s for Spectral, 0.30\,s for HDBSCAN
-and 2.80\,s for GMM. GMM is the slowest here: with full covariances each EM step costs
-$O(nkd^2)$ with $d=50$. These times exclude parameter search, which refits DBSCAN 15 times and
-HDBSCAN 6 times.
-% [Ky] Source: results/hotspot/shared_rule.csv (runtime_s, one fit at the chosen setting).
-On D3 (15{,}000 points, 2 dimensions) one fit takes 0.04 to 0.06\,s for K-means, 0.52\,s for DBSCAN and
-1.1\,s for HDBSCAN; on D4 (336 proteins) every method takes under 0.03\,s (Table~\ref{tab:cmp_d3d4}). At
-these sizes runtime does not decide the choice of method.
+\begin{table}[h]\centering\small
+\caption{Fit time in ms per 1{,}000 points. \textbf{Bold}: ARI $>0.9$; \underline{underlined}: ARI
+$>0.7$; --: not run. D2 and D3 have no labels.}
+\label{tab:runtime}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Data} & \textbf{$n$} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN} & \textbf{GMM}
+& \textbf{Spectral} & \textbf{Agglom.} \\
+\midrule
+D1 & 1{,}000  & 552  & 3.2  & \underline{36} & 202     & \textbf{244} & 26 \\
+D2 & 7{,}643  & 0.5\textsuperscript{a} & 13 & 265 & -- & -- & -- \\
+D3 & 15{,}000 & 58   & 43   & 77   & --      & --  & -- \\
+D4 & 336      & 255  & 12   & 15   & --      & --  & -- \\
+D5 & 3{,}000  & 112  & 6.4  & 128  & 11{,}324 & 467 & 184 \\
+D6 & 178      & \underline{34} & 7.7 & 9.1 & \textbf{37} & 53 & \underline{79} \\
+D8 & 20{,}000 & 72\textsuperscript{a} & 88 & 244 & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\par\raggedright\footnotesize\textsuperscript{a}\,One start (\texttt{n\_init}=1); 10 elsewhere.
+\end{table}
 
-\begin{figure}[h]\centering
-\includegraphics[width=0.75\textwidth]{hdb_scalability}
-\caption{D8, median fit time against the number of sales, log--log, at the chosen settings; the slope of
-each line is in the legend. DBSCAN stops at 100{,}000 sales: the full data would need about 6\,GB of
-neighbour indices.}
-\label{fig:runtime}
-\end{figure}
+\begin{table}[h]\centering\small
+\caption{Fastest method reaching each ARI level (ms per 1{,}000 points). Labelled data only.}
+\label{tab:runtime_ari}
+\begin{tabular}{lll}
+\toprule
+\textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} \\
+\midrule
+D1 & Spectral (244) & HDBSCAN (36) \\
+D4 & none           & none\textsuperscript{b} \\
+D5 & none           & none \\
+D6 & GMM (37)       & K-Means++ (34) \\
+D8 & none           & none \\
+\bottomrule
+\end{tabular}
+\par\raggedright\footnotesize\textsuperscript{b}\,K-Means++ reaches 0.731 at $K=7$, chosen with labels.
+\end{table}
+
+% Source: results/hdb_resale/scalability_summary.csv; experiments/12_data_gov_hdb_resale_ablation.ipynb, section 6.
+On small data a fixed start-up cost dominates, so these times say little about scaling. On all 234{,}294
+D8 sales K-means takes under 0.06\,s and HDBSCAN 212\,s; DBSCAN did not run, as its neighbour lists
+would need about 6\,GB. Spectral and Agglomerative were skipped above 10{,}000 points.
