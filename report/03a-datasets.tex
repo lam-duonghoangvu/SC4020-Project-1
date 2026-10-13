@@ -2,98 +2,25 @@
 
 % Rubric: "target challenging datasets". Say why each dataset is hard for at least one method.
 
-\begin{table}[h]\centering\small
-\caption{Datasets, grouped by the data property each one tests.}
+% Sources: experiments/01 (D6), 03 (D1), 05 (D5), 06 and 13 (D3, D4), 07 (D2), 10 and 11 (D8).
+\begin{table}[h]\centering\footnotesize
+\caption{Datasets and the difficulty each one poses.}
 \label{tab:data}
-\resizebox{\textwidth}{!}{\begin{tabular}{llrrll}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}Xrrl>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{ID} & \textbf{Dataset} & \textbf{$n$} & \textbf{$d$} & \textbf{Labels} & \textbf{Property tested} \\
+\textbf{ID} & \textbf{Dataset} & \textbf{$n$} & \textbf{$d$} & \textbf{Labels} & \textbf{Preparation} & \textbf{Difficulty} \\
 \midrule
-D1 & make\_moons (synthetic)          & 1{,}000  & 2        & 2 classes    & curved shapes (control) \\
-D2 & Earthquakes, 2023, M$\geq$4.5    & 7{,}643  & 2        & none         & long belts, uneven density \\
-D3 & Uber NYC pickups, Apr 2014       & 15{,}000 & 2 & none      & density contrast in a city \\
-D4 & Ecoli                            & 336      & 7        & 8 classes    & dimensionality, rare classes \\
-D5 & Fashion-MNIST (PCA)              & 3{,}000  & 50       & 10 classes   & high dimensions \\
-D6 & Wine                             & 178      & 13       & 3 classes    & silhouette vs labels \\
-D8 & HDB resale flats, 2017--2026     & 20{,}000\textsuperscript{b} & 4 & flat type (7) & no gaps, scale, recorded ties \\
+D1 & make\_moons~\cite{pedregosa2011} & 1{,}000 & 2 & 2 classes & noise 0.07; standardised & non-convex shapes \\
+D2 & Earthquakes 2023, M$\geq$4.5~\cite{usgs2017} & 7{,}643 & 2 & none & 8 eruptions dropped; epicentre only & long belts; uneven density; $180^\circ$ meridian \\
+D3 & Uber NYC, Apr 2014~\cite{fivethirtyeight2014} & 15{,}000 & 2 & none & sampled from 558{,}019 in NYC box; km & 71\% in Manhattan; no gaps \\
+D4 & Ecoli~\cite{horton1996} & 336 & 7 & 8 sites & standardised & classes of 2 to 143 \\
+D5 & Fashion-MNIST~\cite{xiao2017} & 3{,}000 & 50 & 10 classes & stratified; PCA 784$\to$50 (86.5\% var.) & high dimensions; overlapping classes \\
+D6 & Wine~\cite{aeberhard1991} & 178 & 13 & 3 cultivars & standardised & compact classes, no gaps \\
+D8 & HDB resale 2017--2026~\cite{hdb2026} & 20{,}000\textsuperscript{a} & 4 & flat type (7) & price index-adjusted & no gaps; 77.7\% tied (3-storey bands) \\
 \bottomrule
-\end{tabular}}
-\par\raggedright\footnotesize\textsuperscript{b}\,Random sample of 234{,}294 usable sales; all 234{,}294 used for runtime (Section~\ref{sec:runtime}).
+\end{tabularx}
+\par\raggedright\footnotesize\textsuperscript{a}\,Sample of 234{,}294 sales; all used for runtime (Section~\ref{sec:runtime}).
 \end{table}
-
-\paragraph{D1 make\_moons.} % Lam. src/sc4020/datasets/load_dataset.py (load_make_moons)
-Two interleaving half-circles from scikit-learn's \texttt{make\_moons}~\cite{pedregosa2011}: 1{,}000 points,
-Gaussian noise 0.07, seed 42, then standardised. The two classes are dense, equal in size and clearly
-separated by a gap, but neither is convex: each moon wraps around the end of the other, so the
-straight boundary a centroid method draws must cut both. With the true labels known and no other
-difficulty present, D1 isolates cluster shape as the single property under test.
-\paragraph{D2 Earthquakes.}
-% Source: experiments/07_usgs_earthquakes_2023_eda.ipynb, sections 1, 4, 8 and 12.
-Every event of magnitude 4.5 or more in 2023 from the USGS ComCat catalogue~\cite{usgs2017}: 7{,}651 events, of which
-8 volcanic eruptions near Saipan are removed, leaving 7{,}643 earthquakes. We cluster the epicentre only.
-Depth is left out because 44.2\% of events carry the default depth of 10\,km. Each method meets a
-different difficulty. Earthquakes lie along narrow belts thousands of kilometres long, which breaks the
-compact-cluster assumption of K-means. Density varies widely: the distance to the nearest earthquake
-runs from 1.2\,km (5th percentile) to 100.5\,km (95th), so no single DBSCAN radius suits every belt.
-And 17.2\% of earthquakes lie within $10^\circ$ of the $180^\circ$ meridian, where flat coordinates
-cut the map. There are no labels.
-\paragraph{D3 Uber NYC.}
-% [Hoang Anh]: my setup, for the merged paragraph. April 2014 file, 564,516 rows; 558,019 inside the
-% box lat 40.57 to 40.92, lon -74.15 to -73.70; random sample of 15,000 (seed 42).
-% Source: experiments/06_kaggle_uber_pickups_clustering.ipynb; src/sc4020/datasets/load_dataset.py (load_uber_pickups).
-% [Ky]: setup agreed with Hoang Anh. Same file, box, sample size and seed, so both pipelines cluster the
-% same 15,000 points (K-means k=5 silhouette 0.475 in both). Ky projects to km; Hoang Anh uses haversine.
-% Source: src/sc4020/datasets/load_dataset.py (load_uber).
-Uber pickups in New York City in April 2014, from the trip records the city's Taxi and Limousine
-Commission released to FiveThirtyEight~\cite{fivethirtyeight2014}: 564{,}516 pickups, each a latitude
-and longitude. We keep the 558{,}019 inside a box around the city (latitude 40.57 to 40.92, longitude
-$-74.15$ to $-73.70$), which drops GPS errors, and sample 15{,}000 at random (seed 42). For K-means and
-DBSCAN the coordinates are projected to kilometres about the mean latitude, so $\varepsilon$ is a
-distance on the ground. Pickups crowd into lower and midtown Manhattan (71\% of the sample), with
-smaller dense spots at the two airports and sparse demand in the outer boroughs. The distance to the
-8th nearest pickup runs from 0.017\,km to 0.418\,km (5th to 95th percentile), but the dense and sparse
-areas meet with no clear gap between them. There are no labels.
-% [Ky] 71%, k-distance percentiles: results/hotspot/case_stats.csv.
-\paragraph{D4 Ecoli.} % Ky. src/sc4020/datasets/load_dataset.py (load_ecoli); class sizes results/hotspot/case_stats.csv.
-The UCI Ecoli data~\cite{horton1996}: 336 proteins of \emph{E.~coli}, each described by seven scores
-computed from its amino-acid sequence and labelled with one of eight sites in the cell where the protein
-is found. Features are standardised. The classes are very unequal: the five largest hold 143, 77, 52, 35
-and 20 proteins, the three smallest 5, 2 and 2. D4 is hard for density methods in two ways. Seven
-dimensions already spread the points so that a density threshold separates less well, and the rare
-classes are too small to form a dense region of their own, so a density method tends to call them noise.
-\paragraph{D5 Fashion-MNIST.} % Lam. src/sc4020/datasets/load_dataset.py (load_fashion_mnist), experiments/05_kaggle_fashion_mnist_clustering.ipynb
-Fashion-MNIST~\cite{xiao2017} holds 70{,}000 $28\times28$ greyscale images of 10 clothing classes.
-We pool the train and test files, scale pixels to $[0,1]$, draw a class-stratified sample of 3{,}000
-images (300 per class, seed 42), and project the 784 pixels onto 50 principal components, which keep
-86.5\% of the variance. The sample keeps Spectral, DBSCAN and HDBSCAN within reach on a laptop
-(Section~\ref{sec:runtime}) while keeping the classes balanced. D5 is hard because the space is high
-dimensional, so distances concentrate~\cite{beyer1999}, and because several classes (shirt, T-shirt,
-pullover, coat) overlap heavily with no density gap between them.
-\habegin
-\paragraph{D6 Wine.} \hatag{}
-% [Hoang Anh]: drafted from my run; Lam to review and merge.
-% Source: experiments/01_scikit_learn_wine_clustering.ipynb; results/datasets/wine_results.csv.
-The UCI Wine data~\cite{aeberhard1991}: 178 wines grown in one Italian region, each described by 13
-chemical measurements such as alcohol, malic acid, flavanoids and proline. The cultivar (3 classes of
-59, 71 and 48 wines) is held out as the label. Features are standardised, because proline runs from
-278 to 1{,}680 while hue stays below 2. The classes are compact, so K-means recovers them well: two
-members ran it independently and both obtained ARI 0.897. The dataset is in the study for the
-opposite reason. No sparse gap separates the cultivars, so the density methods return 2 clusters with
-about a third or more of the wines as noise, and the silhouette still prefers them
-(Section~\ref{sec:silhouette}).
-\haend
-\paragraph{D8 HDB resale.}
-% Source: experiments/10_data_gov_hdb_resale_eda.ipynb, sections 6, 10, 11 and 17;
-% sample size: experiments/11_data_gov_hdb_resale_clustering.ipynb, section 1;
-% floor-area ARI: from the removed Stage 0 screening (screening_labels.csv); not regenerated.
-Every resale of a public housing flat in Singapore from January 2017, from data.gov.sg~\cite{hdb2026}. The 6{,}051
-sales after June 2026 (2.5\%) have no price index value yet and are dropped, leaving 234{,}294. Methods
-are compared on a random sample of 20{,}000 (seed 0); all 234{,}294 are used for runtime. There are four
-features: floor area, remaining lease, storey, and price adjusted to 2026 levels with the HDB resale
-price index. Flat type (7 classes) is held out as a label, but it is nearly a function of size: floor
-area alone reaches ARI 0.601 against it. The data are hard for density methods. There are no gaps
-between groups of flats, and storeys are recorded in 3-storey bands, so 77.7\% of sales share their
-floor area, lease and storey with at least one other sale.
 
 \subsection{Preprocessing}\label{sec:prep}
 Three rules apply wherever a dataset has the property they address.
