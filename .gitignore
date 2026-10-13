@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
 
 # Virtual environments
 .venv
@@ -12,15 +13,20 @@ wheels/
 # Notebooks
 .ipynb_checkpoints/
 
-# Raw datasets (see lam/data/README.md for download instructions)
-lam/data/*.csv
+# OS
+.DS_Store
 
-# Ky's raw datasets (download commands in SC4020-Ky/README.md)
-SC4020-Ky/data/*.csv
-SC4020-Ky/data/*.arff
+# Raw datasets: never committed (each member's loader or data/<member>/README.md says how to get them)
+data/**/*.csv
+data/**/*.arff
+data/**/*.json
+data/hoanganh/team/
+data/weiyew/
 
-# Team datasets downloaded by hoanganh/comparison/team_data.py
-hoanganh/data/team/
+# weiyew: per-point label files and figures are not committed (report figures live in report/figures/)
+results/weiyew/*/*_labels.csv
+!results/weiyew/hdb/screening_labels.csv
+results/weiyew/*/figures/
 
 # Built submission package (submission/make_code_zip.py)
 submission/group_*_code/

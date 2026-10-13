@@ -6,39 +6,44 @@ its public dataset on first use, or the member README says where to place the fi
 
 ## Setup
 
-Python 3.13 (Python 3.12 is enough for `weiyew/`).
+Python 3.13. From this folder:
 
     pip install -r requirements.txt
+    pip install -e .
 
 On Windows, set `PYTHONUTF8=1` before running.
 
 ## Layout
 
-| Folder | Owner | Contents |
-|---|---|---|
-| `hoanganh/` | Hoang Anh | `src/sc4020/` (clustering, metrics, DBCV, tuning, plots); `notebooks/` Wine, Breast Cancer, Uber NYC; `comparison/` the shared 4-method x 10-dataset comparison |
-| `lam/` | Lam | `src/sc4020/` and `notebooks/` for Wine, Mall Customers, Fashion-MNIST, make_moons; `00_summary.ipynb` |
-| `SC4020-Ky/` | Ky | `src/` hotspot study on Earthquakes 1965-2016, Uber NYC, Ecoli: `run.py` (experiments), `figures.py` (figures) |
-| `weiyew/sc4020-earthquake/` | Wei Yew | USGS 2023 earthquakes: `quake/` package, `experiments/`, `notebooks/`, `tests/` |
-| `weiyew/sc4020-hdb/` | Wei Yew | HDB resale flats: `hdb/` package, `experiments/`, `notebooks/`, `tests/` |
+All code is one package, `sc4020`, with one subpackage per member. Every folder below is split
+the same way, by member: `src/sc4020/<member>/`, `notebooks/<member>/`, `results/<member>/`,
+`data/<member>/`.
 
-Every folder has a `results/` with the CSVs cited in the report. Each member folder also has
-its own README with more detail.
+| Subpackage | Owner | Contents |
+|---|---|---|
+| `sc4020.hoanganh` | Hoang Anh | clustering, metrics, DBCV, tuning, plots; notebooks Wine, Breast Cancer, Uber NYC; `comparison/` the shared 4-method x 10-dataset comparison |
+| `sc4020.lam` | Lam | Wine, Mall Customers, Fashion-MNIST, make_moons; `00_summary.ipynb` |
+| `sc4020.ky` | Ky | hotspot study on Earthquakes 1965-2016, Uber NYC, Ecoli: `run` (experiments), `figures` (figures) |
+| `sc4020.weiyew.quake` | Wei Yew | USGS 2023 earthquakes: package, `experiments/`, notebooks, tests |
+| `sc4020.weiyew.hdb` | Wei Yew | HDB resale flats: package, `experiments/`, notebooks, tests |
+
+`results/<member>/` holds the CSVs cited in the report. Member READMEs are next to their code in
+`src/sc4020/<member>/`.
 
 ## Reproduce
 
-Run each command from the folder named in it.
+Run every command from this folder.
 
-| Report part | Folder | Command |
-|---|---|---|
-| Cross-dataset comparison (3.3), runtime (3.6) | `hoanganh/` | `python comparison/run_team_comparison.py`, then `python comparison/run_report_tables.py` |
-| Per-dataset analyses: Wine, Breast Cancer, Uber | `hoanganh/` | `notebooks/01_*.ipynb` to `03_*.ipynb` |
-| make_moons, Fashion-MNIST, Mall Customers | `lam/` | `notebooks/00_summary.ipynb` to `04_*.ipynb` (data placement: `lam/data/README.md`) |
-| Earthquakes 1965-2016, Uber, Ecoli: k sweep, k-distance, ablations | `SC4020-Ky/src/` | `python run.py && python figures.py` (data placement: `SC4020-Ky/README.md`) |
-| Earthquakes 2023: screening, clustering, ablations | `weiyew/sc4020-earthquake/` | `python -m quake.usgs`, `python -m experiments.screening`, then the notebooks |
-| HDB resale: screening, ablations, scalability | `weiyew/sc4020-hdb/` | `python -m hdb.datagov`, `python -m experiments.screening`, `python -m experiments.scalability`, then the notebooks |
+| Report part | Command |
+|---|---|
+| Cross-dataset comparison (3.3), runtime (3.6) | `python -m sc4020.hoanganh.comparison.run_team_comparison`, then `python -m sc4020.hoanganh.comparison.run_report_tables` |
+| Per-dataset analyses: Wine, Breast Cancer, Uber | `notebooks/hoanganh/01_*.ipynb` to `03_*.ipynb` |
+| make_moons, Fashion-MNIST, Mall Customers | `notebooks/lam/00_summary.ipynb` to `04_*.ipynb` (data placement: `data/lam/README.md`) |
+| Earthquakes 1965-2016, Uber, Ecoli: k sweep, k-distance, ablations | `python -m sc4020.ky.run`, then `python -m sc4020.ky.figures` (data placement: `src/sc4020/ky/README.md`) |
+| Earthquakes 2023: screening, clustering, ablations | `python -m sc4020.weiyew.quake.usgs`, `python -m sc4020.weiyew.quake.experiments.screening`, then `notebooks/weiyew/quake/` |
+| HDB resale: screening, ablations, scalability | `python -m sc4020.weiyew.hdb.datagov`, `python -m sc4020.weiyew.hdb.experiments.screening`, `python -m sc4020.weiyew.hdb.experiments.scalability`, then `notebooks/weiyew/hdb/` |
 
-Unit tests: `python -m pytest` in either `weiyew/` project.
+Unit tests: `python -m pytest`.
 
 ## Datasets (not included)
 

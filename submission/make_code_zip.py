@@ -20,13 +20,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 HERE = REPO / "submission"
 
-MEMBER_ROOTS = ("hoanganh/", "lam/", "SC4020-Ky/", "weiyew/")
+INCLUDE = ("pyproject.toml", ".python-version", "src/", "notebooks/", "results/", "data/", "tests/")
 
 EXCLUDE = [
-    "hoanganh/untitled10.py",        # Colab export, superseded by the notebooks
-    "SC4020-Ky/_archive/*",          # per-point labels (model output)
-    "SC4020-Ky/docs/*",              # individual draft report, not code
-    "SC4020-Ky/report/*",
+    "notebooks/hoanganh/untitled10.py",  # Colab export, superseded by the notebooks
+    "results/ky/_archive/*",             # per-point labels (model output)
+    "results/ky/raw/*",                  # older copies of files in results/ky/
     "*.bak",
     "*.pdf",
     "*.npy",
@@ -35,9 +34,6 @@ EXCLUDE = [
     "*.joblib",
     "*.zip",
 ]
-
-# Ky's data/raw/ holds experiment outputs, not datasets; ship them as results/.
-RENAME = {"SC4020-Ky/data/raw/": "SC4020-Ky/results/"}
 
 MD_LINK = re.compile(r"\[([^\]]+)\]\((?:https?://)[^)]+\)")
 URL = re.compile(r"https?://[^\s\"'<>)\]\\]+")
@@ -54,20 +50,11 @@ def is_dataset(path):
 
 
 def keep(path):
-    if not path.startswith(MEMBER_ROOTS):
+    if not path.startswith(INCLUDE):
         return False
     if any(fnmatch.fnmatch(path, pat) for pat in EXCLUDE):
         return False
-    if any(path.startswith(src) for src in RENAME):
-        return True
     return not is_dataset(path)
-
-
-def target(path):
-    for src, dst in RENAME.items():
-        if path.startswith(src):
-            return dst + path[len(src):]
-    return path
 
 
 def strip_md_links(text):
@@ -116,7 +103,7 @@ def main():
 
     files = [p for p in tracked_files() if keep(p)]
     for p in files:
-        copy(REPO / p, out / target(p))
+        copy(REPO / p, out / p)
     copy(HERE / "README_code.md", out / "README.md")
     shutil.copy2(HERE / "requirements.txt", out / "requirements.txt")
 

@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - "report/**"
-      - "SC4020-Ky/figures/**"
+      - "results/ky/figures/**"
   workflow_dispatch:
 
 permissions:

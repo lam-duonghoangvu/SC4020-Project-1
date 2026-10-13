@@ -1,0 +1,34 @@
+[project]
+name = "sc4020"
+version = "0.1.0"
+description = "SC4020 Project 1: clustering technical review (K-Means, DBSCAN, HDBSCAN, GMM)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "jupyter>=1.1.1",
+  "kagglehub>=1.0.2",
+  "matplotlib>=3.11.2",
+  "numpy>=2.5.3",
+  "pandas>=3.0.5",
+  "requests>=2.34.2",
+  "scikit-learn>=1.9.1",
+  "scipy>=1.16.2",
+  "seaborn>=0.13.2",
+]
+
+[project.scripts]
+sc4020 = "sc4020:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+  "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# weiyew's quake and hdb suites share test file names
+addopts = ["--import-mode=importlib"]
