@@ -30,5 +30,3 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# weiyew's quake and hdb suites share test file names
-addopts = ["--import-mode=importlib"]

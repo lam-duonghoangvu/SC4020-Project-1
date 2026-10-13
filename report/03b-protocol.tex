@@ -26,8 +26,8 @@ drawn uniformly in the same latitude and longitude range. A result counts as str
 score clearly above the fake data.
 
 \paragraph{Selection rule.}
-% Sources: weiyew/sc4020-earthquake/results/dbscan_grid.csv (min_samples 10, eps quantile 0.25);
-% weiyew/sc4020-hdb/results/hdbscan_grid.csv (min_cluster_size 400, min_samples None, real).
+% Sources: results/earthquakes_2023/dbscan_grid.csv (min_samples 10, eps quantile 0.25);
+% results/hdb_resale/hdbscan_grid.csv (min_cluster_size 400, min_samples None, real).
 One rule picks the setting of DBSCAN and HDBSCAN on every dataset: among the settings that give at least
 2 clusters and label at most 50\% of points as noise, take the one with the highest silhouette. The noise
 cap is needed because the silhouette ignores noise. Without it, the silhouette prefers settings that throw
@@ -39,8 +39,8 @@ of these decided. On labelled data we report the rule's choice and the setting w
 cost of choosing without labels is visible.
 
 \paragraph{Parameter grids.}
-% Sources: weiyew/sc4020-earthquake/results/{kmeans_k_selection,dbscan_grid,hdbscan_grid}.csv;
-% weiyew/sc4020-hdb/results/{kmeans_k_sweep,dbscan_grid,hdbscan_grid}.csv.
+% Sources: results/earthquakes_2023/{kmeans_k_selection,dbscan_grid,hdbscan_grid}.csv;
+% results/hdb_resale/{kmeans_k_sweep,dbscan_grid,hdbscan_grid}.csv.
 K-means and K-means++: $K=2$ to 12, 10 starts each. DBSCAN: \texttt{minPts} (\texttt{min\_samples} in
 scikit-learn) in $\{5, 10, 20\}$. Its radius $\varepsilon$ comes from the k-distance curve, the sorted
 distance from each point to its \texttt{minPts}-th neighbour: on D2 we take the 25th, 50th, 75th, 90th and
@@ -48,8 +48,8 @@ distance from each point to its \texttt{minPts}-th neighbour: on D2 we take the 
 curve. HDBSCAN: \texttt{min\_cluster\_size} scaled to the data (25, 50, 100 on D2; 100, 200, 400 on D8)
 and \texttt{min\_samples} in \{default, 5, 10\}.
 \habegin
-% Source: hoanganh/src/sc4020/tuning.py; every setting tried is in
-% hoanganh/comparison/results/team_tuning.csv.
+% Source: src/sc4020/tuning.py; every setting tried is in
+% results/comparison/team_tuning.csv.
 \hatag{}On D6 and D7, K-means is searched over $K=2$ to 10 with 10 starts and reported at the number of
 classes. GMM takes 2 to 10 components and four covariance types (full, tied, diagonal, spherical),
 chosen by BIC. DBSCAN takes \texttt{minPts} in $\{10, 20, 40, 80\}$ and $\varepsilon$ at 0.5 to 4
@@ -59,15 +59,15 @@ density settings that pass the constraints (at least 2 clusters, at most 50\% no
 clusters) are ranked by DBCV~\cite{moulavi2014}, a score built for density clusters, instead of the
 silhouette. Agglomerative clustering uses Ward linkage at the number of classes.
 \haend
-% Lam: lam/src/sc4020/hyperparams.py
+% Lam: src/sc4020/tuning.py
 GMM and Spectral on D1 and D5: $k$ set to the number of classes on labelled data, else the silhouette-best
 K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) for D6 and Mall,
 10-nearest-neighbour graph for D1 and D5. DBSCAN and HDBSCAN on D1 and D5: \texttt{minPts} from
 $\{\lfloor m/2\rfloor, m, 2m\}$ with $m=\mathrm{clip}(2d,4,20)$, $\varepsilon$ from $\{0.5,0.75,1,1.5,2\}\times$
 the k-distance knee; \texttt{min\_cluster\_size} from $\{5,10,20,30,50,n/20\}$; the setting with the
 best silhouette (noise excluded, $\geq2$ clusters, $\leq50\%$ noise) is kept.
-% [Ky]: SC4020-Ky/src/run.py (grids); SC4020-Ky/src/shared_rule.py -> SC4020-Ky/results/shared_rule.csv;
-% K choice on D3 from SC4020-Ky/results/fake_data_check.csv.
+% [Ky]: src/sc4020/experiments/hotspot.py (grids); src/sc4020/experiments/shared_rule.py -> results/hotspot/shared_rule.csv;
+% K choice on D3 from results/hotspot/fake_data_check.csv.
 On D3 and D4: K-means and K-means++ $K=2$ to 25, 10 starts. DBSCAN \texttt{minPts} in $\{4,8,16,32\}$
 (D3) or $\{3,5,8,12\}$ (D4), with $\varepsilon$ at 0.1 to 3 times the knee of the k-distance curve.
 HDBSCAN \texttt{min\_cluster\_size} from 10 to 250 (D3) or 5 to 30 (D4). The shared rule picks the
@@ -81,4 +81,4 @@ On D3 and D4 the same library versions ran on Python 3.12.10, on an Intel Core U
 of memory; every random step uses seed 42, and repeated runs use seeds 0 to 29.
 \todo{Lam}{versions and hardware if different.}
 \todo{Hoang Anh}{D6, D7 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
-\decide{shared code: Ky's src/core.py or Wei Yew's metrics.py, so every table has the same columns.}
+\decide{shared code: now src/sc4020/metrics.py (one evaluate for every table), so every table has the same columns.}

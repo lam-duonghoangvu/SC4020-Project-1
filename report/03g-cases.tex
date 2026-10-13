@@ -8,13 +8,13 @@ the sparse belts of the Americas (62\% of earthquakes clustered, against 20\% fo
 clusters that follow the plate boundary. It succeeds because its density threshold adapts to each
 cluster, the property D2 needs most.
 \habegin
-% Source: hoanganh/comparison/results/report_d6_d7.csv; figure from hoanganh/comparison/run_report_tables.py.
+% Source: results/comparison/report_d6_d7.csv; figure from src/sc4020/experiments/report_tables.py.
 \paragraph{GMM on D7: classes of unequal spread.} \hatag{} Shown in Figure~\ref{fig:bc_cases}. GMM matches the
 diagnosis best of all methods (ARI 0.774). K-means places its boundary too far into the wide malignant
 class (ARI 0.654); the full covariance of each GMM component lets the boundary follow the compact benign
 class. Cause of success: the model allows clusters of different spread.
 \haend
-\paragraph{Spectral and DBSCAN on D1.} % lam/results/make_moons_results.csv
+\paragraph{Spectral and DBSCAN on D1.} % results/datasets/make_moons_results.csv
 Both follow the curve of each moon (Figure~\ref{fig:lam-d1}): Spectral reaches ARI 1.000 and DBSCAN
 0.982, leaving 9 outlying points as noise. They succeed for the same reason: each moon is a chain of
 close neighbours, and the gap between moons is wider than any link in the chain. K-Means++ and GMM
@@ -26,7 +26,7 @@ fail on the same data because they assume convex clusters.
 DBSCAN, HDBSCAN and Spectral follow the curves (ARI 0.98, 0.95, 1.00). Grey crosses: noise.}
 \label{fig:lam-d1}
 \end{figure}
-% [Ky] Sources: SC4020-Ky/results/main.csv, shared_rule.csv, case_stats.csv (class shares).
+% [Ky] Sources: results/hotspot/main.csv, shared_rule.csv, case_stats.csv (class shares).
 \paragraph{K-Means++ on D4: compact classes in seven dimensions.} With $K=7$, K-Means++ matches the
 localisation sites best of all methods on D4 (ARI 0.731; with the $K=5$ the silhouette picks, 0.697). It
 keeps 96\% of the largest class (cytoplasm, 143 proteins) in one cluster, 86 to 91\% of the three
@@ -35,7 +35,7 @@ classes are compact groups in seven dimensions that touch, with no density gap b
 K-means is built for, and the case where a density threshold fails (Ablation~D). The inner-membrane
 proteins (77) are its weak spot: they overlap the related inner-membrane classes, and only 52\% end up in
 one cluster.
-% Sources: weiyew/sc4020-hdb/results/ablation_features.csv, ablation_flat_design_clusters.csv
+% Sources: results/hdb_resale/ablation_features.csv, ablation_flat_design_clusters.csv
 % (variant "floor area and lease only").
 \paragraph{HDBSCAN on D8, floor area and lease only: flat designs.} This feature set was chosen after
 seeing the main results, so we present it as an ablation finding and a sanity check, not as a tuned
@@ -78,7 +78,7 @@ density contrast in 30 dimensions.}
 \label{fig:bc_cases}
 \end{figure}
 \haend
-\paragraph{DBSCAN on D5.} % lam/results/fashion_mnist_results.csv
+\paragraph{DBSCAN on D5.} % results/datasets/fashion_mnist_results.csv
 DBSCAN puts most of the ten classes into one cluster, a second small cluster at the edge, and 33\%
 of images into noise (ARI 0.033; Figure~\ref{fig:lam-d5}). The cause is one global $\varepsilon$ in 50
 dimensions: an $\varepsilon$ large enough to connect points within a class also connects the
@@ -92,7 +92,7 @@ DBSCAN merges most classes into one cluster (ARI 0.03); HDBSCAN calls 71\% of po
 Spectral, GMM and K-Means++ reach ARI 0.40, 0.39, 0.34.}
 \label{fig:lam-d5}
 \end{figure}
-% [Ky] Sources: SC4020-Ky/results/shared_rule.csv (Ecoli HDBSCAN rows), case_stats.csv (noise per class).
+% [Ky] Sources: results/hotspot/shared_rule.csv (Ecoli HDBSCAN rows), case_stats.csv (noise per class).
 \paragraph{HDBSCAN on D4: rare classes called noise.} Even at its best setting by ARI, a minimum
 cluster size of 12, HDBSCAN returns two clusters and calls 37\% of proteins noise (ARI 0.339),
 yet it has the highest silhouette of the four methods at their best-ARI settings (0.483,

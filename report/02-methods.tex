@@ -4,7 +4,7 @@
 % rule, parameters, complexity, assumption it makes, how it fails.
 
 \subsection{K-Means and K-Means++}
-% Ky. Code: SC4020-Ky/src/core.py (run_kmeans)
+% Ky. Code: src/sc4020/methods.py (kmeans)
 K-means~\cite{lloyd1982} looks for $k$ centres $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$ that minimise
 the within-cluster sum of squares (inertia), $J=\sum_{i=1}^{n}\min_j\lVert\mathbf{x}_i-\boldsymbol{\mu}_j\rVert^2$.
 Each iteration assigns every point to its nearest centre and moves each centre to the mean of its points.
@@ -17,7 +17,7 @@ $k$. Because $J$ sums squared Euclidean distances, K-means suits compact, roughl
 similar spread. It cuts curved or elongated clusters, gives every point a cluster, so outliers pull the
 centres, and depends on the scale of each feature (Ablation~C).
 \subsection{DBSCAN}
-% Ky. Code: SC4020-Ky/src/core.py (run_dbscan, k_distance_curve, knee)
+% Ky. Code: src/sc4020/methods.py (dbscan), src/sc4020/tuning.py (k_distance_curve, knee)
 DBSCAN~\cite{ester1996} takes a radius $\varepsilon$ and a count \texttt{minPts}. A point is a core point
 if at least \texttt{minPts} points lie within $\varepsilon$ of it. Core points within $\varepsilon$ of
 each other join the same cluster, points within $\varepsilon$ of a core point join its cluster as border
@@ -31,7 +31,7 @@ similar density, so a radius that separates dense clusters calls sparse ones noi
 sparse clusters merges dense ones. In many dimensions distances become alike~\cite{beyer1999}, and a
 radius separates little.
 \subsection{HDBSCAN}
-% Ky. Code: SC4020-Ky/src/core.py (run_hdbscan)
+% Ky. Code: src/sc4020/methods.py (hdbscan)
 HDBSCAN~\cite{campello2013} removes $\varepsilon$. Each point's core distance is the distance to its
 $m$-th nearest neighbour, and the mutual reachability distance
 $d_{\mathrm{mr}}(a,b)=\max\{\mathrm{core}(a),\mathrm{core}(b),d(a,b)\}$ pushes points in sparse regions
@@ -45,7 +45,7 @@ $O(n\log n)$ and $O(n^2)$. Because \texttt{min\_cluster\_size} is a count, the r
 size of the sample. HDBSCAN can call large parts of the data noise, and like DBSCAN it has nothing to
 find where the data have no density gaps.
 \subsection{Gaussian Mixture Model}
-% Lam. Code: lam/src/sc4020/clustering.py
+% Lam. Code: src/sc4020/methods.py
 A Gaussian mixture model (GMM) treats the data as drawn from $k$ Gaussians,
 $p(\mathbf{x})=\sum_{j=1}^{k}\pi_j\,\mathcal{N}(\mathbf{x}\mid\boldsymbol{\mu}_j,\boldsymbol{\Sigma}_j)$,
 and fits the weights $\pi_j$, means and covariances by expectation--maximisation (EM)~\cite{dempster1977}.
@@ -60,7 +60,7 @@ GMM generalises K-Means: full covariances allow ellipsoidal clusters of differen
 and weight, but each cluster must still be a single convex blob. It fails on curved or nested shapes,
 has no noise label, and with full covariances it needs many points per component when $d$ is large.
 \subsection{Spectral clustering}
-% Lam. Code: lam/src/sc4020/clustering.py; affinity per dataset in lam/notebooks/0*_*.ipynb
+% Lam. Code: src/sc4020/methods.py; affinity per dataset in notebooks/{wine_tuned_methods,mall_customers,fashion_mnist,make_moons}.ipynb
 Spectral clustering~\cite{ng2002} turns clustering into graph partitioning. It (i) builds an affinity
 matrix $W$ whose entry $w_{ij}$ measures how similar points $i$ and $j$ are; (ii) forms the normalised
 graph Laplacian and takes its $k$ leading eigenvectors, giving each point a $k$-dimensional embedding;
@@ -76,8 +76,8 @@ eigensolver is much cheaper but still limits $n$ (Section~\ref{sec:runtime}). Sp
 needs $k$, has no noise label, and is sensitive to the affinity scale.
 \subsection{Agglomerative clustering}
 \habegin
-% Source: hoanganh/src/sc4020/clustering.py (wine_models, breast_cancer_models);
-% ARI from hoanganh/results/{wine,breast_cancer}_results.csv.
+% Source: notebooks/wine_model_zoo.ipynb, notebooks/breast_cancer.ipynb;
+% ARI from results/datasets/{wine_model_zoo,breast_cancer}_results.csv.
 \hatag{}Agglomerative clustering starts with every point as its own cluster and repeatedly merges the two
 closest clusters until $k$ remain. The linkage defines which two are closest. We use Ward
 linkage~\cite{ward1963}, which merges the pair whose union raises the total within-cluster variance

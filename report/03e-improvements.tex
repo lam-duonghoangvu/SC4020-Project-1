@@ -2,8 +2,8 @@
 
 % Rubric: "discuss or implement possible solutions to improve the methods".
 % Each row: a failure we observed, its cause, the fix we implemented, and the measured effect.
-% [Ky] Sources: K-Means++ row SC4020-Ky/results/ablation.csv (init, Ecoli); D3 gap = silhouette minus
-% shuffled-data silhouette at K=2 and K=5, SC4020-Ky/results/fake_data_check.csv.
+% [Ky] Sources: K-Means++ row results/hotspot/ablation.csv (init, Ecoli); D3 gap = silhouette minus
+% shuffled-data silhouette at K=2 and K=5, results/hotspot/fake_data_check.csv.
 
 \begin{table}[h]\centering\small
 \caption{Implemented improvements. Each fix targets a failure observed in Section~\ref{sec:comparison}.}
@@ -24,8 +24,8 @@ Degenerate $k$ chosen & silhouette alone & constraints + fake-data check & D2, D
 \end{tabular}}
 \end{table}
 
-% Sources: weiyew/sc4020-earthquake/results/ablation_distance.csv, case_density_regions.csv,
-% kmeans_k_selection.csv; weiyew/sc4020-hdb/results/hdbscan_grid.csv (single_storey_clusters, 9 settings
+% Sources: results/earthquakes_2023/ablation_distance.csv, case_density_regions.csv,
+% kmeans_k_selection.csv; results/hdb_resale/hdbscan_grid.csv (single_storey_clusters, 9 settings
 % per data version).
 \paragraph{Surface distance (D2).} Haversine distance for density methods and 3D unit vectors for
 K-means measure what matters, the distance along the Earth's surface. The fix is exact, and its only
@@ -53,8 +53,8 @@ fake data rules out $K=2$ and $K=3$. From $K=4$ the gap is 0.126 to 0.149 and al
 choice, $K=6$, rests on agreement between seeds (ARI 0.993). The check costs extra clustering runs on fake
 data for each $K$.
 \habegin
-% Source: hoanganh/comparison/results/report_d6_d7.csv; label-free choices from
-% hoanganh/comparison/results/team_results.csv (label_free_choice).
+% Source: results/comparison/report_d6_d7.csv; label-free choices from
+% results/comparison/team_results.csv (label_free_choice).
 \paragraph{GMM instead of K-means (D7).} \hatag{} K-means cuts the space halfway between two centres, which
 suits clusters of equal spread. On D7 the malignant class is the wider one, so the boundary falls inside
 it: 36 of the 212 malignant tumours join the benign cluster. With GMM that falls to 16. A GMM with one full covariance matrix per component
@@ -70,7 +70,7 @@ before DBSCAN or HDBSCAN is the natural next step; on D7 the first two component
 the variance.
 \haend
 
-\paragraph{Spectral clustering for curved clusters (D1).} % lam/results/make_moons_results.csv
+\paragraph{Spectral clustering for curved clusters (D1).} % results/datasets/make_moons_results.csv
 K-Means++ fails on D1 because it assigns each point to the nearest centroid, so cluster boundaries
 are straight lines. Spectral clustering replaces Euclidean distance with connectivity in a
 10-nearest-neighbour graph: points along one moon are linked by short hops, the two moons are

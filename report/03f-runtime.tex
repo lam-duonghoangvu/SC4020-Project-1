@@ -1,8 +1,8 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 
-% Sources: weiyew/sc4020-hdb/results/scalability_summary.csv (median of runs per size);
-% weiyew/sc4020-hdb/experiments/scalability.py; memory estimate from
-% weiyew/sc4020-hdb/notebooks/ablation.ipynb, scalability section.
+% Sources: results/hdb_resale/scalability_summary.csv (median of runs per size);
+% src/sc4020/experiments/hdb_scalability.py; memory estimate from
+% notebooks/hdb_resale_ablation.ipynb, scalability section.
 D8 is large enough to measure how each method grows. Each method ran at its chosen setting on random
 subsets of 1{,}000 to 234{,}294 sales (K-means from one start). Figure~\ref{fig:runtime} plots the median
 time against size on log scales, where the slope of a line estimates the exponent $b$ in
@@ -15,7 +15,7 @@ the data grow. Estimated from 2{,}000 probe points, the full data would hold abo
 pairs, about 6\,GB for the neighbour indices alone, which scikit-learn's DBSCAN stores in full. HDBSCAN,
 slower at every size, did run on all sales within 16\,GB.
 
-% Lam: lam/results/fashion_mnist_results.csv (fit_seconds; single fit at the chosen parameters, tuning excluded)
+% Lam: results/datasets/fashion_mnist_results.csv (fit_seconds; single fit at the chosen parameters, tuning excluded)
 D5 was sampled down from 70{,}000 to 3{,}000 images because three methods scale badly with $n$ in
 50 dimensions. Spectral clustering needs an $n\times n$ affinity matrix: dense, at $n=70{,}000$ it
 takes about 39\,GB in double precision, and the eigenvector step grows faster than linearly even with
@@ -25,7 +25,7 @@ one fit takes 0.011\,s for DBSCAN, 0.079\,s for K-Means++, 0.18\,s for Spectral,
 and 2.80\,s for GMM. GMM is the slowest here: with full covariances each EM step costs
 $O(nkd^2)$ with $d=50$. These times exclude parameter search, which refits DBSCAN 15 times and
 HDBSCAN 6 times.
-% [Ky] Source: SC4020-Ky/results/shared_rule.csv (runtime_s, one fit at the chosen setting).
+% [Ky] Source: results/hotspot/shared_rule.csv (runtime_s, one fit at the chosen setting).
 On D3 (15{,}000 points, 2 dimensions) one fit takes 0.04 to 0.06\,s for K-means, 0.52\,s for DBSCAN and
 1.1\,s for HDBSCAN; on D4 (336 proteins) every method takes under 0.03\,s (Table~\ref{tab:cmp_d3d4}). At
 these sizes runtime does not decide the choice of method.

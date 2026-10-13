@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - "report/**"
-      - "results/ky/figures/**"
+      - "results/*/figures/**"
   workflow_dispatch:
 
 permissions:

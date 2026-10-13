@@ -20,10 +20,9 @@ wheels/
 data/*
 !data/README.md
 
-# weiyew: per-point label files and figures are not committed (report figures live in report/figures/)
-results/weiyew/*/*_labels.csv
-!results/weiyew/hdb/screening_labels.csv
-results/weiyew/*/figures/
+# Per-point cluster labels are model output, not results; screening_labels.csv is a summary table
+results/**/*_labels.csv
+!results/hdb_resale/screening_labels.csv
 
 # Built submission package (submission/make_code_zip.py)
 submission/group_*_code/

@@ -23,9 +23,6 @@ HERE = REPO / "submission"
 INCLUDE = ("pyproject.toml", ".python-version", "src/", "notebooks/", "results/", "data/", "tests/")
 
 EXCLUDE = [
-    "notebooks/hoanganh/untitled10.py",  # Colab export, superseded by the notebooks
-    "results/ky/_archive/*",             # per-point labels (model output)
-    "results/ky/raw/*",                  # older copies of files in results/ky/
     "*.bak",
     "*.pdf",
     "*.npy",
