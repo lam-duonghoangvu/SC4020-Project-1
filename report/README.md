@@ -18,7 +18,6 @@ Before submitting, set `\draftfalse` in `main.tex`: owners, TODOs and DECIDE not
 | 03a-datasets.tex | 3.1 Datasets, preprocessing | each dataset owner; Wei Yew |
 | 03b-protocol.tex | 3.2 Metrics, parameter selection | Ky, Wei Yew |
 | 03c-comparison.tex | 3.3 Comparison by data property | All |
-| 03e-improvements.tex | 3.5 Improvements | All |
 | 03f-runtime.tex | 3.6 Runtime | Wei Yew, Lam |
 | 03g-cases.tex | 3.7 Success and failure cases | each owner |
 | 03h-factors.tex | 3.8 Key factors, guidance | Ky |
@@ -34,7 +33,7 @@ Before submitting, set `\draftfalse` in `main.tex`: owners, TODOs and DECIDE not
 - Comparisons, strengths and weaknesses: 3.3
 - Success and failure cases, visualisations: 3.7
 - Challenging datasets: 3.1 (D2, D5, D8)
-- Solutions to improve the methods: 3.5
+- Solutions to improve the methods: removed (section 3.5 left unused so later numbers stay)
 
 ## Rules
 - Write in your own file. To comment on someone else's, add `% [Name]: note`.
