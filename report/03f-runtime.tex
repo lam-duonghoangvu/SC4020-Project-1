@@ -1,48 +1,26 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 
-% Sources: one fit at the rule's setting, tuning excluded. D1, D5, D6: results/datasets/{make_moons,
-% fashion_mnist,wine}_results.csv (fit_seconds); D2: results/earthquakes_2023/method_comparison.csv;
-% D3, D4: results/hotspot/shared_rule.csv (choice=rule); D8: results/hdb_resale/comparison.csv (data=real).
+% Sources: one fit at the rule's setting, tuning excluded; results/datasets/{make_moons,wine}_results.csv
+% (fit_seconds, ari). No method reaches ARI > 0.7 at the rule's setting on D4 (results/hotspot/shared_rule.csv),
+% D5 (results/datasets/fashion_mnist_results.csv) or D8 (results/hdb_resale/comparison.csv); D2 and D3 have no labels.
 % ms per 1,000 points = fit seconds / n x 10^6.
-Table~\ref{tab:runtime} gives one fit's time per 1{,}000 points at the rule's setting; accuracy is ARI.
-Table~\ref{tab:runtime_ari} keeps the fastest method that reaches each accuracy level.
+Runtime is compared only where a method reaches ARI $>0.7$, which happens on D1 and D6 only; it is one
+fit's time per 1{,}000 points at the rule's setting (Table~\ref{tab:runtime}).
+In the case where ARI $>0.9$, only one method qualifies on each dataset: Spectral on D1 (244\,ms) and GMM
+on D6 (37\,ms). In the case where ARI $>0.7$, the ranking from fastest is HDBSCAN (36\,ms), then Spectral
+(244\,ms) on D1, and K-Means++ (34\,ms), then GMM (37\,ms), then Agglomerative (79\,ms) on D6.
 
 \begin{table}[h]\centering\small
-\caption{Fit time in ms per 1{,}000 points. \textbf{Bold}: ARI $>0.9$; \underline{underlined}: ARI
-$>0.7$; \emph{italic}: ARI $>0.5$; --: not run. D2 and D3 have no labels.}
+\caption{Methods reaching each ARI level, ranked by fit time (ms per 1{,}000 points), fastest first.}
 \label{tab:runtime}
-\begin{tabular}{lrrrrrrr}
+\begin{tabular}{lll}
 \toprule
-\textbf{Data} & \textbf{$n$} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN} & \textbf{GMM}
-& \textbf{Spectral} & \textbf{Agglom.} \\
+\textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} \\
 \midrule
-D1 & 1{,}000  & 552  & 3.2  & \underline{36} & \emph{202} & \textbf{244} & \emph{26} \\
-D2 & 7{,}643  & 0.5\textsuperscript{a} & 13 & 265 & -- & -- & -- \\
-D3 & 15{,}000 & 58   & 43   & 77   & --      & --  & -- \\
-D4 & 336      & \emph{255} & 12   & 15   & --      & --  & -- \\
-D5 & 3{,}000  & 112  & 6.4  & 128  & 11{,}324 & 467 & 184 \\
-D6 & 178      & \underline{34} & 7.7 & 9.1 & \textbf{37} & 53 & \underline{79} \\
-D8 & 20{,}000 & 72\textsuperscript{a} & 88 & 244 & -- & -- & -- \\
+D1 ($n=1{,}000$) & Spectral (244) & HDBSCAN (36), Spectral (244) \\
+D6 ($n=178$)     & GMM (37)       & K-Means++ (34), GMM (37), Agglomerative (79) \\
 \bottomrule
 \end{tabular}
-\par\raggedright\footnotesize\textsuperscript{a}\,One start (\texttt{n\_init}=1); 10 elsewhere.
-\end{table}
-
-\begin{table}[h]\centering\small
-\caption{Fastest method reaching each ARI level (ms per 1{,}000 points). Labelled data only.}
-\label{tab:runtime_ari}
-\begin{tabular}{llll}
-\toprule
-\textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} & \textbf{ARI $>0.5$} \\
-\midrule
-D1 & Spectral (244) & HDBSCAN (36) & Agglomerative (26) \\
-D4 & none           & none\textsuperscript{b} & K-Means++ (255) \\
-D5 & none           & none & none \\
-D6 & GMM (37)       & K-Means++ (34) & K-Means++ (34) \\
-D8 & none           & none & none \\
-\bottomrule
-\end{tabular}
-\par\raggedright\footnotesize\textsuperscript{b}\,K-Means++ reaches 0.731 at $K=7$, chosen with labels.
 \end{table}
 
 % Source: results/hdb_resale/scalability_summary.csv; experiments/12_data_gov_hdb_resale_ablation.ipynb, section 6.
