@@ -42,10 +42,10 @@ once the notebooks it reads from have run (only 12 needs 09). Figures are shown 
 | `06_kaggle_uber_pickups_clustering.ipynb` | Uber NYC pickups (D3) |
 | `07_usgs_earthquakes_2023_eda.ipynb` | Earthquakes 2023 (D2): exploratory analysis behind each preprocessing choice |
 | `08_usgs_earthquakes_2023_clustering.ipynb` | Earthquakes 2023: parameter choice, initialisation, cluster maps, comparison |
-| `09_usgs_earthquakes_2023_ablation.ipynb` | Earthquakes 2023: ablations, success and failure cases, scalability, cross-dataset table |
+| `09_usgs_earthquakes_2023_cases.ipynb` | Earthquakes 2023: success and failure cases, scalability, cross-dataset table |
 | `10_data_gov_hdb_resale_eda.ipynb` | HDB resale (D8): exploratory analysis |
 | `11_data_gov_hdb_resale_clustering.ipynb` | HDB resale: parameter choice and comparison |
-| `12_data_gov_hdb_resale_ablation.ipynb` | HDB resale: largest-cluster cap, cases, feature ablation, stability, scalability (needs 09) |
+| `12_data_gov_hdb_resale_cases.ipynb` | HDB resale: success and failure cases, scalability, cross-dataset table (needs 09) |
 | `13_multi_source_hotspot_clustering.ipynb` | Uber, Ecoli: sweeps, main comparison, ablations A-D, fake-data check, shared-table rows, case statistics, figures |
 
 The command for each part of the report is in `submission/README_code.md`; topic notes are in `docs/`.
