@@ -1,26 +1,24 @@
-% Owner: Ky. Write LAST, after Section 3 numbers are final.
+% Write LAST, after Section 3 numbers are final.
+% Sources: D1 results/comparison/report_d1.csv; D2 results/earthquakes_2023/{case_density_regions,
+% method_comparison}.csv; D7 results/hdb_resale/comparison.csv; four of five: Section 1.3 source comment.
 \begin{abstract}
 \noindent
-% [Ky]: draft (about 230 words) following the thesis proposed below; revise once the title is decided.
-Clustering methods differ in what they take a cluster to be, and real data break those ideas in
-different ways. We compare K-means, K-means++, DBSCAN and HDBSCAN on eight datasets, each chosen to test
-one data property: curved shapes, long belts of uneven density, density contrast within a city, rare
-classes, high dimensions, classes of unequal spread, and data with no gaps between groups. We ask where
-each method fails, whether the scores available without labels reveal those failures, and whether known
-remedies repair them. Each method failed where the data broke its idea of a cluster. K-means cut the
-curved classes of make\_moons (ARI 0.48 against 0.98 for DBSCAN); one DBSCAN radius clustered 90\% of
-earthquakes in the dense south-west Pacific but 20\% in the Americas; and in 7 to 50 dimensions the
-density methods fell to ARI 0.03 to 0.05. The silhouette did not reveal these failures: on five of six
-labelled datasets the method with the top silhouette was not the one that matched the labels best, and
-on Ecoli it ranked the four methods almost in reverse (Spearman $\rho=-0.80$). Rerunning each result on
-fake data caught methods that found nothing real, but not ones that found the wrong structure. Surface
-distance, HDBSCAN and standardisation each fixed a specific failure at a cost; none produced clusters in
-data with no gaps. The choice of method should follow from the structure of the data, and every score
-needs a check against fake data.
-
-
-\decide{Thesis, proposed 7 Oct (Wei Yew), to match the research question in Section~\ref{sec:intro}:
-each method fails where the data break its idea of a cluster (RQ1); the silhouette does not reveal
-these failures, a fake-data check reveals only some, and the rest need checks aimed at a known problem
-(RQ2); known remedies fix some failures at a cost, and none fixes data with no gaps (RQ3).}
+Clustering is used when there are no labels to check the result against, so a clustering is usually
+judged by an internal score such as the silhouette. We test whether that is safe. The methods assume
+different things: K-means and Gaussian mixtures expect compact groups, spectral clustering expects groups
+joined by chains of close neighbours, and DBSCAN and HDBSCAN expect dense groups separated by empty
+space. We ran all six (K-means with random and K-means++ starts, GMM, spectral clustering, DBSCAN and
+HDBSCAN) on seven datasets chosen to break these assumptions, five of them with known labels, and chose
+every setting with one label-free rule. We asked three questions: does a method fail when its assumption
+breaks, can the failure be seen without labels, and does extending a method by one component fix it? Every method failed where
+its assumption broke. K-means cut two curved clusters in the wrong place (agreement with the true labels
+0.48 out of 1, against 1.00 for spectral clustering), and on housing data with no empty space between
+groups DBSCAN put 96\% of sales in one cluster. The silhouette did not reveal these failures: on four of
+the five labelled datasets it favoured a different method from the one that best matched the labels, and
+on the curved clusters it chose a DBSCAN setting that shattered them into 72 pieces (agreement 0.01).
+Comparing each result with the same setting on fake data caught results with no real structure, but not
+K-means joining earthquake belts thousands of kilometres apart into one cluster. Adding one component
+to a method, such as HDBSCAN's density hierarchy or GMM's covariances, fixed the failures it targets,
+but none helped data with no gaps. No single score can choose a clustering method: an analyst should look at the data, report
+how many points each method discards, and test directly for the failures the data make likely.
 \end{abstract}

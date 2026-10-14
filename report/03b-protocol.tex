@@ -1,84 +1,67 @@
 \subsection{Evaluation metrics and parameter selection}\label{sec:protocol}
 
 % Rubric: "analyze and discuss the parameter settings".
+% Code: src/sc4020/metrics.py (evaluate), src/sc4020/tuning.py (the selection rule).
 
 \paragraph{Metrics.}
-% [Wei Yew]: the columns below are the shared schema for every table in Section 3.3. Calinski-Harabasz
-% is left out because not every member computed it.
-Every result table reports the same columns. \emph{Internal} scores need no labels. The silhouette
+Every result table reports the same columns, computed by one shared scoring function.
+\emph{Internal} scores need no labels. The silhouette
 coefficient~\cite{rousseeuw1987} of a point is $(b-a)/\max(a,b)$, where $a$ is its mean distance to its
 own cluster and $b$ its mean distance to the nearest other cluster; we report the mean over points, from
-$-1$ to $1$, higher is better. The Davies--Bouldin index~\cite{davies1979} averages, over clusters, the
-worst ratio of within-cluster spread to between-centre distance; lower is better. Both are computed on
-clustered points only, so they say nothing about the points a density method calls noise. Two
-\emph{coverage} figures therefore stand next to them: the noise fraction and the share of points in the
-largest cluster. \emph{External} scores need labels. The Adjusted Rand Index (ARI)~\cite{hubert1985} counts
-pairs of points on which a clustering and the labels agree, corrected so that a random clustering scores
-about 0 and a perfect one 1. Normalised mutual information (NMI) measures the same agreement in terms of
-shared information. For both, noise counts as one more cluster, so a method cannot raise its score by
-discarding hard points. We also report the fit time.
+$-1$ to $1$, higher is better. On datasets above 5{,}000 points (D2, D3, D7) it is estimated on a random
+sample of 5{,}000. On D2 it uses the great-circle distance. The Davies--Bouldin index~\cite{davies1979}
+averages, over clusters, the worst ratio of within-cluster spread to between-centre distance; lower is
+better. Both are computed on clustered points only, so they say nothing about the points a density
+method calls noise. Two \emph{coverage} figures therefore stand next to them: the noise fraction and the
+share of points in the largest cluster. \emph{External} scores need labels. The Adjusted Rand Index
+(ARI)~\cite{hubert1985} counts pairs of points on which a clustering and the labels agree, corrected so
+that a random clustering scores about 0 and a perfect one 1. Normalised mutual information (NMI) measures
+the same agreement in terms of shared information. For both, noise counts as one more cluster, so a
+method cannot raise its score by discarding hard points. We also report the fit time.
 
 \paragraph{Fake-data check.}
 An internal score has no fixed scale: a silhouette of 0.3 can be strong on one dataset and meaningless on
 another. Each chosen setting is therefore run again on fake data that keeps each feature's distribution but
-has no joint structure. For tables, each column is shuffled independently. For coordinates, points are
-drawn uniformly in the same latitude and longitude range. A result counts as structure only if the real data
-score clearly above the fake data.
+has no joint structure: every column shuffled independently. For density methods on coordinates (D2, D3)
+the fake points are instead drawn uniformly in the same range, because shuffling latitude and longitude
+keeps the dense bands of each. A result counts as structure only if the real data score clearly above the
+fake data. On D1 and D6 the setting is chosen again on the fake data rather than reused, so the check asks
+whether the rule finds anything there at all.
 
 \paragraph{Selection rule.}
-% Sources: results/earthquakes_2023/dbscan_grid.csv (min_samples 10, eps quantile 0.25);
-% results/hdb_resale/hdbscan_grid.csv (min_cluster_size 400, min_samples None, real).
-One rule picks the setting of DBSCAN and HDBSCAN on every dataset: among the settings that give at least
-2 clusters and label at most 50\% of points as noise, take the one with the highest silhouette. The noise
-cap is needed because the silhouette ignores noise. Without it, the silhouette prefers settings that throw
-most of the data away. On D2 it would pick DBSCAN with $\varepsilon=20.4$\,km, which scores 0.878 by
-calling 69.4\% of earthquakes noise. On D8 it would pick HDBSCAN with \texttt{min\_cluster\_size}~400,
-which scores 0.448 with 70.9\% of sales as noise. For K-means, $K$ is chosen from the elbow in inertia,
-the silhouette, the gap to the fake-data silhouette and agreement between seeds; each dataset states which
-of these decided. On labelled data we report the rule's choice and the setting with the best ARI, so the
-cost of choosing without labels is visible.
+% Sources: results/earthquakes_2023/dbscan_grid.csv; results/hdb_resale/hdbscan_grid.csv.
+One label-free rule picks every setting (\texttt{sc4020.tuning}).
+\begin{itemize}\itemsep1pt
+\item \textbf{DBSCAN and HDBSCAN:} among the settings that give at least 2 clusters and label at most 50\%
+of points as noise, the one with the highest silhouette. The noise cap is needed because the silhouette
+ignores noise. Without it, the silhouette prefers settings that throw most of the data away: on D2 it would
+pick DBSCAN with $\varepsilon=20.4$\,km, which scores 0.878 by calling 69.4\% of earthquakes noise; on D7 it
+would pick HDBSCAN with \texttt{min\_cluster\_size}~400, which scores 0.451 with 71.9\% of sales as noise.
+\item \textbf{K-means:} on labelled data, the number of classes. Otherwise, among the $K$ whose seeds agree
+(minimum pairwise ARI of at least 0.95 over 10 seeds), the one with the largest gap between the real
+silhouette and the silhouette of the same $K$ on fake data. The silhouette alone would pick $K=2$ on both
+D2 and D3, where fake data score almost as well (0.544 against 0.528 on D2).
+\item \textbf{GMM and spectral clustering:} the $K$ of K-means on the same dataset, so that the methods
+differ only in how they cluster; GMM's covariance type by BIC.
+\end{itemize}
+On labelled data we also report the setting with the best ARI, so the cost of choosing without labels is
+visible.
 
 \paragraph{Parameter grids.}
-% Sources: results/earthquakes_2023/{kmeans_k_selection,dbscan_grid,hdbscan_grid}.csv;
-% results/hdb_resale/{kmeans_k_sweep,dbscan_grid,hdbscan_grid}.csv.
-K-means and K-means++: $K=2$ to 12, 10 starts each. DBSCAN: \texttt{minPts} (\texttt{min\_samples} in
-scikit-learn) in $\{5, 10, 20\}$. Its radius $\varepsilon$ comes from the k-distance curve, the sorted
-distance from each point to its \texttt{minPts}-th neighbour: on D2 we take the 25th, 50th, 75th, 90th and
-95th percentiles of the curve (11 to 810\,km); on D8 we take 0.5, 0.75, 1, 1.5 and 2 times the knee of the
-curve. HDBSCAN: \texttt{min\_cluster\_size} scaled to the data (25, 50, 100 on D2; 100, 200, 400 on D8)
-and \texttt{min\_samples} in \{default, 5, 10\}.
-\habegin
-% Source: src/sc4020/tuning.py; every setting tried is in
-% results/datasets/<dataset>_tuning.csv.
-\hatag{}On D6 and D7, K-means is searched over $K=2$ to 10 with 10 starts and reported at the number of
-classes. GMM takes 2 to 10 components and four covariance types (full, tied, diagonal, spherical),
-chosen by BIC. DBSCAN takes \texttt{minPts} in $\{10, 20, 40, 80\}$ and $\varepsilon$ at 0.5 to 4
-times the knee of the k-distance curve. HDBSCAN takes \texttt{min\_cluster\_size} from 5 up to
-$n/10$ (15 on D6, 50 on D7) and \texttt{min\_samples} in \{default, 5, 10\}. On these two datasets the
-density settings that pass the constraints (at least 2 clusters, at most 50\% noise, and at most 10
-clusters) are ranked by DBCV~\cite{moulavi2014}, a score built for density clusters, instead of the
-silhouette. Agglomerative clustering uses Ward linkage at the number of classes.
-\haend
-% Lam: src/sc4020/tuning.py
-GMM and Spectral on D1 and D5: $k$ set to the number of classes on labelled data, else the silhouette-best
-K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) for D6 and Mall,
-10-nearest-neighbour graph for D1 and D5. DBSCAN and HDBSCAN on D1 and D5: \texttt{minPts} from
-$\{\lfloor m/2\rfloor, m, 2m\}$ with $m=\mathrm{clip}(2d,4,20)$, $\varepsilon$ from $\{0.5,0.75,1,1.5,2\}\times$
-the k-distance knee; \texttt{min\_cluster\_size} from $\{5,10,20,30,50,n/20\}$; the setting with the
-best silhouette (noise excluded, $\geq2$ clusters, $\leq50\%$ noise) is kept.
-% [Ky]: experiments/13_multi_source_hotspot_clustering.ipynb (grids: section 2; shared rule: section 9 -> results/hotspot/shared_rule.csv);
-% K choice on D3 from results/hotspot/fake_data_check.csv.
-On D3 and D4: K-means and K-means++ $K=2$ to 25, 10 starts. DBSCAN \texttt{minPts} in $\{4,8,16,32\}$
-(D3) or $\{3,5,8,12\}$ (D4), with $\varepsilon$ at 0.1 to 3 times the knee of the k-distance curve.
-HDBSCAN \texttt{min\_cluster\_size} from 10 to 250 (D3) or 5 to 30 (D4). The shared rule picks the
-density settings. On D3 the silhouette alone picks $K=2$; we use $K=5$, where the gap to fake data is
-larger (0.113 against 0.089). On D4 the silhouette picks $K=5$, and $K=7$ gives the best ARI.
+% Sources: experiments 08 (D2), 11 (D7), 13 (D3, D4) and src/sc4020/run.py (D1, D5, D6).
+K-means and K-means++ run 10 starts at each $K$, over $K=2$ to 12 (D2, D7), 2 to 25 (D3, D4) or 2 to 10
+(D1, D5, D6). DBSCAN's radius $\varepsilon$ comes from the k-distance curve, the sorted distance from each
+point to its \texttt{minPts}-th neighbour: on D2 at the 25th to 95th percentiles of the curve (11 to
+810\,km) with \texttt{minPts} in $\{5,10,20\}$; elsewhere at multiples of the curve's knee (0.5 to 2 on D7,
+0.1 to 3 on D3 and D4, 0.5 to 4 on D1, D5 and D6), with \texttt{minPts} in $\{5,10,20\}$ on D7,
+$\{4,8,16,32\}$ on D3, $\{3,5,8,12\}$ on D4, and $m/2$, $m$, $2m$ with $m=\min(\max(2d,4),20)$ on D1, D5
+and D6. HDBSCAN's \texttt{min\_cluster\_size} is scaled to the data (25 to 100 on D2, 100 to 400 on D7, 10
+to 250 on D3, 5 to 30 on D4, 5 up to $n/10$ on D1, D5, D6), with \texttt{min\_samples} in \{default, 5,
+10\} except on D3 and D4 (default only). The datasets keep the grids their owners chose, because a sensible
+range depends on $n$, $d$ and the units, but the rule that picks from each grid is the same.
 
 \paragraph{Reproducibility.}
-On D2 and D8 every random step uses seed 0, and repeated runs use seeds 0 to 19. They ran on Python
-3.12.13, scikit-learn~\cite{pedregosa2011} 1.9.1 and NumPy 2.5.3 on an Apple M2 with 16\,GB of memory.
-On D3 and D4 the same library versions ran on Python 3.12.10, on an Intel Core Ultra 5 225 with 32\,GB
-of memory; every random step uses seed 42, and repeated runs use seeds 0 to 29.
-\todo{Lam}{versions and hardware if different.}
-\todo{Hoang Anh}{D6, D7 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
-\decide{shared code: now src/sc4020/metrics.py (one evaluate for every table), so every table has the same columns.}
+All experiments run from the notebooks in \texttt{experiments/} on the shared package \texttt{sc4020}, with
+Python 3.13.16, scikit-learn~\cite{pedregosa2011} 1.9.1 and NumPy 2.5.3, on an Intel Core Ultra 5 225 with
+32\,GB of memory (D5 was run by its owner on the same versions). Random steps use seed 0 on D2 and D7 and
+seed 42 elsewhere; repeated runs use seeds 0 to 19 (D2, D7) or 0 to 29 (D3, D4).

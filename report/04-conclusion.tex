@@ -1,45 +1,44 @@
 \section{Conclusion}\label{sec:conclusion}
-% [Ky]: draft; every number is quoted from Sections 3.3 to 3.5. Adjust once the title is decided.
-We compared K-means, K-means++, DBSCAN and HDBSCAN on eight datasets, each chosen to test one data
-property, with GMM, spectral and agglomerative clustering as reference points. Density beats centroids
-when clusters are separated by gaps and have any shape, in few dimensions: on D1 DBSCAN reaches ARI 0.98
-against 0.48 for K-means, and on D2 HDBSCAN follows belts that K-means merges. Centroids win when classes
-are compact and touch, or the data have many dimensions: on D4 K-Means++ reaches ARI 0.697 without labels
-while both density methods fall to 0.04, and the ranking reverses between 3 and 4 principal components.
-Where the data have no gaps at all, as in the core of D3 and in D8, neither family finds natural groups.
-Density methods return one dominant cluster, and K-means draws borders where its objective puts them.
+% Every number is quoted from Section 3.
+We compared six clustering methods, K-means with random and K-means++ starts, GMM, spectral clustering,
+DBSCAN and HDBSCAN, on seven datasets, each chosen to test one data property, with every setting chosen by
+one label-free rule. Which family wins depends on the data. Density and graph methods win when groups are
+separated by gaps and have any shape, in few dimensions: on D1 spectral clustering recovers the moons
+exactly where K-means reaches ARI 0.48, and on D2 HDBSCAN follows belts that K-means merges. Centroid and
+mixture methods win when classes are compact and touch, or the data have many dimensions: on D4 GMM reaches
+ARI 0.618 and K-Means++ 0.508 while both density methods fall to 0.04, and on D5 no density setting
+reaches 0.07. Where the data have no gaps at all, as in the core
+of D3 and in D7, no family finds natural groups. Density methods return one dominant cluster, spectral
+clustering scores below its own fake data, and K-means draws borders where its objective puts them.
 
-The silhouette did not tell us which case we were in. On five of the six labelled datasets the method
-with the top silhouette was not the one that matched the labels best, and on D4 it ranks the four methods
-almost in reverse (Spearman $\rho=-0.80$). Rerunning each result on fake data helps where a method finds
-nothing real (D4, D8), but not where it finds the wrong structure (D2). Known remedies, namely surface
-distance, HDBSCAN for uneven density, standardisation and K-means++, repaired the failures they target,
-each at a cost, and none produced clusters in data with no gaps. The choice of method should follow from
-what the data look like and what the analysis needs, and every score should be checked against fake data
-and against the points it ignores.
+The silhouette did not tell us which case we were in. On four of the five labelled datasets the method
+with the top silhouette was not the one that matched the labels best; on D4 it ranks the six methods
+almost in reverse (Spearman $\rho=-0.82$); and on D1 it chose a DBSCAN setting that shattered the moons
+when another setting recovered them exactly. Rerunning each result on fake data helps where a method finds
+nothing real (D4, D7), but not where it finds the wrong structure (D2). Adding one component to a method, namely
+K-means++ seeding, HDBSCAN's density hierarchy, GMM's covariances and spectral clustering's neighbour
+graph, repaired the failures it targets, each at a cost, and none produced clusters in data with no gaps. The
+choice of method should follow from what the data look like and what the analysis needs, and every score
+should be checked against fake data and against the points it ignores.
 
 \subsection*{Limitations}
-\habegin
-% [Hoang Anh]: my line for D6 and D7. Source: results/datasets/{wine,breast_cancer}_results.csv (label_free_choice).
-\hatag{}On D6 and D7, the methods that need $k$ were given the number of classes, which an analyst would not
-know. The label-free criteria happen to agree here (the silhouette picks $k=3$ on D6 and $k=2$ on D7 for
-K-means), so the cost is small on these two tables, but both are small (178 and 569 points) and their
-density settings were ranked by DBCV, not by the silhouette used elsewhere.
-\haend
-
-% [Ky]: my line for D3 and D4. Sources: results/hotspot/shared_rule.csv, case_stats.csv.
-D3 has no labels, so its clusters are judged against known geography only, and it is one 15{,}000-point
-sample of one month. The D4 settings with the best ARI use the labels and overstate what an analyst could
-reach without them; D4 is also small (336 proteins), so a single protein moves a rare class's share by up to 50\%.
-
-% [Wei Yew]: my line for D2 and D8. Sources: results/earthquakes_2023/ablation_time_window.csv;
-% floor-area ARI 0.601: from the removed Stage 0 screening (screening_labels.csv); not regenerated.
-D2 has no labels, so its failures are judged against plate-boundary geography and cannot be scored.
-Its density parameters are counts of points, so the clusters change with the size of the catalogue: a
-random half of the year agrees with the full year at ARI 0.51 to 0.55 only for the density methods
-(Ablation~F). D8 has no
-location beyond the town, so its clusters describe flats rather than places, and its one label, flat
-type, is nearly a function of floor area (ARI 0.601 from floor area alone), so a low ARI on D8 says
+D2 and D3 have no labels, so their clusters are judged against plate-boundary geography and the map of
+the city only. Density parameters such as \texttt{minPts} and \texttt{min\_cluster\_size} are counts of
+points, so the clusters change with the size of the data: a random half of the 2023 earthquakes agrees
+with the full year at ARI 0.51 to 0.55 for the density methods, against 0.97 to 0.99 for K-Means++.
+% Source: results/earthquakes_2023/ablation_time_window.csv (random-half control rows).
+D7 has no location beyond the town, so its clusters describe flats rather
+than places, and its one label, flat type, is nearly a function of floor area, so a low ARI on D7 says
 little about the quality of a clustering.
 
-\todo{Lam}{one line: datasets go up to 50 dimensions only (D5).}
+On the labelled datasets, K-means, GMM and spectral clustering were given the number of classes, which an
+analyst would not know, and the best-ARI rows use the labels outright; both overstate what can be reached
+without labels. D4 and D6 are small (336 and 178 points), so a single protein moves a rare class's share
+by up to 50\%. The datasets keep their owners' parameter grids, so the rule is shared but the search space
+is not. On D1 and D6 the fake-data setting is chosen again on the fake data, and on D5 the fake-data check
+was not run, because its data could not be rebuilt identically outside the owner's environment.
+
+Our evidence on dimensionality comes from two datasets, D4 with 7 features and D5 reduced to 50
+principal components from 784 pixels, which keep 86.5\% of the variance. We did not test the methods on
+the full 784 dimensions or beyond, so the high-dimensional results describe data that have already been
+reduced.

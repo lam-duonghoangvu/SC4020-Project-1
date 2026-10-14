@@ -4,21 +4,24 @@
 % rule, parameters, complexity, assumption it makes, how it fails.
 
 \subsection{K-Means and K-Means++}
-% Ky. Code: src/sc4020/methods.py (kmeans)
-K-means~\cite{lloyd1982} looks for $k$ centres $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$ that minimise
+% Code: src/sc4020/methods.py (kmeans, kmeans_random_init)
+\paragraph{Overview} K-means~\cite{lloyd1982} looks for $k$ centres $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$ that minimise
 the within-cluster sum of squares (inertia), $J=\sum_{i=1}^{n}\min_j\lVert\mathbf{x}_i-\boldsymbol{\mu}_j\rVert^2$.
 Each iteration assigns every point to its nearest centre and moves each centre to the mean of its points.
 $J$ never rises, so the method stops at a local optimum that depends on the starting centres. One
 iteration costs $O(nkd)$. Random starts pick $k$ data points uniformly. K-means++~\cite{arthur2007} picks
 the first centre at random and each next one with probability proportional to its squared distance from
 the nearest centre already chosen. Only the start differs, so we treat the two as one method with two
-initialisations (Ablation~A). We use scikit-learn's \texttt{KMeans} with 10 starts; the only parameter is
+initialisations (Ablation~A). 
+
+\paragraph{Implementation} We use scikit-learn's \texttt{KMeans} with 10 starts; the only parameter is 
 $k$. Because $J$ sums squared Euclidean distances, K-means suits compact, roughly round clusters of
 similar spread. It cuts curved or elongated clusters, gives every point a cluster, so outliers pull the
-centres, and depends on the scale of each feature (Ablation~C).
+centres, and depends on the scale of each feature.
+
 \subsection{DBSCAN}
-% Ky. Code: src/sc4020/methods.py (dbscan), src/sc4020/tuning.py (k_distance_curve, knee)
-DBSCAN~\cite{ester1996} takes a radius $\varepsilon$ and a count \texttt{minPts}. A point is a core point
+% Code: src/sc4020/methods.py (dbscan); src/sc4020/tuning.py (k_distance_curve, find_knee)
+\paragraph{Overview} DBSCAN~\cite{ester1996} takes a radius $\varepsilon$ and a count \texttt{minPts}. A point is a core point
 if at least \texttt{minPts} points lie within $\varepsilon$ of it. Core points within $\varepsilon$ of
 each other join the same cluster, points within $\varepsilon$ of a core point join its cluster as border
 points, and every other point is noise. The method needs no $k$ and assumes no shape, and on coordinates
@@ -30,9 +33,10 @@ joining the two ends of the curve. The weakness is the single radius. It assumes
 similar density, so a radius that separates dense clusters calls sparse ones noise, and one that keeps
 sparse clusters merges dense ones. In many dimensions distances become alike~\cite{beyer1999}, and a
 radius separates little.
+
 \subsection{HDBSCAN}
-% Ky. Code: src/sc4020/methods.py (hdbscan)
-HDBSCAN~\cite{campello2013} removes $\varepsilon$. Each point's core distance is the distance to its
+% Code: src/sc4020/methods.py (hdbscan)
+\paragraph{Overview} HDBSCAN~\cite{campello2013} removes $\varepsilon$. Each point's core distance is the distance to its
 $m$-th nearest neighbour, and the mutual reachability distance
 $d_{\mathrm{mr}}(a,b)=\max\{\mathrm{core}(a),\mathrm{core}(b),d(a,b)\}$ pushes points in sparse regions
 apart. A minimum spanning tree under $d_{\mathrm{mr}}$ holds the DBSCAN clusterings at every density
@@ -44,68 +48,57 @@ what DBSCAN cannot do. We use scikit-learn's \texttt{HDBSCAN}; the main paramete
 $O(n\log n)$ and $O(n^2)$. Because \texttt{min\_cluster\_size} is a count, the result changes with the
 size of the sample. HDBSCAN can call large parts of the data noise, and like DBSCAN it has nothing to
 find where the data have no density gaps.
+
 \subsection{Gaussian Mixture Model}
-% Lam. Code: src/sc4020/methods.py
-A Gaussian mixture model (GMM) treats the data as drawn from $k$ Gaussians,
+% Code: src/sc4020/methods.py (gmm); src/sc4020/tuning.py (select_gmm_by_bic)
+\paragraph{Overview} A Gaussian mixture model (GMM) treats the data as drawn from $k$ Gaussians,
 $p(\mathbf{x})=\sum_{j=1}^{k}\pi_j\,\mathcal{N}(\mathbf{x}\mid\boldsymbol{\mu}_j,\boldsymbol{\Sigma}_j)$,
 and fits the weights $\pi_j$, means and covariances by expectation--maximisation (EM)~\cite{dempster1977}.
 The E-step computes each point's responsibility (posterior probability) under every component; the
 M-step re-estimates $\pi_j$, $\boldsymbol{\mu}_j$ and $\boldsymbol{\Sigma}_j$ from those soft
 assignments; the two steps repeat until the log-likelihood stops improving. Each point is then given
-its most probable component. We use scikit-learn's \texttt{GaussianMixture}~\cite{pedregosa2011} with
-\emph{full} covariance matrices (the default), $k$-means initialisation, one start and a fixed seed.
-The only parameter is the number of components $k$, which we set to the number of classes on labelled
-data and to the silhouette-best $k\in[2,10]$ otherwise. One EM iteration costs $O(nkd^2+kd^3)$.
+its most probable component. 
+
+\paragraph{Implementation} We use scikit-learn's \texttt{GaussianMixture}~\cite{pedregosa2011} with
+$k$-means initialisation, three starts and a fixed seed. The parameters are the number of components $k$,
+which is the same $k$ as K-means on each dataset (Section~\ref{sec:protocol}), and the covariance type
+(full, tied, diagonal or spherical), chosen by the lowest BIC at that $k$; full covariances won on every
+dataset except D1 (tied) and D6 (diagonal). One EM iteration costs $O(nkd^2+kd^3)$.
 GMM generalises K-Means: full covariances allow ellipsoidal clusters of different size, orientation
 and weight, but each cluster must still be a single convex blob. It fails on curved or nested shapes,
 has no noise label, and with full covariances it needs many points per component when $d$ is large.
+
 \subsection{Spectral clustering}
-% Lam. Code: src/sc4020/methods.py; affinity per dataset in src/sc4020/run.py (SPECTRAL_AFFINITY_BY_DATASET)
-Spectral clustering~\cite{ng2002} turns clustering into graph partitioning. It (i) builds an affinity
+% Code: src/sc4020/methods.py (spectral)
+\paragraph{Overview} Spectral clustering~\cite{ng2002} turns clustering into graph partitioning. It (i) builds an affinity
 matrix $W$ whose entry $w_{ij}$ measures how similar points $i$ and $j$ are; (ii) forms the normalised
 graph Laplacian and takes its $k$ leading eigenvectors, giving each point a $k$-dimensional embedding;
 (iii) runs K-Means on the rows of that embedding. Points joined by a chain of close neighbours land
 near each other in the embedding even when they are far apart in the input space, so the method can
-recover curved and non-convex clusters. We use scikit-learn's \texttt{SpectralClustering} with two
-affinities: an RBF kernel $w_{ij}=\exp(-\gamma\lVert\mathbf{x}_i-\mathbf{x}_j\rVert^2)$, $\gamma=1$,
-for roughly globular data (D6 Wine, Mall), and a symmetric 10-nearest-neighbour graph for manifold-shaped
-data (D1 make\_moons, D5 Fashion-MNIST), where one global bandwidth fits poorly. Parameters are $k$
-and the affinity (with $\gamma$ or the neighbour count). A dense RBF affinity costs $O(n^2d)$ time and
-$O(n^2)$ memory, and a full eigendecomposition $O(n^3)$; the sparse $k$-NN graph with an iterative
-eigensolver is much cheaper but still limits $n$ (Section~\ref{sec:runtime}). Spectral clustering
-needs $k$, has no noise label, and is sensitive to the affinity scale.
-\subsection{Agglomerative clustering}
-\habegin
-% Source: experiments/01_scikit_learn_wine_clustering.ipynb and 02_scikit_learn_breast_cancer_clustering.ipynb;
-% ARI from results/datasets/{wine,breast_cancer}_results.csv.
-\hatag{}Agglomerative clustering starts with every point as its own cluster and repeatedly merges the two
-closest clusters until $k$ remain. The linkage defines which two are closest. We use Ward
-linkage~\cite{ward1963}, which merges the pair whose union raises the total within-cluster variance
-least. This is the K-means objective, searched greedily from the bottom up. The method therefore
-needs no starting centres and returns the same partition on every run, which makes it a direct check
-on K-means: same objective, different search. The only parameter is $k$, set to the number of classes
-(3 on D6, 2 on D7); distances are Euclidean on standardised features. It needs $O(n^2)$ time and
-memory for the pairwise distances, so we ran it on the two small tables only ($n=178$ and $n=569$).
-Like K-means, it assumes compact clusters, assigns every point and has no noise label. Its own
-weakness is that a merge is never undone, so an early mistake stays in the final partition. On both
-datasets it matched the labels less well than K-means (ARI 0.790 against 0.897 on D6, 0.575 against
-0.654 on D7).
-\haend
+recover curved and non-convex clusters. 
+
+\paragraph{Implementation} We use scikit-learn's \texttt{SpectralClustering}, with a symmetric
+graph that links each point to its 10 nearest neighbours as the affinity on every dataset, and the same $k$ as K-means. The graph adapts
+to the local scale of the data, where one global RBF bandwidth fits poorly, and it is sparse: a dense RBF
+affinity costs $O(n^2d)$ time and $O(n^2)$ memory and a full eigendecomposition $O(n^3)$, which would rule
+out the 15{,}000 and 20{,}000 points of D3 and D7, while the sparse graph with an iterative eigensolver
+fits them in under 1.2\,s (Section~\ref{sec:runtime}). Spectral clustering needs $k$, has no noise label,
+and depends on the neighbour count.
 
 \begin{table}[h]\centering\small
 \caption{Structural assumptions of the methods compared.}
 \label{tab:assump}
-\resizebox{\textwidth}{!}{\begin{tabular}{lccccccc}
+\resizebox{\textwidth}{!}{\begin{tabular}{lcccccc}
 \toprule
 & \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN}
-& \textbf{GMM} & \textbf{Spectral} & \hatag\textbf{Agglom.} \\
+& \textbf{GMM} & \textbf{Spectral} \\
 \midrule
-Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & ellipsoidal & connected (graph) & compact (Ward) \\
-Requires $k$               & yes & yes & no & no & yes & yes & yes \\
-Explicit noise label       & no & no & yes & yes & no & no & no \\
-Handles varying density    & no & no & no & yes & partly\textsuperscript{b} & partly\textsuperscript{c} & no \\
-Parameter is interpretable & no & no & yes (km) & partly & no & no & no \\
-Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & $O(nkd^2 i)$ & $O(n^2d+n^3)$\textsuperscript{d} & $O(n^2)$ \\
+Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & ellipsoidal & connected (graph) \\
+Requires $k$               & yes & yes & no & no & yes & yes \\
+Explicit noise label       & no & no & yes & yes & no & no \\
+Handles varying density    & no & no & no & yes & partly\textsuperscript{b} & partly\textsuperscript{c} \\
+Parameter is interpretable & no & no & yes (km) & partly & no & no \\
+Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & $O(nkd^2 i)$ & $O(n^2d+n^3)$\textsuperscript{d} \\
 \bottomrule
 \end{tabular}}
 \par\raggedright\footnotesize\textsuperscript{a}\,With an effective spatial index; $O(n^2)$ worst case.

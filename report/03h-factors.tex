@@ -1,56 +1,50 @@
 \subsection{Key factors and practical guidance}\label{sec:factors}
 
 % Rubric: "discuss the key factors that affect the performance".
+% Ranked by how much each factor changed the outcome; each effect is quoted from the section cited.
 
-% [Ky]: ranked by how much each factor changed the outcome; every number is quoted from the section cited.
-\paragraph{Key factors.} Ordered by the size of their effect in our experiments:
-\begin{enumerate}\itemsep1pt
-\item \textbf{Cluster shape against the method's assumption.} On D1 K-Means++ reaches ARI 0.481 and
-DBSCAN 0.98; on D2 K-means joins belts thousands of kilometres apart (Section~\ref{sec:shape}). No
-parameter setting repairs a wrong assumption about shape.
-\item \textbf{Gaps between groups.} Density methods need empty space between clusters. Where there is
-none they return one dominant cluster: 97.1\% of sales on D8, 96.1\% of pickups on D3 and 97\% of proteins
-on D4 at the settings chosen without labels (Sections~\ref{sec:nogaps} and \ref{sec:density}).
-\item \textbf{Dimensionality.} On D4 the ranking of DBSCAN and K-Means++ reverses between 3 and 4
-principal components (Ablation~D); on D5, with 50 dimensions, DBSCAN reaches ARI 0.03 and HDBSCAN
-calls 71\% of points noise (Section~\ref{sec:dims}).
-\item \textbf{Uneven density.} One DBSCAN radius clusters 90\% of the dense south-west Pacific but 20\%
-of the Americas on D2; HDBSCAN raises the Americas to 62\% (Section~\ref{sec:density}).
-\item \textbf{Parameter choice without labels.} On D4 the rule's DBSCAN setting scores ARI 0.039 against
-0.489 at the best setting; on D3 the knee and the silhouette-best radius differ threefold and give 13 and
-2 clusters (Table~\ref{tab:cmp_d3d4}).
-\item \textbf{Feature scaling.} Standardising D4 raises K-Means++ ARI from 0.497 to 0.731; on D8, raw
-units turn K-means into price bands (Ablation~C).
-\item \textbf{Values recorded in steps.} On D8, 107 of 124 HDBSCAN clusters are single storey bands on
-the recorded data and none on jittered data (Ablation~E).
-\item \textbf{Initialisation.} Over 30 seeds K-Means++ raises mean ARI on D4 from 0.485 to 0.561, and on
-D2 it cuts the mean gap to the best inertia from 10.9\% to 4.8\%; on D3 and D8 it makes no difference to
-the result (Ablation~A).
-\item \textbf{Runtime.} It only matters at the size of D8, where HDBSCAN takes 212\,s and DBSCAN runs out
-of memory (Section~\ref{sec:runtime}).
-\end{enumerate}
-% [Wei Yew]: evidence for the two guidance items handed to Ky.
-% Fake-data check: D2 K=2 silhouette 0.544 vs 0.529 on shuffled coordinates (kmeans_k_selection.csv);
-% D8 density methods below their null (comparison.csv). Recorded steps: D8 107 of 124 HDBSCAN clusters
-% are single storey bands on recorded data, 0 of 23 on jittered data (hdbscan_grid.csv).
+\paragraph{Key factors.} Table~\ref{tab:factors} ranks the factors by the largest change each one caused
+in our experiments; the evidence is in the section named in the last column. Two patterns stand out. The
+first three factors decide \emph{which family} of method can work at all, and no parameter setting
+overrides them. The rest change how well a suitable method does.
+
+\begin{table}[h]\centering\small
+\caption{Key factors, ranked by the largest effect we measured.}
+\label{tab:factors}
+\resizebox{\textwidth}{!}{\begin{tabular}{rllll}
+\toprule
+& \textbf{Factor} & \textbf{Methods it hurts} & \textbf{Largest effect measured} & \textbf{Evidence} \\
+\midrule
+1 & Cluster shape vs the method's assumption & K-means, GMM & D1: ARI 0.48 against 1.00 for spectral & \S\ref{sec:shape} \\
+2 & No gaps between groups & DBSCAN, HDBSCAN, spectral & D4, D7: one cluster holds 96--97\% & \S\ref{sec:density}, \S\ref{sec:nogaps} \\
+3 & Number of dimensions & DBSCAN, HDBSCAN & D5: no density setting reaches ARI 0.07 & \S\ref{sec:dims} \\
+4 & Selection by the silhouette & all, most of all density & D1: DBSCAN ARI 0.009 chosen over 1.000 & \S\ref{sec:shape} \\
+5 & Density varying between clusters & DBSCAN & D2: Americas 20\% clustered against 90\% elsewhere & Abl.~B \\
+6 & Values recorded in steps & DBSCAN, HDBSCAN & D7: 34 of 37 clusters are storey bands & \S\ref{sec:nogaps} \\
+7 & Feature scale & K-means, GMM & D7: raw price holds 100\% of distance & \S\ref{sec:prep} \\
+8 & Initialisation & K-means & D4: mean gap to best inertia 52.9\% & Abl.~A \\
+9 & Data size & DBSCAN, HDBSCAN & D7: DBSCAN out of memory above 50{,}000 & \S\ref{sec:runtime} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \paragraph{Practical guidance.}
 \begin{enumerate}\itemsep1pt
 \item \textbf{Choose by the structure of the data, not by a score.} Plot the data or a projection first.
-If the groups are curved or long, no choice of $k$ will help K-means; if they are compact and touching,
-or the data have more than a handful of dimensions, no choice of $\varepsilon$ will help DBSCAN.
-\item \textbf{Do not pick settings by the silhouette alone.} It favours few, round clusters and settings
-that call hard points noise. First restrict the search to what the analysis needs (a noise cap, a
-minimum number of clusters), then compare within that range.
+If the groups are curved or long, no choice of $k$ will help K-means or GMM; if they are compact and
+touching, or the data have more than a handful of dimensions, no choice of $\varepsilon$ will help DBSCAN.
+\item \textbf{Do not pick settings by the silhouette alone.} It favours few, round clusters, small
+fragments and settings that call hard points noise. First restrict the search to what the analysis needs
+(a noise cap, a minimum number of clusters), then compare within that range.
 \item \textbf{Report the noise fraction and the largest cluster next to every silhouette.} A silhouette
-computed after discarding 37\% of the points, or with 97\% in one cluster, says little.
+computed after discarding half the points, or with almost all of them in one cluster, says little.
 \item \textbf{Compare every result against fake data.} Rerun the chosen setting on shuffled columns or
-uniform points. It catches results with no real structure (D4 density methods, D8), though not results
-with the wrong structure (D2).
-\item \textbf{Check for values recorded in steps.} Tied values such as storey bands form dense spots that
-density methods report as clusters; add jitter within each step and see whether the clusters remain.
-\item \textbf{Standardise before K-means, and use K-means++ with several starts.} One K-means++ start is
-not enough when the objective has many local optima (D2).
+uniform points. It catches results with no real structure, though not results with the wrong structure.
+\item \textbf{Check for values recorded in steps.} Tied values form dense spots that density methods
+report as clusters; add jitter within each step and see whether the clusters remain.
+\item \textbf{Standardise before K-means, and use K-means++ with several starts.} One start is not enough
+when the objective has many local optima.
 \item \textbf{Prefer a parameter whose unit means something, and measure distance correctly.} A radius
 in kilometres can be checked by someone who knows the area; a $k$ cannot. Use distance on the sphere for
-global coordinates (D2); a local projection is enough within a city (D3).
+global coordinates; a local projection is enough within a city.
 \end{enumerate}

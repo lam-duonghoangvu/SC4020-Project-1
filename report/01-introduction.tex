@@ -6,7 +6,9 @@ active fault systems; a housing analyst grouping resale transactions wants marke
 has labels to check a result against.
 
 Each clustering method carries its own idea of what a cluster is. K-means~\cite{lloyd1982} looks for
-compact groups around a centre and assigns every point to one of them. DBSCAN~\cite{ester1996} and
+compact groups around a centre and assigns every point to one of them; a Gaussian mixture allows those
+groups to be stretched ellipses; spectral clustering~\cite{ng2002} joins points linked by chains of close
+neighbours, whatever the shape. DBSCAN~\cite{ester1996} and
 HDBSCAN~\cite{campello2013} look for dense regions separated by sparse space, and leave points in the
 sparse space as noise. Whether or not that idea matches the data, the method returns a partition. On
 one year of global earthquakes, K-means returns six tidy regions, one of which joins five plate
@@ -20,62 +22,55 @@ This report asks one question: \emph{when a clustering method's idea of a cluste
 data, does it fail, and can the failure be detected without labels?} We split it into three parts.
 \begin{description}\itemsep1pt
 \item[RQ1, cause.] Which property of the data breaks which method? We consider cluster shape, density
-that varies between clusters, the number of dimensions, the absence of gaps between groups, feature
-scale, and values recorded in steps.
+that varies between clusters, the number of dimensions, the absence of gaps between groups, and
+values recorded in steps.
 \item[RQ2, detection.] Do checks that need no labels reveal those failures? We test the silhouette, the
 Davies--Bouldin index, the share of points labelled noise, and a fake-data check: the same method run
 on data whose features have been shuffled independently, which keeps each feature's values but removes
 any joint structure.
-\item[RQ3, remedy.] For each failure, does a known remedy help, and what does it cost?
+\item[RQ3, remedy.] Does extending a method by one component, such as a better seeding, a density
+hierarchy or a covariance per cluster, repair its failures, and what does it cost?
 \end{description}
 
-We compare four methods, K-means with random starts, K-means++~\cite{arthur2007}, DBSCAN and HDBSCAN,
-on eight datasets (Table~\ref{tab:data}). Each dataset was chosen to test one data property, most of
-them a property that breaks at least one method's assumption. Six have class labels, so a method's output can be scored against them with the
-Adjusted Rand Index (ARI)~\cite{hubert1985}, and the internal scores can be checked against that
-answer. Two have no labels (earthquakes, Uber pickups); there we judge failures on maps, against known
-geography.
-Gaussian mixtures, spectral clustering and agglomerative clustering appear only as reference points on
-the labelled datasets where we ran them (D1, D5, D6, D7), not as part of the main comparison.
+We compare six methods, K-means with random starts, K-means++~\cite{arthur2007}, a Gaussian mixture
+(GMM), spectral clustering, DBSCAN and HDBSCAN, on seven datasets (Table~\ref{tab:data}), and choose every
+setting with one label-free rule (Section~\ref{sec:protocol}). Each dataset was chosen to test one data
+property, most of them a property that breaks at least one method's assumption. Five have class labels,
+so a method's output can be scored against them with the Adjusted Rand Index (ARI)~\cite{hubert1985},
+and the internal scores can be checked against that answer. Two have no labels (earthquakes, Uber
+pickups); there we judge failures on maps, against known geography.
 
 \subsection{Findings in brief}
-% Sources: results/datasets/{make_moons,fashion_mnist,wine}_results.csv; results/datasets/breast_cancer_results.csv;
-% results/hotspot/{main,shared_rule}.csv (Ecoli); results/earthquakes_2023/{case_density_regions,
-% method_comparison,ablation_distance}.csv; results/hdb_resale/comparison.csv.
-% RQ2 count, method with top silhouette vs method with top ARI, density settings within the 50% noise cap:
-% D1 K-means 0.495 (ARI 0.481) vs Spectral 1.000; D4 DBSCAN 0.560 (0.039) vs K-Means++ 0.731;
-% D5 K-means 0.202 (0.343) vs Spectral 0.398; D6 HDBSCAN 0.359 (0.263) vs K-means 0.897;
-% D7 K-means 0.343 (0.654) vs GMM 0.774; D8 K-means is top on both (not counted).
+% Sources (all under results/): comparison/{report_d1,report_d6_d7,gmm_spectral}.csv;
+% datasets/fashion_mnist_results.csv; hotspot/shared_rule.csv; earthquakes_2023/{method_comparison,
+% case_density_regions,ablation_distance}.csv; hdb_resale/{comparison,hdbscan_grid}.csv.
+% RQ2 count, method with top silhouette (ARI) vs method with top ARI, settings chosen by the rule:
+% D1 HDBSCAN 0.529 (0.709) vs Spectral 1.000; D4 DBSCAN and HDBSCAN 0.559 (0.038) vs GMM 0.618;
+% D5 K-Means 0.202 (0.343) vs Spectral 0.398; D6 DBSCAN 0.365 (0.431) vs GMM 0.915;
+% D7 K-Means (random init) is top on both, 0.301 (0.223), so it is not counted.
 \begin{description}\itemsep1pt
-\item[RQ1.] Each method failed where the data broke its assumption. K-means split the two interleaved
-half-moons of D1 wrongly (ARI 0.48) and merged distant belts on D2. With one radius, DBSCAN clustered
-90\% of earthquakes in the dense south-west Pacific but only 20\% in the sparser Americas. In 50
-dimensions (D5) it barely matched the labels (ARI 0.03). On D8, where housing sales form one mass with no
-gaps, both density methods returned one dominant cluster.
-\item[RQ2.] The silhouette did not reveal these failures. On five of the six labelled datasets, the
-method with the highest silhouette was not the one that matched the labels best. On D1 it ranks K-means
-first (0.495 against 0.392 for DBSCAN), although DBSCAN recovers the moons (ARI 0.98 against 0.48). On
-Ecoli (D4) it orders the four methods almost exactly opposite to ARI (Spearman $\rho=-0.80$). The
-fake-data check, which we ran on D2, D3, D4 and D8, does better, but only partly. It detects when a
-method finds nothing real: on D8 both density methods score below the same setting on shuffled data, and
-on D4 the HDBSCAN setting chosen without labels scores no better than on shuffled data (0.559 against
-0.551). It does not detect the wrong structure:
-on D2, K-means scores well above shuffled coordinates (silhouette 0.528 against 0.391) while merging
-unrelated belts. Two failures were found only by checks aimed at a known problem: clusters cut at the
-$180^\circ$ meridian, and clusters that are just one recorded storey band.
-\item[RQ3.] Known remedies repaired some failures and not others. Measuring distance on the sphere kept
-all 92 close earthquake pairs across the $180^\circ$ meridian together, where flat coordinates kept
-none. HDBSCAN raised the clustered share of the Americas from 20\% to 62\%, at the cost of trimming the
-densest belts (78\% against 90\%). Nothing we tried produced meaningful density clusters on D8 with all
-four features: capping the size of the largest cluster only made the rule select storey bands.
+\item[F1.] Each method failed where the data broke its assumption. K-means and GMM split the two
+interleaved half-moons of D1 wrongly (ARI 0.48 and 0.50) and K-means merged distant belts on D2. With one
+radius, DBSCAN clustered 90\% of earthquakes in the dense south-west Pacific but only 20\% in the sparser
+Americas. In 50 dimensions (D5) it barely matched the labels (ARI 0.03). On D7, where housing sales form
+one mass with no gaps, DBSCAN put 96\% of sales in one cluster.
+\item[F2.] The silhouette did not reveal these failures. On four of the five labelled datasets, the
+method with the highest silhouette was not the one that matched the labels best. On D1 the rule picks a
+DBSCAN setting that breaks the moons into 72 small clusters (ARI 0.01) because its silhouette, 0.523, is
+higher than that of spectral clustering, which recovers the moons exactly (0.387, ARI 1.00). On Ecoli
+(D4) the silhouette orders the six methods almost exactly opposite to ARI (Spearman $\rho=-0.82$). The
+fake-data check does better, but only partly. It detects when a method finds nothing real: on D4 both
+density methods score barely above the same setting on shuffled data (0.559 against 0.545 and 0.551), and
+on D7 HDBSCAN scores far below it (0.158 against 0.564). It does not detect the wrong structure: on D2,
+K-means scores well above shuffled coordinates (silhouette 0.529 against 0.390) while merging unrelated
+belts. One failure was found only by a check aimed at a known problem: on D7, 34 of the 37 clusters
+HDBSCAN returns on the recorded values are each a single recorded storey band.
+\item[F3.] Adding one component to a method repaired some failures and not others. HDBSCAN's density
+hierarchy raised the clustered share of the Americas from 20\% to 62\%, at the cost of trimming the
+densest belts (78\% against 90\%); GMM's covariance per cluster raised ARI on Ecoli from 0.508 to
+0.618; K-Means++ seeding cut the mean gap to the best K-means objective on Ecoli from 52.9\% to 3.4\%.
+None of them found meaningful clusters in D7, which has no gaps.
 \end{description}
-% [Ky]: D4 confirmed under the shared rule (results/hotspot/shared_rule.csv): DBSCAN has the top
-% silhouette, 0.560 with ARI 0.039; HDBSCAN is 0.559 with ARI 0.038. Spearman -0.80 holds both under the
-% rule and at each method's best-ARI setting. Fake-data check now also run on D3 and D4
-% (results/hotspot/fake_data_check.csv, shared_rule.csv: D4 HDBSCAN rule 0.559 vs null 0.551).
-\todo{Lam, Hoang Anh}{confirm the RQ2 numbers above are your settings under the shared selection
-rule (Section~\ref{sec:protocol}); the comment above lists each one.}
-
 Section~\ref{sec:methods} describes the methods and Section~\ref{sec:experiments} the datasets,
 protocol and results, grouped by data property. Section~\ref{sec:conclusion} turns them into guidance.
 

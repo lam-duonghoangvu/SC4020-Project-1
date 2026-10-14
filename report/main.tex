@@ -4,11 +4,24 @@
 \usepackage[table]{xcolor}
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
+\usepackage[section]{placeins} % \FloatBarrier: floats cannot drift past a barrier
 \captionsetup{font=small,labelfont=bf}
 \setlength{\parskip}{2pt}
 % Figures: put new ones in report/figures/. Ky's existing figures are found automatically.
 \graphicspath{{figures/}{../results/hotspot/figures/}}
 
+% Float placement: every figure and table may go here, top, bottom or on a float page,
+% whatever option its file gives (e.g. [h]). Stops floats queueing up to the end of the report.
+\let\origfigure\figure \let\endorigfigure\endfigure
+\renewenvironment{figure}[1][]{\origfigure[htbp]}{\endorigfigure}
+\let\origtable\table \let\endorigtable\endtable
+\renewenvironment{table}[1][]{\origtable[htbp]}{\endorigtable}
+% Let big figures sit at the top or bottom of a text page, and only give a figure
+% a page of its own when it fills most of a page.
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}
 % ---------------------------------------------------------------
 % Team macros. Set \draftfalse before submission: owners, TODOs and
 % DECIDE notes then disappear from the PDF.
@@ -18,26 +31,19 @@
   \newcommand{\todo}[2]{{\color{red}[\textbf{#1}: #2]}}
   \newcommand{\decide}[1]{{\color{blue}[\textbf{DECIDE}: #1]}}
   \newcommand{\figtodo}[2]{\fbox{\parbox[c][2.6cm][c]{0.92\linewidth}{\centering\small\color{red}\textbf{#1}: #2}}}
-  % Hoang Anh's text carries a [HoangAnh] tag for review (draft only):
-  % \ha{..} inline, \habegin..\haend around paragraphs, \hatag in captions.
-  \newcommand{\hatag}{\textbf{[HoangAnh]}\ }
 \else
-  \newcommand{\hatag}{}
   \newcommand{\owner}[1]{}
   \newcommand{\todo}[2]{}
   \newcommand{\decide}[1]{}
   \newcommand{\figtodo}[2]{}
 \fi
-\newcommand{\ha}[1]{\hatag #1}
-\newcommand{\habegin}{\begingroup}
-\newcommand{\haend}{\endgroup}
 % ---------------------------------------------------------------
 
 \title{\vspace{-1.2cm}\textbf{When Does Density Beat Centroids?\\
 A Comparative Study of Clustering Methods Across Data Geometries}\\[2pt]
 \normalsize\decide{final title. Proposed: ``When Clustering Fails: Which Data Break Which Methods, and
 Can You Tell Without Labels?'', to match the research question}}
-\author{SC4020 Project 1 --- Group XX\\
+\author{SC4020 Project 1 --- Group 28\\
 \small\todo{All}{full names exactly as on student cards; replace XX with group ID}}
 \date{}
 
@@ -49,15 +55,15 @@ Can You Tell Without Labels?'', to match the research question}}
 \input{01-introduction}
 \input{02-methods}
 
+% \FloatBarrier after each part keeps its figures and tables inside that part.
 \section{Experiments}\label{sec:experiments}
-\input{03a-datasets}
-\input{03b-protocol}
-\input{03c-comparison}
-\input{03d-ablations}
-\input{03e-improvements}
-\input{03f-runtime}
-\input{03g-cases}
-\input{03h-factors}
+\input{03a-datasets}       \FloatBarrier
+\input{03b-protocol}       \FloatBarrier
+\input{03c-comparison}     \FloatBarrier
+\input{03d-ablations}      \FloatBarrier
+\input{03f-runtime}        \FloatBarrier
+\input{03g-cases}          \FloatBarrier
+\input{03h-factors}        \FloatBarrier
 
 \input{04-conclusion}
 \input{references}

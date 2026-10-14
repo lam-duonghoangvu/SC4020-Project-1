@@ -81,7 +81,7 @@
   "kdist": {
     "earthquakes_1965_2016": {
       "min_samples": 6,
-      "knee": 0.02726270172691949
+      "knee": 0.0272627017269195
     },
     "uber_pickups": {
       "min_samples": 4,
