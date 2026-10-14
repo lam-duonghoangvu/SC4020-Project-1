@@ -1,4 +1,4 @@
-"""Cluster validity metrics and distances on the sphere.
+"""Cluster validity metrics.
 
 Internal scores (silhouette, Davies-Bouldin, Calinski-Harabasz) are computed on clustered points
 only, so they say nothing about points a density method calls noise; the noise fraction and the
@@ -16,7 +16,6 @@ cluster is weighted by |C| / n with n including noise.
 import itertools
 
 import numpy as np
-import pandas as pd
 from scipy.sparse.csgraph import minimum_spanning_tree
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
@@ -29,9 +28,6 @@ from sklearn.metrics import (
     normalized_mutual_info_score,
     silhouette_score,
 )
-from sklearn.neighbors import BallTree
-
-from sc4020.datasets.preprocess_dataset import EARTH_RADIUS_KM, to_radians
 
 NOISE_LABEL = -1
 SILHOUETTE_SAMPLE = 5000
@@ -65,18 +61,6 @@ def cluster_shares(labels) -> dict:
         if len(clustered)
         else 0.0,
     }
-
-
-def single_value_share(labels, values) -> pd.Series:
-    """For each cluster, the share of its members holding the cluster's most common value.
-
-    A share of 1.0 means the cluster is a single discrete value (e.g. one storey band), which
-    suggests a density method found a tie in the data rather than a group of similar entities."""
-    frame = pd.DataFrame({"label": np.asarray(labels), "value": np.asarray(values)})
-    frame = frame[frame["label"] != NOISE_LABEL]
-    return frame.groupby("label")["value"].agg(
-        lambda v: v.value_counts(normalize=True).iloc[0]
-    )
 
 
 def evaluate(
@@ -130,25 +114,6 @@ def pairwise_ari(label_runs) -> np.ndarray:
     if not pairs:
         raise ValueError("Need at least two clusterings to compare")
     return np.array([adjusted_rand_score(a, b) for a, b in pairs])
-
-
-def haversine_km(lat1, lon1, lat2, lon2):
-    """Great-circle distance in km between points given in degrees."""
-    lat1, lon1, lat2, lon2 = (
-        np.radians(np.asarray(v, dtype=float)) for v in (lat1, lon1, lat2, lon2)
-    )
-    a = (
-        np.sin((lat2 - lat1) / 2) ** 2
-        + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
-    )
-    return 2 * EARTH_RADIUS_KM * np.arcsin(np.sqrt(a))
-
-
-def nearest_neighbour_km(lat, lon, k=1):
-    """Great-circle distance in km from each point to its k-th nearest other point."""
-    X = to_radians(lat, lon)
-    distances, _ = BallTree(X, metric="haversine").query(X, k=k + 1)
-    return distances[:, k] * EARTH_RADIUS_KM
 
 
 def _core_distances(D: np.ndarray, n_features: int) -> np.ndarray:

@@ -141,11 +141,6 @@ def find_knee(curve) -> tuple[int, float]:
     return idx, float(y[idx])
 
 
-def k_at_inertia_elbow(inertias, ks) -> int:
-    """The knee rule applied to the K-Means inertia curve."""
-    return ks[find_knee(inertias)[0]]
-
-
 def min_samples_from_dimension(n_features: int) -> int:
     return int(np.clip(2 * n_features, 4, 20))
 

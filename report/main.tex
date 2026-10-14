@@ -7,7 +7,7 @@
 \captionsetup{font=small,labelfont=bf}
 \setlength{\parskip}{2pt}
 % Figures: put new ones in report/figures/. Ky's existing figures are found automatically.
-\graphicspath{{figures/}{../results/hotspot/figures/}}
+\graphicspath{{figures/}}
 
 % ---------------------------------------------------------------
 % Team macros. Set \draftfalse before submission: owners, TODOs and
@@ -53,8 +53,8 @@ Can You Tell Without Labels?'', to match the research question}}
 \input{03a-datasets}
 \input{03b-protocol}
 \input{03c-comparison}
-\input{03d-ablations}
-\input{03e-improvements}
+\stepcounter{subsection} % 3.4 (ablations) removed; later subsections keep their numbers
+\stepcounter{subsection} % 3.5 (improvements) removed; later subsections keep their numbers
 \input{03f-runtime}
 \input{03g-cases}
 \input{03h-factors}

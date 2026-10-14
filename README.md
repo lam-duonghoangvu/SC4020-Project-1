@@ -7,45 +7,40 @@ team's datasets. The report is in `report/`.
 
 One Python project (`pyproject.toml`) with one package, `sc4020`:
 
-| Path                                     | Contents                                                                                                           |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `src/sc4020/datasets/`                   | every dataset by name: `load_dataset.py`, `download_dataset.py`, `preprocess_dataset.py`                           |
-| `src/sc4020/methods.py`                  | the clustering methods and a timed runner                                                                          |
-| `src/sc4020/tuning.py`                   | the shared selection rule (k-distance knee, K-Means, GMM, DBSCAN, HDBSCAN), K by the gap over fake data            |
-| `src/sc4020/metrics.py`                  | validity scores, DBCV, distances on the sphere                                                                     |
-| `src/sc4020/clusters.py`                 | cluster renumbering and centres                                                                                    |
-| `src/sc4020/generate_figures.py`         | every figure and output table                                                                                      |
-| `src/sc4020/run.py`                      | per-dataset helpers behind notebooks 01-06: select, fit and score one method at a time (see `docs/datasets.md`)   |
-| `experiments/`                           | every experiment as a numbered notebook (`NN_<source>_<dataset>_<step>.ipynb`); run them in order                 |
-| `results/<topic>/`                       | result CSVs and figures cited in the report: `comparison`, `datasets`, `hotspot`, `earthquakes_2023`, `hdb_resale` |
-| `data/`                                  | `README.md` lists every dataset and how it is downloaded; downloads are gitignored                                 |
-| `tests/`                                 | unit tests                                                                                                         |
-| `docs/`                                  | notes per topic, and the hotspot study's individual draft report                                                   |
-| `submission/`                            | builds the code zip: `python submission/make_code_zip.py --group XX`                                               |
+| Path                             | Contents                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/sc4020/datasets/`           | every dataset by name: `load_dataset.py`, `download_dataset.py`, `preprocess_dataset.py`                    |
+| `src/sc4020/methods.py`          | the clustering methods and a timed runner                                                                   |
+| `src/sc4020/tuning.py`           | the shared selection rule (k-distance knee, K-Means, GMM, DBSCAN, HDBSCAN), K by the gap over fake data     |
+| `src/sc4020/metrics.py`          | validity scores and DBCV                                                                                    |
+| `src/sc4020/generate_figures.py` | every figure and output table                                                                               |
+| `src/sc4020/run.py`              | the helpers behind every notebook: select, fit and score one method at a time, with the fake-data columns   |
+| `experiments/`                   | one clustering notebook per dataset (`NN_<source>_<dataset>_clustering.ipynb`), all on the same template    |
+| `results/datasets/`              | written by the notebooks and gitignored: `<dataset>_results.csv`, `<dataset>_tuning.csv` and `figures/`     |
+| `data/`                          | `README.md` lists every dataset and how it is downloaded; downloads are gitignored                          |
+| `tests/`                         | unit tests                                                                                                  |
+| `submission/`                    | builds the code zip: `python submission/make_code_zip.py --group XX`                                        |
 
 ## Setup
 
     uv sync
     uv run pytest
 
-Every experiment is a notebook in `experiments/`, numbered in the order to run them (gaps are notebooks that were removed); each also runs on its own
-once the notebooks it reads from have run (only 12 needs 09). Figures are shown in the notebook and saved to
-`results/<topic>/figures/`:
+Every experiment is a notebook in `experiments/`, one per dataset, numbered by the report's dataset order. The
+notebooks share one template: dataset loading, then K-Means, K-Means++, DBSCAN, HDBSCAN, GMM and Spectral,
+then metrics (with the silhouette on fake data) and cluster plots. Each runs on its own; figures are shown in
+the notebook and saved to `results/datasets/figures/`:
 
-    uv run jupyter nbconvert --to notebook --execute --inplace experiments/01_scikit_learn_wine_clustering.ipynb
+    uv run jupyter nbconvert --to notebook --execute --inplace experiments/01_scikit_learn_make_moons_clustering.ipynb
 
-| Notebook | What it does |
-| --- | --- |
-| `01_scikit_learn_wine_clustering.ipynb` | Wine (D6): every method, metrics, cluster plots, and the report's shared table |
-| `03_scikit_learn_make_moons_clustering.ipynb` | make_moons (D1) |
-| `05_kaggle_fashion_mnist_clustering.ipynb` | Fashion-MNIST (D5) |
-| `06_kaggle_uber_pickups_clustering.ipynb` | Uber NYC pickups (D3) |
-| `07_usgs_earthquakes_2023_eda.ipynb` | Earthquakes 2023 (D2): exploratory analysis behind each preprocessing choice |
-| `08_usgs_earthquakes_2023_clustering.ipynb` | Earthquakes 2023: parameter choice, initialisation, cluster maps, comparison |
-| `09_usgs_earthquakes_2023_cases.ipynb` | Earthquakes 2023: success and failure cases, scalability, cross-dataset table |
-| `10_data_gov_hdb_resale_eda.ipynb` | HDB resale (D8): exploratory analysis |
-| `11_data_gov_hdb_resale_clustering.ipynb` | HDB resale: parameter choice and comparison |
-| `12_data_gov_hdb_resale_cases.ipynb` | HDB resale: success and failure cases, scalability, cross-dataset table (needs 09) |
-| `13_multi_source_hotspot_clustering.ipynb` | Uber, Ecoli: sweeps, main comparison, ablations A-D, fake-data check, shared-table rows, case statistics, figures |
+| Notebook                                      | Dataset                     |
+| --------------------------------------------- | --------------------------- |
+| `01_scikit_learn_make_moons_clustering.ipynb` | make_moons (D1)             |
+| `02_usgs_earthquakes_2023_clustering.ipynb`   | Earthquakes 2023 (D2)       |
+| `03_kaggle_uber_pickups_clustering.ipynb`     | Uber NYC pickups (D3)       |
+| `04_uci_ecoli_clustering.ipynb`               | Ecoli (D4)                  |
+| `05_kaggle_fashion_mnist_clustering.ipynb`    | Fashion-MNIST (D5)          |
+| `06_scikit_learn_wine_clustering.ipynb`       | Wine (D6)                   |
+| `07_data_gov_hdb_resale_clustering.ipynb`     | HDB resale (D8)             |
 
-The command for each part of the report is in `submission/README_code.md`; topic notes are in `docs/`.
+The command for each part of the report is in `submission/README_code.md`.

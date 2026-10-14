@@ -1,15 +1,14 @@
-"""Per-dataset clustering runs, tuned without labels: the helpers behind experiments/01-06.
+"""Per-dataset clustering runs, tuned without labels: the helpers behind every notebook in experiments/.
 
 A notebook goes one method at a time: `select_method` picks the settings, `fit_method` fits them, and
 `score_methods`, `tried_settings` and `save_dataset_run` turn the fits into results/datasets/ tables.
-`run_dataset` does all of it for a list of methods in one call.
 
 K-Means, DBSCAN, HDBSCAN and GMM are tuned by the shared rule (tuning.select_all_methods); K-Means and
-GMM get the true k on labelled data, and the label-free choice is recorded. K-Means (random init),
-Spectral and Agglomerative use the K-Means k, and Affinity Propagation picks its own number of
-exemplars. Spectral, Agglomerative and Affinity Propagation need memory quadratic in the number of
-points, so they are skipped above MAX_POINTS_FOR_QUADRATIC_METHODS. Labels are used only for ARI and
-the other external scores. `max_clusters` caps the cluster count of the density methods.
+GMM get the true k on labelled data, and the label-free choice is recorded. K-Means (random init) and
+Spectral use the K-Means k; Spectral with a dense RBF affinity is skipped above
+MAX_POINTS_FOR_DENSE_SPECTRAL points. Labels are used only for ARI and the other external scores.
+`max_clusters` caps the cluster count of the density methods. Every fit is repeated on fake data
+(every column shuffled) for the null silhouette.
 """
 
 import dataclasses
@@ -21,13 +20,10 @@ import pandas as pd
 
 from sc4020 import generate_figures as gf
 from sc4020 import methods, tuning
-from sc4020.datasets import DATASETS
 from sc4020.metrics import dbcv_score, evaluate
 from sc4020.paths import results_dir
 
 TOPIC = "datasets"
-# The report's shared table for Wine (D6).
-SHARED_TABLE_NAME = "report_d6.csv"
 NULL_SEED = 0  # seed of the column shuffle behind the fake-data silhouette
 SEED = methods.SEED
 
@@ -36,11 +32,11 @@ SILHOUETTE_SAMPLE = 5000
 DBCV_SAMPLE = 3000
 
 # These methods take the k that K-Means chose instead of tuning their own.
-METHODS_USING_KMEANS_K = ("K-Means (random init)", "Spectral", "Agglomerative")
+METHODS_USING_KMEANS_K = ("K-Means (random init)", "Spectral")
 
-# Affinity matrices and the Ward merge tree need memory quadratic in the number of points.
-QUADRATIC_METHODS = ("Spectral", "Agglomerative", "Affinity Propagation")
-MAX_POINTS_FOR_QUADRATIC_METHODS = 10_000
+# A dense RBF affinity matrix needs memory quadratic in the number of points; a nearest-neighbour
+# graph is sparse, so Spectral with it runs at any size.
+MAX_POINTS_FOR_DENSE_SPECTRAL = 10_000
 
 # Global earthquake catalogues have dozens of natural belts, so every method may use up to 50
 # clusters there (a coarse grid keeps GMM's BIC search affordable).
@@ -51,12 +47,8 @@ K_RANGES = {"earthquakes_2023": QUAKE_K_RANGE}
 # (report, Section 2 "Spectral clustering").
 SPECTRAL_AFFINITY_BY_DATASET = {"wine": "rbf"}
 DEFAULT_SPECTRAL_AFFINITY = "nearest_neighbors"
-AFFINITY_PROPAGATION_PARAMS_BY_DATASET = {
-    "wine": {"damping": 0.8},
-}
-DEFAULT_AFFINITY_PROPAGATION_PARAMS = {"damping": 0.9}
 
-# Columns run_dataset adds to gf.build_results_table, in the order they appear.
+# Columns score_methods adds to gf.build_results_table, in the order they appear.
 RUN_COLUMNS = (
     "n_points",
     "n_features",
@@ -67,6 +59,9 @@ RUN_COLUMNS = (
     "label_free_choice",
     "best_ari_choice",
     "tuning_seconds",
+    "null_silhouette",
+    "null_clusters",
+    "null_noise_fraction",
 )
 
 
@@ -89,29 +84,27 @@ def format_params(params: dict | None) -> str:
     )
 
 
+def _spectral_affinity(ds) -> str:
+    return SPECTRAL_AFFINITY_BY_DATASET.get(ds.name, DEFAULT_SPECTRAL_AFFINITY)
+
+
 def is_too_large(ds, method_name: str) -> bool:
-    """Whether `method_name` needs more memory than `ds` allows (see QUADRATIC_METHODS)."""
+    """Whether `method_name` needs more memory than `ds` allows (see MAX_POINTS_FOR_DENSE_SPECTRAL)."""
     return (
-        method_name in QUADRATIC_METHODS
-        and len(ds.data) > MAX_POINTS_FOR_QUADRATIC_METHODS
+        method_name == "Spectral"
+        and _spectral_affinity(ds) != "nearest_neighbors"
+        and len(ds.data) > MAX_POINTS_FOR_DENSE_SPECTRAL
     )
 
 
-def _fixed_params(ds, method_name: str, k: int | None) -> dict:
-    if method_name == "Spectral":
-        affinity = SPECTRAL_AFFINITY_BY_DATASET.get(ds.name, DEFAULT_SPECTRAL_AFFINITY)
-        return {"n_clusters": k, "affinity": affinity}
-    if method_name == "Agglomerative":
-        return {"n_clusters": k, "linkage": "ward"}
-    return AFFINITY_PROPAGATION_PARAMS_BY_DATASET.get(
-        ds.name, DEFAULT_AFFINITY_PROPAGATION_PARAMS
-    )
+def _spectral_params(ds, k: int) -> dict:
+    return {"n_clusters": k, "affinity": _spectral_affinity(ds)}
 
 
 def select_method(
     ds, method_name: str, selections=None, k_range=None, max_clusters=None
 ) -> tuning.Selection:
-    """The Selection for one method: the shared rule for the four tuned methods, fixed settings for the rest.
+    """The Selection for one method: the shared rule for the four tuned methods, fixed settings for Spectral.
 
     Methods in METHODS_USING_KMEANS_K take the k of `selections["K-Means"]`, tuning K-Means first when
     it is missing."""
@@ -133,30 +126,14 @@ def select_method(
         )
         selection = dataclasses.replace(kmeans_selection, tried=[])
     else:
-        k = None
-        if method_name in METHODS_USING_KMEANS_K:
-            kmeans_selection = (selections or {}).get("K-Means") or select_method(
-                ds, "K-Means", k_range=k_range
-            )
-            k = kmeans_selection.params["n_clusters"]
-        selection = tuning.Selection(_fixed_params(ds, method_name, k), np.nan)
+        kmeans_selection = (selections or {}).get("K-Means") or select_method(
+            ds, "K-Means", k_range=k_range
+        )
+        selection = tuning.Selection(
+            _spectral_params(ds, kmeans_selection.params["n_clusters"]), np.nan
+        )
     selection.tuning_seconds = time.perf_counter() - start
     return selection
-
-
-def select_params(
-    ds, method_names, k_range=None, max_clusters=None
-) -> dict[str, tuning.Selection]:
-    """A Selection per method in `method_names`; K-Means is tuned once when another method needs its k."""
-    selections = {}
-    if any(name in METHODS_USING_KMEANS_K for name in method_names):
-        selections["K-Means"] = select_method(ds, "K-Means", k_range=k_range)
-    for name in method_names:
-        if name not in selections:
-            selections[name] = select_method(
-                ds, name, selections, k_range, max_clusters
-            )
-    return {name: selections[name] for name in method_names}
 
 
 def fit_method(
@@ -196,7 +173,26 @@ def score_methods(ds, selections, results) -> pd.DataFrame:
         format_params(selections[name].best_ari) for name in names
     ]
     table["tuning_seconds"] = [selections[name].tuning_seconds for name in names]
+    null_rows = [null_scores(ds, name, selections[name]) for name in names]
+    table["null_silhouette"] = [row["silhouette"] for row in null_rows]
+    table["null_clusters"] = [row["n_clusters"] for row in null_rows]
+    table["null_noise_fraction"] = [row["noise_fraction"] for row in null_rows]
     return table
+
+
+def null_scores(ds, method_name: str, selection: tuning.Selection) -> dict:
+    """metrics.evaluate of `method_name` refitted at `selection` on a copy of the data with every
+    column shuffled (the fake-data check)."""
+    X_null = tuning.shuffle_columns_independently(
+        ds.data, np.random.default_rng(NULL_SEED)
+    )
+    params = {method_name: selection.params}
+    labels = methods.run_models(methods.build_models(params), X_null)[
+        method_name
+    ].labels
+    return evaluate(
+        X_null, labels, silhouette_sample=silhouette_sample_size(len(X_null))
+    )
 
 
 def tried_settings(ds, selections) -> pd.DataFrame:
@@ -207,30 +203,6 @@ def tried_settings(ds, selections) -> pd.DataFrame:
             for name, selection in selections.items()
             for setting in selection.tried
         ]
-    )
-
-
-def run_dataset(
-    ds, method_names, k_range=None, max_clusters=None
-) -> tuple[pd.DataFrame, pd.DataFrame, dict, dict]:
-    """(scores, tried settings, chosen parameters, cluster results) of `method_names` on one dataset."""
-    too_large = [name for name in method_names if is_too_large(ds, name)]
-    if too_large:
-        print(
-            f"   skipping {', '.join(too_large)} on {ds.name}: {len(ds.data):,} points is above "
-            f"{MAX_POINTS_FOR_QUADRATIC_METHODS:,}"
-        )
-    method_names = [name for name in method_names if name not in too_large]
-    selections = select_params(ds, method_names, k_range, max_clusters)
-    results = {
-        name: fit_method(ds, name, selection) for name, selection in selections.items()
-    }
-    params = {name: selection.params for name, selection in selections.items()}
-    return (
-        score_methods(ds, selections, results),
-        tried_settings(ds, selections),
-        params,
-        results,
     )
 
 
@@ -276,59 +248,3 @@ def save_dataset_run(dataset_name, table, tried) -> None:
     tuning_path = out / f"{dataset_name}_tuning.csv"
     _replace_rows(results_path, table).to_csv(results_path, index=False)
     _replace_rows(tuning_path, tried).to_csv(tuning_path, index=False)
-
-
-def _shared_table_params(X, k: int) -> dict[str, dict]:
-    """The shared rule's four methods plus Agglomerative (Ward) and Spectral (nearest-neighbour graph) at k."""
-    params = {
-        name: selection.params
-        for name, selection in tuning.select_all_methods(X, k=k).items()
-    }
-    params["Agglomerative"] = {"n_clusters": k, "linkage": "ward"}
-    params["Spectral"] = {"n_clusters": k, "affinity": "nearest_neighbors"}
-    return params
-
-
-def shared_table_rows(ds) -> tuple[list[dict], dict[str, np.ndarray]]:
-    """(rows, labels_by_method) of the report's shared table for one labelled dataset.
-
-    Each row adds the fake-data columns: the same selection and fit on a copy with every column
-    shuffled."""
-    X, k = ds.data, ds.n_true_clusters
-    X_null = tuning.shuffle_columns_independently(X, np.random.default_rng(NULL_SEED))
-    params = _shared_table_params(X, k)
-    null_models = methods.build_models(_shared_table_params(X_null, k))
-    rows, labels_by_method = [], {}
-    for name, model in methods.build_models(params).items():
-        labels, seconds = methods.fit_predict_timed(model, X)
-        null = evaluate(X_null, null_models[name].fit_predict(X_null))
-        rows.append(
-            {
-                "dataset": ds.name,
-                "method": name,
-                "params": params[name],
-                **evaluate(X, labels, ds.target),
-                "fit_seconds": seconds,
-                "null_silhouette": null["silhouette"],
-                "null_clusters": null["n_clusters"],
-                "null_noise_fraction": null["noise_fraction"],
-            }
-        )
-        labels_by_method[name] = labels
-    return rows, labels_by_method
-
-
-def save_shared_table_rows(rows: list[dict]) -> pd.DataFrame:
-    """Write `rows` into results/comparison/report_d6.csv, replacing that dataset's old rows."""
-    path = results_dir("comparison") / SHARED_TABLE_NAME
-    new_rows = pd.DataFrame(rows)
-    if path.exists():
-        old_rows = pd.read_csv(path)
-        kept = old_rows[~old_rows["dataset"].isin(new_rows["dataset"])]
-        new_rows = pd.concat([kept, new_rows], ignore_index=True)
-    order = {name: i for i, name in enumerate(DATASETS)}
-    table = new_rows.sort_values(
-        "dataset", key=lambda column: column.map(order), kind="stable"
-    )
-    table.to_csv(path, index=False)
-    return table

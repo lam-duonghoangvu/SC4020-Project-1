@@ -63,21 +63,6 @@ def project_km(lat, lon) -> np.ndarray:
     )
 
 
-# "82 km WNW of Hihifo, Tonga" and "south of the Fiji Islands" start with a position relative to a place.
-_RELATIVE_POSITION = (
-    r"^(?:\d+(?:\.\d+)? km [NSEW]{1,3} of |(?:north|south|east|west)\w* of )"
-)
-
-
-def region_from_place(place: pd.Series) -> pd.Series:
-    """Region name from USGS place strings: the text after the last comma, without a leading position.
-
-    "82 km WNW of Hihifo, Tonga" -> "Tonga"; "south of the Fiji Islands" -> "the Fiji Islands";
-    "Gulf of Alaska" stays "Gulf of Alaska".
-    """
-    return place.str.split(", ").str[-1].str.replace(_RELATIVE_POSITION, "", regex=True)
-
-
 # --- Fashion-MNIST ----------------------------------------------------------------------------
 
 

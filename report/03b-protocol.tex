@@ -18,67 +18,87 @@ about 0 and a perfect one 1. Normalised mutual information (NMI) measures the sa
 shared information. For both, noise counts as one more cluster, so a method cannot raise its score by
 discarding hard points. We also report the fit time.
 
+\paragraph{Which metric judges which dataset.}
+% Source: experiments/08_multi_source_dataset_shape.ipynb -> results/datasets/dataset_shape.csv
+% (src/sc4020/datasets/describe_dataset.py). Labels describe the classes only; no method is tuned on them.
+No single score suits every dataset, so before clustering we measured each dataset's shape
+(Table~\ref{tab:metric_choice}). Density spread is the 90th over the 10th percentile of each point's distance
+to its 10th neighbour (1 means even density). Far outliers are points whose distance lies beyond
+$Q_3+3\,\mathrm{IQR}$; this share is the noise a dataset can be expected to have, so a noise fraction well
+above it means a method discarded real points rather than removed outliers. With labels we also score the
+true classes as if they were a clustering, and compare two classifiers: 1-nearest-neighbour follows any
+shape, nearest-centroid only convex, roughly spherical classes, so a 1-NN accuracy well above the
+nearest-centroid accuracy means the classes are not convex. Three rules follow. (i) On labelled data, ARI
+ranks the methods and NMI confirms it. (ii) The silhouette and Davies--Bouldin assume compact, convex
+clusters. They are trusted only when the true classes have that shape (D6), and are never trusted when the
+true classes themselves score worse than a wrong clustering (D1: 0.387 for the moons against 0.495 for
+K-means). (iii) On unlabelled data they are the only scores we have, so they are read only together with the
+fake-data silhouette, the noise fraction against the far-outlier share, and the largest cluster.
+
+\begin{table}[h]\centering\footnotesize
+\caption{Shape of each dataset and the metrics used to judge methods on it. Spread: 10-NN distance, 90th
+over 10th percentile. Outliers: far-outlier share. S$_\text{true}$, DB$_\text{true}$: silhouette and
+Davies--Bouldin of the true classes. 1-NN / NC: cross-validated accuracy of 1-nearest-neighbour and
+nearest-centroid.}
+\label{tab:metric_choice}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}Xl>{\raggedright\arraybackslash}p{3.4cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Measured shape} & \textbf{Reading} & \textbf{Ranked by} & \textbf{Read alongside} \\
+\midrule
+D1 & 2 classes, 50\%/50\%; S$_\text{true}$ 0.387, DB$_\text{true}$ 1.02; 1-NN 1.00 / NC 0.86; spread 2.1;
+outliers 1.4\% & Separated but not convex: S and DB score the true moons below K-means. & ARI & NMI; noise vs.\ 1.4\% \\
+D2 & no labels; spread 34.6; outliers 3.8\% & Long belts of very uneven density: S and DB favour compact
+blobs, not belts. & S, DB & null S; largest cluster; noise vs.\ 3.8\% \\
+D3 & no labels; spread 8.5; outliers 9.2\% & One dense city with no gaps and a sparse fringe: one giant
+cluster scores a high S. & S, DB & null S; largest cluster; noise vs.\ 9.2\% \\
+D4 & 8 classes, 0.6\% to 42.6\%; S$_\text{true}$ 0.226, DB$_\text{true}$ 1.59; 1-NN 0.76 / NC 0.82; spread
+2.3; outliers 4.2\% & Roughly convex but overlapping, with tiny classes: ARI is driven by the large classes. &
+ARI & NMI; noise vs.\ 4.2\%; largest cluster \\
+D5 & 10 classes, 10\% each; S$_\text{true}$ 0.064, DB$_\text{true}$ 3.01; 1-NN 0.78 / NC 0.68; spread 2.0;
+outliers 0.0\% & Heavily overlapping, even density: true classes score S near 0, so S cannot rank. & ARI &
+NMI; any noise is lost data \\
+D6 & 3 classes, 27\% to 40\%; S$_\text{true}$ 0.280, DB$_\text{true}$ 1.41; 1-NN 0.95 / NC 0.97; spread 1.7;
+outliers 2.2\% & Compact, convex, even density: the one case where S and DB match the classes. & ARI &
+S and DB at equal noise; noise vs.\ 2.2\% \\
+D8 & no labels; spread 3.4; outliers 1.2\% & No gaps and fairly even density: little to remove as noise. & S,
+DB & null S; largest cluster; noise vs.\ 1.2\% \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \paragraph{Fake-data check.}
 An internal score has no fixed scale: a silhouette of 0.3 can be strong on one dataset and meaningless on
 another. Each chosen setting is therefore run again on fake data that keeps each feature's distribution but
-has no joint structure. For tables, each column is shuffled independently. For coordinates, points are
-drawn uniformly in the same latitude and longitude range. A result counts as structure only if the real data
-score clearly above the fake data.
+has no joint structure: every column shuffled independently (seed 0), on every dataset. A result counts
+as structure only if the real data score clearly above the fake data.
 
 \paragraph{Selection rule.}
-% Sources: results/earthquakes_2023/dbscan_grid.csv (min_samples 10, eps quantile 0.25);
-% results/hdb_resale/hdbscan_grid.csv (min_cluster_size 400, min_samples None, real).
+% Sources: results/datasets/make_moons_tuning.csv (DBSCAN eps 0.089, minPts 16);
+% results/datasets/fashion_mnist_tuning.csv (DBSCAN eps 2.94, minPts 40).
 One rule picks the setting of DBSCAN and HDBSCAN on every dataset: among the settings that give at least
 2 clusters and label at most 50\% of points as noise, take the one with the highest silhouette. The noise
 cap is needed because the silhouette ignores noise. Without it, the silhouette prefers settings that throw
-most of the data away. On D2 it would pick DBSCAN with $\varepsilon=20.4$\,km, which scores 0.878 by
-calling 69.4\% of earthquakes noise. On D8 it would pick HDBSCAN with \texttt{min\_cluster\_size}~400,
-which scores 0.448 with 70.9\% of sales as noise. For K-means, $K$ is chosen from the elbow in inertia,
-the silhouette, the gap to the fake-data silhouette and agreement between seeds; each dataset states which
-of these decided. On labelled data we report the rule's choice and the setting with the best ARI, so the
-cost of choosing without labels is visible.
+most of the data away. On D1 it would pick DBSCAN with $\varepsilon=0.089$, which scores 0.948 by calling
+96.5\% of points noise; on D5, DBSCAN with $\varepsilon=2.94$, which scores 0.525 with 90.4\% noise.
+For K-means, $K$ is the number of classes on labelled data; otherwise, among the $K$ whose 10 seeds agree
+(pairwise ARI $\geq0.95$), the one with the largest gap between the real silhouette and the mean
+silhouette on 3 fake copies. GMM takes the components and covariance type with the lowest BIC, with the
+number of components fixed to the number of classes on labelled data. Spectral takes the $K$ of K-means.
+On labelled data we also record the setting with the best ARI, so the cost of choosing without labels is
+visible.
 
 \paragraph{Parameter grids.}
-% Sources: results/earthquakes_2023/{kmeans_k_selection,dbscan_grid,hdbscan_grid}.csv;
-% results/hdb_resale/{kmeans_k_sweep,dbscan_grid,hdbscan_grid}.csv.
-K-means and K-means++: $K=2$ to 12, 10 starts each. DBSCAN: \texttt{minPts} (\texttt{min\_samples} in
-scikit-learn) in $\{5, 10, 20\}$. Its radius $\varepsilon$ comes from the k-distance curve, the sorted
-distance from each point to its \texttt{minPts}-th neighbour: on D2 we take the 25th, 50th, 75th, 90th and
-95th percentiles of the curve (11 to 810\,km); on D8 we take 0.5, 0.75, 1, 1.5 and 2 times the knee of the
-curve. HDBSCAN: \texttt{min\_cluster\_size} scaled to the data (25, 50, 100 on D2; 100, 200, 400 on D8)
-and \texttt{min\_samples} in \{default, 5, 10\}.
-\habegin
-% Source: src/sc4020/tuning.py; every setting tried is in
-% results/datasets/<dataset>_tuning.csv.
-\hatag{}On D6, K-means is searched over $K=2$ to 10 with 10 starts and reported at the number of
-classes. GMM takes 2 to 10 components and four covariance types (full, tied, diagonal, spherical),
-chosen by BIC. DBSCAN takes \texttt{minPts} in $\{10, 20, 40, 80\}$ and $\varepsilon$ at 0.5 to 4
-times the knee of the k-distance curve. HDBSCAN takes \texttt{min\_cluster\_size} from 5 up to
-$n/10$ (15 on D6) and \texttt{min\_samples} in \{default, 5, 10\}. On this dataset the
-density settings that pass the constraints (at least 2 clusters, at most 50\% noise, and at most 10
-clusters) are ranked by DBCV~\cite{moulavi2014}, a score built for density clusters, instead of the
-silhouette. Agglomerative clustering uses Ward linkage at the number of classes.
-\haend
-% Lam: src/sc4020/tuning.py
-GMM and Spectral on D1 and D5: $k$ set to the number of classes on labelled data, else the silhouette-best
-K-Means++ $k\in[2,10]$; GMM full covariance; spectral affinity RBF ($\gamma=1$) for D6,
-10-nearest-neighbour graph for D1 and D5. DBSCAN and HDBSCAN on D1 and D5: \texttt{minPts} from
-$\{\lfloor m/2\rfloor, m, 2m\}$ with $m=\mathrm{clip}(2d,4,20)$, $\varepsilon$ from $\{0.5,0.75,1,1.5,2\}\times$
-the k-distance knee; \texttt{min\_cluster\_size} from $\{5,10,20,30,50,n/20\}$; the setting with the
-best silhouette (noise excluded, $\geq2$ clusters, $\leq50\%$ noise) is kept.
-% [Ky]: experiments/13_multi_source_hotspot_clustering.ipynb (grids: section 2; shared rule: section 9 -> results/hotspot/shared_rule.csv);
-% K choice on D3 from results/hotspot/fake_data_check.csv.
-On D3 and D4: K-means and K-means++ $K=2$ to 25, 10 starts. DBSCAN \texttt{minPts} in $\{4,8,16,32\}$
-(D3) or $\{3,5,8,12\}$ (D4), with $\varepsilon$ at 0.1 to 3 times the knee of the k-distance curve.
-HDBSCAN \texttt{min\_cluster\_size} from 10 to 250 (D3) or 5 to 30 (D4). The shared rule picks the
-density settings. On D3 the silhouette alone picks $K=2$; we use $K=5$, where the gap to fake data is
-larger (0.113 against 0.089). On D4 the silhouette picks $K=5$, and $K=7$ gives the best ARI.
+% Source: src/sc4020/tuning.py, src/sc4020/run.py; every setting tried is in results/datasets/<dataset>_tuning.csv.
+The same grids are used on every dataset. K-means and K-means++: $K=2$ to 10 with 10 starts (on D2 a
+coarse grid from 2 to 50, since a global catalogue has dozens of belts). GMM: the same $K$ grid and four
+covariance types (full, tied, diagonal, spherical). DBSCAN: \texttt{minPts} at half, once, twice and four
+times $m=\mathrm{clip}(2d,4,20)$, and $\varepsilon$ at 0.5 to 4 times the knee of the k-distance curve.
+HDBSCAN: \texttt{min\_cluster\_size} in $\{5,10,15,20,30,50,100,200,400\}$ up to $n/10$, and
+\texttt{min\_samples} in \{default, 5, 10\}. Spectral: an RBF affinity on D6 and a 10-nearest-neighbour
+graph elsewhere. Silhouettes are estimated on a sample of 5{,}000 points when $n$ is larger.
 
 \paragraph{Reproducibility.}
-On D2 and D8 every random step uses seed 0, and repeated runs use seeds 0 to 19. They ran on Python
-3.12.13, scikit-learn~\cite{pedregosa2011} 1.9.1 and NumPy 2.5.3 on an Apple M2 with 16\,GB of memory.
-On D3 and D4 the same library versions ran on Python 3.12.10, on an Intel Core Ultra 5 225 with 32\,GB
-of memory; every random step uses seed 42, and repeated runs use seeds 0 to 29.
-\todo{Lam}{versions and hardware if different.}
-\todo{Hoang Anh}{D6 ran on Python 3.13 and scikit-learn 1.9; fill in exact versions and hardware.}
-\decide{shared code: now src/sc4020/metrics.py (one evaluate for every table), so every table has the same columns.}
+% Source: experiments/01-07 (each notebook runs on its own and writes results/datasets/).
+Every method uses seed 42 and the fake data seed 0. All seven notebooks ran on Python 3.13.15,
+scikit-learn~\cite{pedregosa2011} 1.9.1, NumPy 2.5.3 and pandas 3.0.5, on an AMD Ryzen 7 5800H with
+16\,GB of memory.

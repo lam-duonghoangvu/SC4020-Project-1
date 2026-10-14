@@ -68,7 +68,6 @@ def test_knee_finds_the_bend_of_increasing_and_decreasing_curves():
 
     assert tuning.find_knee(hockey_stick) == (89, pytest.approx(1.0))
     assert tuning.find_knee([2.0, 2.0, 2.0])[1] == 2.0
-    assert tuning.k_at_inertia_elbow([100, 40, 20, 18, 17, 16], [2, 3, 4, 5, 6, 7]) == 4
 
 
 def test_default_min_samples_is_twice_the_dimension_within_4_to_20():

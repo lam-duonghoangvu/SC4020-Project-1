@@ -1,38 +1,34 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 
-% Sources: results/hdb_resale/scalability_summary.csv (median of runs per size);
-% experiments/12_data_gov_hdb_resale_ablation.ipynb, section 6 (runtimes and memory estimate).
-D8 is large enough to measure how each method grows. Each method ran at its chosen setting on random
-subsets of 1{,}000 to 234{,}294 sales (K-means from one start). Figure~\ref{fig:runtime} plots the median
-time against size on log scales, where the slope of a line estimates the exponent $b$ in
-$t \propto n^{b}$. K-means is far cheaper than either density method at every size: under 0.06\,s on all
-234{,}294 sales. Its fitted slopes (0.57 and 0.67) are below 1 only because a fixed start-up cost
-dominates at these sizes; each iteration is linear in $n$. HDBSCAN grows with slope 1.79, from 0.02\,s at
-1{,}000 sales to 212\,s at 234{,}294. DBSCAN grows with slope 1.65, but at full size it was not run at
-all, because of memory rather than time. With a fixed $\varepsilon$, every sale has more neighbours as
-the data grow. Estimated from 2{,}000 probe points, the full data would hold about 742 million neighbour
-pairs, about 6\,GB for the neighbour indices alone, which scikit-learn's DBSCAN stores in full. HDBSCAN,
-slower at every size, did run on all sales within 16\,GB.
+% Sources: one fit at the rule's setting, tuning excluded; results/datasets/{make_moons,wine}_results.csv
+% (fit_seconds, ari). No method reaches ARI > 0.7 at the rule's setting on D4 (results/datasets/ecoli_results.csv)
+% or D5 (results/datasets/fashion_mnist_results.csv); D2, D3 and D8 have no labels.
+% ms per 1,000 points = fit seconds / n x 10^6.
+Runtime is compared only where a method reaches ARI $>0.7$, which happens on D1 and D6 only; it is one
+fit's time per 1{,}000 points at the rule's setting (Table~\ref{tab:runtime}).
+In the case where ARI $>0.9$, only one method qualifies on each dataset: Spectral on D1 (14\,ms) and GMM
+on D6 (39\,ms). In the case where ARI $>0.7$, the ranking from fastest is Spectral (14\,ms), then HDBSCAN
+(18\,ms) on D1, and K-Means (26\,ms), then K-Means++ (33\,ms), then GMM (39\,ms) on D6.
 
-% Lam: results/datasets/fashion_mnist_results.csv (fit_seconds; single fit at the chosen parameters, tuning excluded)
-D5 was sampled down from 70{,}000 to 3{,}000 images because three methods scale badly with $n$ in
-50 dimensions. Spectral clustering needs an $n\times n$ affinity matrix: dense, at $n=70{,}000$ it
-takes about 39\,GB in double precision, and the eigenvector step grows faster than linearly even with
-a sparse graph. DBSCAN and HDBSCAN rely on neighbour queries, and in 50 dimensions spatial indexes
-prune little, so these queries approach the $O(n^2)$ brute-force cost. On the 3{,}000-point sample
-one fit takes 0.011\,s for DBSCAN, 0.079\,s for K-Means++, 0.18\,s for Spectral, 0.30\,s for HDBSCAN
-and 2.80\,s for GMM. GMM is the slowest here: with full covariances each EM step costs
-$O(nkd^2)$ with $d=50$. These times exclude parameter search, which refits DBSCAN 15 times and
-HDBSCAN 6 times.
-% [Ky] Source: results/hotspot/shared_rule.csv (runtime_s, one fit at the chosen setting).
-On D3 (15{,}000 points, 2 dimensions) one fit takes 0.04 to 0.06\,s for K-means, 0.52\,s for DBSCAN and
-1.1\,s for HDBSCAN; on D4 (336 proteins) every method takes under 0.03\,s (Table~\ref{tab:cmp_d3d4}). At
-these sizes runtime does not decide the choice of method.
+\begin{table}[h]\centering\small
+\caption{Methods reaching each ARI level, ranked by fit time (ms per 1{,}000 points), fastest first.}
+\label{tab:runtime}
+\begin{tabular}{lll}
+\toprule
+\textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} \\
+\midrule
+D1 ($n=1{,}000$) & Spectral (14) & Spectral (14), HDBSCAN (18) \\
+D6 ($n=178$)     & GMM (39)       & K-Means (26), K-Means++ (33), GMM (39) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{figure}[h]\centering
-\includegraphics[width=0.75\textwidth]{hdb_scalability}
-\caption{D8, median fit time against the number of sales, log--log, at the chosen settings; the slope of
-each line is in the legend. DBSCAN stops at 100{,}000 sales: the full data would need about 6\,GB of
-neighbour indices.}
-\label{fig:runtime}
-\end{figure}
+% Sources: results/datasets/{fashion_mnist,hdb_resale,uber_pickups}_results.csv (fit_seconds, tuning_seconds).
+On small data a fixed start-up cost dominates, so these times say little about scaling. The largest
+costs come from model size, not from $n$: GMM with full covariances in 50 dimensions takes 14.7\,s on the
+3{,}000 images of D5, against at most 0.33\,s for every other method there. On the 20{,}000 sales of D8
+one fit takes 2.4\,s for Spectral on a nearest-neighbour graph, 1.6\,s for HDBSCAN, 1.5\,s for GMM and
+0.6\,s for DBSCAN. Choosing the setting costs far more than fitting it: selecting $K$ for K-means, which
+fits every $K$ with 10 seeds and on 3 fake copies, takes 126\,s on D3 and 130\,s on D8. A dense RBF
+affinity for Spectral would need memory quadratic in $n$, so it is used only on D6; the
+nearest-neighbour graph is sparse and ran on every dataset.

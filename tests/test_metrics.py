@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-import pandas as pd
 import pytest
 from sklearn.datasets import make_blobs, make_moons
 
@@ -9,10 +8,7 @@ from sc4020.datasets.preprocess_dataset import to_radians, to_unit_vectors
 from sc4020.metrics import (
     dbcv_score,
     evaluate,
-    haversine_km,
-    nearest_neighbour_km,
     pairwise_ari,
-    single_value_share,
 )
 
 KM_PER_DEGREE_AT_EQUATOR = 111.195
@@ -111,30 +107,6 @@ def test_pairwise_ari_compares_every_pair_and_ignores_label_names():
         pairwise_ari([np.array([0, 1])])
 
 
-def test_haversine_distances():
-    assert haversine_km(0, 0, 0, 1) == pytest.approx(KM_PER_DEGREE_AT_EQUATOR, rel=1e-4)
-    assert haversine_km(0, 179.9, 0, -179.9) == pytest.approx(
-        0.2 * KM_PER_DEGREE_AT_EQUATOR, rel=1e-4
-    )
-    assert haversine_km(60, 0, 60, 1) == pytest.approx(
-        0.5 * KM_PER_DEGREE_AT_EQUATOR, rel=1e-3
-    )
-
-
-def test_nearest_neighbour_distances_along_equator_and_across_180():
-    lat, lon = [0, 0, 0], [0, 1, 3]
-
-    assert nearest_neighbour_km(lat, lon) == pytest.approx(
-        KM_PER_DEGREE_AT_EQUATOR * np.array([1, 1, 2]), rel=1e-4
-    )
-    assert nearest_neighbour_km(lat, lon, k=2) == pytest.approx(
-        KM_PER_DEGREE_AT_EQUATOR * np.array([3, 2, 3]), rel=1e-4
-    )
-    assert nearest_neighbour_km([0, 0], [179.5, -179.5]) == pytest.approx(
-        [KM_PER_DEGREE_AT_EQUATOR] * 2, rel=1e-4
-    )
-
-
 def test_separated_dense_clusters_score_high_and_wrong_splits_low():
     X, y = make_moons(n_samples=300, noise=0.05, random_state=0)
     across = (X[:, 0] > 0.5).astype(int)  # a straight cut through both moons
@@ -158,12 +130,3 @@ def test_noise_counts_against_the_score():
     noisy[:100] = -1
 
     assert dbcv_score(X, noisy) < dbcv_score(X, y)
-
-
-def test_single_value_share_per_cluster_skips_noise():
-    shares = single_value_share(
-        [0, 0, 0, 0, 1, 1, -1], ["a", "a", "a", "b", "c", "c", "a"]
-    )
-
-    assert shares.to_dict() == {0: 0.75, 1: 1.0}
-    assert isinstance(shares, pd.Series)

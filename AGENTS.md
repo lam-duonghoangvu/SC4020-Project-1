@@ -8,11 +8,11 @@ Rules for any coding agent (and human) editing this repository. They are mandato
 - Dataset loading and preprocessing: `src/sc4020/datasets/`. Per-dataset helpers: `src/sc4020/run.py`.
 - Every experiment is a notebook in `experiments/` (flat, no subfolders), named
   `NN_<source>_<dataset>_<step>.ipynb`: `NN` is the run order, `<source>` where the data comes from
-  (`scikit_learn`, `kaggle`, `usgs`, `data_gov`, `multi_source`). Notebooks that depend on each other get
+  (`scikit_learn`, `kaggle`, `usgs`, `data_gov`, `uci`). Notebooks that depend on each other get
   consecutive numbers; steps that run in sequence or share a purpose go in one notebook, not separate
   scripts. Notebooks import from `sc4020`; nothing in `sc4020` imports them.
 - Every figure in a notebook is shown, then saved, through `show_and_save(fig, topic, name)` (to
-  `results/<topic>/figures/`) or `show_and_save_to(fig, path)`; never `fig.savefig` or `plt.show()`.
+  `results/<topic>/figures/`); never `fig.savefig` or `plt.show()`.
 - In notebooks, import from `sc4020.generate_figures` by name, at the top of the cell that uses it, and only
   what that cell uses (`from sc4020.generate_figures import plot_k_distance, show_and_save`); no `gf` alias.
 - Generated outputs in `results/` and `report/figures/`, tests in `tests/`.
