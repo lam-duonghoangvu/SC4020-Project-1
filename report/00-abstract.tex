@@ -1,27 +1,19 @@
-% Owner: Ky. Write LAST, after Section 3 numbers are final.
 \begin{abstract}
 \noindent
-% [Ky]: draft (about 230 words) following the thesis proposed below; revise once the title is decided.
-Clustering methods differ in what they take a cluster to be, and real data break those ideas in
-different ways. We compare K-means, K-means++, DBSCAN, HDBSCAN, Gaussian mixtures and spectral clustering
-on seven datasets, each chosen to test one data property: curved shapes, long belts of uneven density, a
-dense city with no gaps, rare classes, high dimensions, and data with no gaps between groups. Every
-method is tuned by one label-free rule. We ask where each method fails, whether the scores available
-without labels reveal those failures, and whether a method built for the property repairs them. Each
-method failed where the data broke its idea of a cluster. K-means cut the curved classes of make\_moons
-(ARI 0.48 against 1.00 for spectral clustering); one DBSCAN radius chained the dense western Pacific into
-one cluster of 36\% of earthquakes while HDBSCAN followed the plate belts; and in 50 dimensions the
-density methods fell to ARI 0.03 or below. The silhouette did not reveal these failures: on all four
-labelled datasets the method with the top silhouette was not the one that matched the labels best, and on
-make\_moons it chose a DBSCAN setting that breaks the moons into 72 fragments (ARI 0.01). Rerunning each
-result on shuffled data caught methods that found nothing real, but not one dominant cluster or the wrong
-structure. No method produced meaningful clusters in data with no gaps. The choice of method should
-follow from the structure of the data, and every score needs a check against fake data and against the
-share of the largest cluster.
-
-
-\decide{Thesis, proposed 7 Oct (Wei Yew), to match the research question in Section~\ref{sec:intro}:
-each method fails where the data break its idea of a cluster (RQ1); the silhouette does not reveal
-these failures, and a fake-data check reveals only some (RQ2); a method built for the property fixes some
-failures, and none fixes data with no gaps (RQ3).}
+Clustering is used when there are no labels to check the result against, so a clustering is usually
+judged by an internal score such as the silhouette. We test whether that is safe. The methods assume
+different things: K-means expects compact groups, while DBSCAN and HDBSCAN expect dense groups separated
+by empty space. We ran K-means (with random and K-means++ starts), DBSCAN and HDBSCAN
+on eight datasets chosen to break these assumptions. Six of the datasets have known labels. We asked
+three questions: does a method fail when its assumption breaks, can the failure be seen without labels,
+and does a known remedy fix it? Every method failed where its assumption broke. K-means cut two curved
+clusters in the wrong place (agreement with the true labels 0.48 out of 1, against 0.98 for DBSCAN), and
+on housing data with no empty space between groups both density methods put most points in one cluster.
+The silhouette did not reveal these failures: on five of the six labelled datasets it favoured a
+different method from the one that best matched the labels. Comparing each result with the same method
+run on shuffled data caught results with no real structure, but not K-means joining earthquake belts
+thousands of kilometres apart into one cluster. Remedies such as measuring distance on the sphere and
+using HDBSCAN fixed the failures they target, but none helped data with no gaps. No single score can
+choose a clustering method: an analyst should look at the data, report how many points each method
+discards, and test directly for the failures the data make likely.
 \end{abstract}
