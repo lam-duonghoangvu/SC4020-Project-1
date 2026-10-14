@@ -27,6 +27,6 @@ uv run python -m sc4020.datasets.download_dataset hdb_resale    # or let load_da
 | `sc4020.tuning` | `k_distance_curve`, `find_knee`, `best_setting_by_shared_rule` (the shared rule, with the optional largest-cluster cap), `select_kmeans_k_by_null_gap` (the K sweep against shuffled columns), `shuffle_columns_independently` |
 | `experiments/10_data_gov_hdb_resale_eda.ipynb` | Stage 1 EDA; decisions in section 17 |
 | `experiments/11_data_gov_hdb_resale_clustering.ipynb` | Stage 3: parameter choice and comparison for all four methods |
-| `experiments/12_data_gov_hdb_resale_ablation.ipynb` | Stage 4: largest-cluster cap, success and failure cases, feature ablation, subsample stability, scalability (runtime against number of sales, up to all sales -> `results/hdb_resale/scalability.csv`, about 5 minutes), cross-dataset table (reads notebook 09's `cross_dataset_comparison.csv`) |
+| `experiments/12_data_gov_hdb_resale_cases.ipynb` | success and failure cases, scalability (runtime against number of sales, up to all sales -> `results/hdb_resale/scalability.csv`, about 5 minutes), cross-dataset table (reads notebook 09's `cross_dataset_comparison.csv`) |
 
 Downloads in `data/` and figures in `results/hdb_resale/figures/` are not committed.

@@ -14,8 +14,8 @@ above from the USGS catalogue, clustered on latitude and longitude.
 | `sc4020.clusters` | renumber clusters by size, centre on the sphere, the 180 degree line check |
 | `sc4020.generate_figures` | `cluster_summary`, `magnitude_threshold_table`, `grid_cell_counts` |
 | `experiments/07_usgs_earthquakes_2023_eda.ipynb` | exploratory analysis that justifies each preprocessing choice (Stage 1) |
-| `experiments/08_usgs_earthquakes_2023_clustering.ipynb` | parameter choice, initialisation ablation, cluster maps and comparison of the four methods (Stage 3) |
-| `experiments/09_usgs_earthquakes_2023_ablation.ipynb` | one-change ablations, time and magnitude robustness, success and failure cases, scalability, comparison with the other datasets (Stage 4) |
+| `experiments/08_usgs_earthquakes_2023_clustering.ipynb` | parameter choice, cluster maps and comparison of the four methods (Stage 3) |
+| `experiments/09_usgs_earthquakes_2023_cases.ipynb` | success and failure cases, scalability, comparison with the other datasets |
 | `results/earthquakes_2023/` | CSVs written by the notebooks, and their figures in `figures/` (per-point label files and figures are gitignored) |
 
 In these notebooks K-Means runs on 3D unit vectors and DBSCAN and HDBSCAN on radians with the
@@ -39,5 +39,5 @@ more than 20,000 events; narrow the dates or raise the magnitude if that happens
 uv run jupyter nbconvert --to notebook --execute --inplace experiments/0[789]_usgs_earthquakes_2023_*.ipynb
 ```
 
-The ablation notebook reads `../sc4020-clustering/results` (synthetic and LTA datasets) if that
+The cases notebook reads `../sc4020-clustering/results` (synthetic and LTA datasets) if that
 separate project sits next to this repo; it is not part of this repository.
