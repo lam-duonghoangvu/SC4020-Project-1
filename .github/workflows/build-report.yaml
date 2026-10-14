@@ -3,7 +3,7 @@ name: Build report
 
 on:
   push:
-    branches: [main]
+    branches: [final]
     paths:
       - "report/**"
   workflow_dispatch:
