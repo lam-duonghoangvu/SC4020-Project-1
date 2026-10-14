@@ -32,8 +32,8 @@ rest are noise. With a spatial index a fit costs about $O(n\log n)$ in few dimen
 \paragraph{Pros.} No $k$; any cluster shape; labels noise; on coordinates $\varepsilon$ is a distance in km.
 \paragraph{Cons.} One radius for all clusters: sparse clusters become noise or dense ones merge. Needs
 gaps between clusters, and weakens in many dimensions, where distances become alike~\cite{beyer1999}.
-\paragraph{Our implementation.} \texttt{dbscan} wraps scikit-learn's \texttt{DBSCAN} (Euclidean, or
-haversine with a ball tree on coordinates in radians). Parameters assessed: \texttt{min\_samples}
+\paragraph{Our implementation.} \texttt{dbscan} wraps scikit-learn's \texttt{DBSCAN} with Euclidean
+distance (on D2 between unit vectors, which follows the sphere). Parameters assessed: \texttt{min\_samples}
 around $\mathrm{clip}(2d,4,20)$ (half, once, twice and four times it) and $\varepsilon$ at
 0.5 to 4 times the knee of the k-distance curve (\texttt{k\_distance\_curve}, \texttt{find\_knee}),
 chosen by \texttt{select\_dbscan\_by\_shared\_rule}: among settings with at least 2 clusters and at most
@@ -80,38 +80,23 @@ affinity costs $O(n^2)$ memory and up to $O(n^3)$ time; a sparse neighbour graph
 \paragraph{Cons.} Needs $k$; no noise label; sensitive to the affinity; quadratic cost limits $n$.
 \paragraph{Our implementation.} \texttt{spectral} wraps scikit-learn's \texttt{SpectralClustering}
 (seed 42). Affinity fixed per dataset: RBF with $\gamma=1$ on D6, a 10-nearest-neighbour graph elsewhere.
-$k$ is taken from the K-means selection, not tuned. Skipped above 10{,}000 points.
-
-\subsection{Agglomerative clustering}
-\habegin
-% Source: experiments/01_scikit_learn_wine_clustering.ipynb; ARI from results/datasets/wine_results.csv.
-% Code: src/sc4020/methods.py (agglomerative)
-\paragraph{How it works.} \hatag{}Every point starts as its own cluster and the two closest clusters are
-merged until $k$ remain. With Ward linkage~\cite{ward1963} the merged pair is the one that raises the
-within-cluster variance least: the K-means objective, searched greedily bottom-up. It needs $O(n^2)$ time
-and memory.
-\paragraph{Pros.} No starting centres, so the same partition on every run: a direct check on K-means.
-\paragraph{Cons.} Assumes compact clusters, no noise label, and a merge is never undone; quadratic cost.
-On D6 it matched the labels less well than K-means (ARI 0.790 against 0.897).
-\paragraph{Our implementation.} \texttt{agglomerative} wraps scikit-learn's \texttt{AgglomerativeClustering}
-with Ward linkage on Euclidean distances. $k$ is taken from the K-means selection, not tuned. Skipped
-above 10{,}000 points.
-\haend
+$k$ is taken from the K-means selection, not tuned. The dense RBF affinity is skipped above 10{,}000
+points; the sparse neighbour graph runs at any size.
 
 \begin{table}[h]\centering\small
 \caption{Structural assumptions of the methods compared.}
 \label{tab:assump}
-\resizebox{\textwidth}{!}{\begin{tabular}{lccccccc}
+\resizebox{\textwidth}{!}{\begin{tabular}{lcccccc}
 \toprule
 & \textbf{K-Means} & \textbf{K-Means++} & \textbf{DBSCAN} & \textbf{HDBSCAN}
-& \textbf{GMM} & \textbf{Spectral} & \hatag\textbf{Agglom.} \\
+& \textbf{GMM} & \textbf{Spectral} \\
 \midrule
-Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & ellipsoidal & connected (graph) & compact (Ward) \\
-Requires $k$               & yes & yes & no & no & yes & yes & yes \\
-Explicit noise label       & no & no & yes & yes & no & no & no \\
-Handles varying density    & no & no & no & yes & partly\textsuperscript{b} & partly\textsuperscript{c} & no \\
-Parameter is interpretable & no & no & yes (km) & partly & no & no & no \\
-Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & $O(nkd^2 i)$ & $O(n^2d+n^3)$\textsuperscript{d} & $O(n^2)$ \\
+Cluster shape assumed      & isotropic & isotropic & arbitrary & arbitrary & ellipsoidal & connected (graph) \\
+Requires $k$               & yes & yes & no & no & yes & yes \\
+Explicit noise label       & no & no & yes & yes & no & no \\
+Handles varying density    & no & no & no & yes & partly\textsuperscript{b} & partly\textsuperscript{c} \\
+Parameter is interpretable & no & no & yes (km) & partly & no & no \\
+Time complexity            & $O(nkdi)$ & $O(nkdi)$ & $O(n\log n)$\textsuperscript{a} & $O(n\log n)$\textsuperscript{a} & $O(nkd^2 i)$ & $O(n^2d+n^3)$\textsuperscript{d} \\
 \bottomrule
 \end{tabular}}
 \par\raggedright\footnotesize\textsuperscript{a}\,With an effective spatial index; $O(n^2)$ worst case.

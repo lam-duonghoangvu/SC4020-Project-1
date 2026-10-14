@@ -63,7 +63,7 @@ def test_build_and_run_models_record_params_and_time():
     params = {
         "K-Means": {"n_clusters": 2},
         "GMM": {"n_components": 2},
-        "Agglomerative": {"n_clusters": 2},
+        "Spectral": {"n_clusters": 2},
     }
 
     results = methods.run_models(methods.build_models(params), X, params=params)

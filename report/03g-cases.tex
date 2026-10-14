@@ -1,87 +1,48 @@
 \subsection{Success and failure cases}\label{sec:cases}
 
 % Rubric: "illustrate and discuss the successful cases and failure cases", "good visualizations".
+% Every number comes from results/datasets/<dataset>_results.csv or <dataset>_tuning.csv.
 
 \subsubsection{Successes}
-\paragraph{HDBSCAN on D2: belts of varying density.} Shown in Figure~\ref{fig:density}. HDBSCAN keeps
-the sparse belts of the Americas (62\% of earthquakes clustered, against 20\% for DBSCAN) as long
-clusters that follow the plate boundary. It succeeds because its density threshold adapts to each
-cluster, the property D2 needs most.
-\paragraph{Spectral and DBSCAN on D1.} % results/datasets/make_moons_results.csv
-Both follow the curve of each moon (Figure~\ref{fig:lam-d1}): Spectral reaches ARI 1.000 and DBSCAN
-0.982, leaving 9 outlying points as noise. They succeed for the same reason: each moon is a chain of
-close neighbours, and the gap between moons is wider than any link in the chain. K-Means++ and GMM
-fail on the same data because they assume convex clusters.
-
-\begin{figure}[h]\centering
-\includegraphics[width=0.9\textwidth]{lam_d1_moons_grid}
-\caption{D1 make\_moons. K-Means++ and GMM cut both moons with a straight boundary (ARI 0.48, 0.49);
-DBSCAN, HDBSCAN and Spectral follow the curves (ARI 0.98, 0.95, 1.00). Grey crosses: noise.}
-\label{fig:lam-d1}
-\end{figure}
-% [Ky] Sources: results/hotspot/main.csv, shared_rule.csv, case_stats.csv (class shares).
-\paragraph{K-Means++ on D4: compact classes in seven dimensions.} With $K=7$, K-Means++ matches the
-localisation sites best of all methods on D4 (ARI 0.731; with the $K=5$ the silhouette picks, 0.697). It
-keeps 96\% of the largest class (cytoplasm, 143 proteins) in one cluster, 86 to 91\% of the three
-mid-sized classes, and all 5 proteins of the outer-membrane lipoproteins together. It succeeds because the
-classes are compact groups in seven dimensions that touch, with no density gap between them: the case
-K-means is built for, and the case where a density threshold fails. The inner-membrane
-proteins (77) are its weak spot: they overlap the related inner-membrane classes, and only 52\% end up in
-one cluster.
-% Sources: results/hdb_resale/ablation_features.csv, ablation_flat_design_clusters.csv
-% (variant "floor area and lease only").
-\paragraph{HDBSCAN on D8, floor area and lease only: flat designs.} This feature set was chosen after
-seeing the main results, so we present it as an ablation finding and a sanity check, not as a tuned
-setting. Dropped to two features, D8 does contain dense spots: standard flat designs, built to fixed
-plans in particular years. HDBSCAN finds 14 clusters (43.2\% noise), and 13 of them are at least 97\% one
-flat type (Figure~\ref{fig:flat_designs}); in the median cluster one flat model accounts for
-83\% of sales. A simple grouping by flat
-model and lease would give similar groups, which is the point: the method recovers a structure we can
-name. ARI against flat type is still only 0.127, because each type is split into several designs and
-the noise counts as a cluster. A low ARI here reflects a finer partition than the labels, not a failure.
-
-\begin{figure}[h]\centering
-\includegraphics[width=0.8\textwidth]{hdb_success_flat_designs}
-\caption{D8, success of HDBSCAN on floor area and remaining lease only (\texttt{min\_cluster\_size}~200;
-grey: noise). Each cluster is one standard flat design; the legend gives its main flat type and model.
-Cause of success: fixed building plans create real dense spots in these two features.}
-\label{fig:flat_designs}
-\end{figure}
+\paragraph{Spectral on D1: curved clusters.} Shown in Figure~\ref{fig:d1}. Spectral clustering on a
+10-nearest-neighbour graph recovers both moons exactly (ARI 1.000). It succeeds because each moon is a
+chain of close neighbours, and the gap between the moons is wider than any link in the chain. K-Means++
+and GMM fail on the same data (ARI 0.481 and 0.501) because they assume convex clusters.
+\paragraph{HDBSCAN on D2: belts of varying density.} Shown in Figure~\ref{fig:d2}. HDBSCAN returns 28
+clusters that follow the plate boundaries, none holding more than 7.5\% of earthquakes, with a silhouette
+of 0.756 against 0.317 on fake data. It succeeds because its density threshold adapts to each cluster,
+the property D2 needs most; DBSCAN, with one radius, joins the dense western Pacific into one cluster of
+35.7\%.
+\paragraph{GMM on D4 and D6: compact classes that touch.} GMM has the best ARI on both (0.618 on D4,
+0.915 on D6), ahead of K-Means++ (0.508 and 0.897). The classes are compact groups with no density gap
+between them, the case centroid and mixture models are built for, and GMM's per-component covariance fits
+classes of different spread and orientation better than K-means' round clusters.
 
 \subsubsection{Failures}
-\paragraph{K-Means++ on D2: unrelated belts merged.} Shown in Figure~\ref{fig:kmeans_belts}. One
-cluster joins five belts whose centres are 2{,}932 to 11{,}449\,km apart, from Iceland to the
-Mid-Indian Ridge. Cause: cluster shape. Compact regions cannot follow long belts.
-\paragraph{Density methods on D8: one mass, or storey bands.} Shown in Figure~\ref{fig:hdb_cmp}. At the chosen settings DBSCAN puts 97.1\% of sales in one cluster. Under a cap on
-the largest cluster, the clusters become single storey bands. Causes: no gaps between groups, and values
-recorded in steps.
-\paragraph{DBSCAN on D5.} % results/datasets/fashion_mnist_results.csv
-DBSCAN puts most of the ten classes into one cluster, a second small cluster at the edge, and 33\%
-of images into noise (ARI 0.033; Figure~\ref{fig:lam-d5}). The cause is one global $\varepsilon$ in 50
-dimensions: an $\varepsilon$ large enough to connect points within a class also connects the
-overlapping classes to each other, and a smaller one turns most points into noise. The $k$-based
-methods, which are not tied to a density threshold, reach ARI 0.34--0.40 on the same data.
+\paragraph{DBSCAN on D1: the silhouette picks fragments.} Shown in Figure~\ref{fig:d1}. The selection
+rule picks $\varepsilon=0.049$, which breaks the moons into 72 fragments with 47.1\% noise (ARI 0.009),
+although the same grid contains a setting with ARI 1.000. Cause: the silhouette scores 72 tight fragments
+(0.523) above two curved moons (0.387). The fake-data check flags it: shuffled data score 0.822 at the
+same setting.
+\paragraph{Density methods on D3 and D8: one mass.} Shown in Figure~\ref{fig:d8}. With no gaps between
+groups, DBSCAN puts 97.7\% of pickups (D3) and 99.7\% of sales (D8) in one cluster, and HDBSCAN 91.5\% and
+99.7\%. Cause: no gaps between groups. On D8 the silhouette (0.438, 0.496) and the fake-data check both
+approve the result; only the largest-cluster share reveals it.
+\paragraph{Density methods on D5: high dimensions.} DBSCAN and HDBSCAN each return two clusters with 23\%
+to 33\% noise and ARI 0.028 and 0.023, while the $k$-based methods reach 0.34 to 0.40
+(Figure~\ref{fig:d5}). Cause: in 50 dimensions an $\varepsilon$ large enough to connect points within a
+class also connects the overlapping classes, and no setting in the grid does better than ARI 0.066.
 
 \begin{figure}[h]\centering
-\includegraphics[width=0.9\textwidth]{lam_d5_fashion_grid}
+\includegraphics[width=0.9\textwidth]{fashion_mnist_clusters}
 \caption{D5 Fashion-MNIST (3{,}000 images; clustered in 50 PCA dimensions, plotted in the first two).
-DBSCAN merges most classes into one cluster (ARI 0.03); HDBSCAN calls 71\% of points noise (ARI 0.05).
-Spectral, GMM and K-Means++ reach ARI 0.40, 0.39, 0.34.}
-\label{fig:lam-d5}
+DBSCAN and HDBSCAN merge most classes into one cluster (ARI 0.028, 0.023); Spectral, GMM and K-Means++
+reach ARI 0.398, 0.389 and 0.343. Grey crosses: noise.}
+\label{fig:d5}
 \end{figure}
-% [Ky] Sources: results/hotspot/shared_rule.csv (Ecoli HDBSCAN rows), case_stats.csv (noise per class).
-\paragraph{HDBSCAN on D4: rare classes called noise.} Even at its best setting by ARI, a minimum
-cluster size of 12, HDBSCAN returns two clusters and calls 37\% of proteins noise (ARI 0.339),
-yet it has the highest silhouette of the four methods at their best-ARI settings (0.483,
-Figure~\ref{fig:silhouette}). The noise is not spread evenly. It takes 95\% of the outer-membrane class (20
-proteins), every protein of two of the three smallest classes (5 and 2), and about half of the inner-membrane
-and periplasm classes. Cause: a class of 2 to 20 proteins in seven dimensions is not dense enough to form
-a cluster of 12, so HDBSCAN discards exactly the classes that are hardest to find, and the silhouette,
-which skips noise, rewards it. The setting the rule picks without labels avoids the noise only by putting
-97\% of proteins in one cluster (ARI 0.038).
-
-\begin{figure}[h]\centering
-\figtodo{All}{success/failure panel grid: one panel per case above}
-\caption{\todo{All}{caption naming the cause of each case}}
-\label{fig:cases}
-\end{figure}
+\paragraph{HDBSCAN on D4: rare classes lost.} At the setting chosen without labels HDBSCAN puts 97.0\%
+of proteins in one cluster (ARI 0.038) and still has the highest silhouette on D4 (0.559). Even its best
+setting by ARI (\texttt{min\_samples} 10) reaches only 0.398 by calling 29.8\% of proteins noise. Cause: a
+class of 2 to 20 proteins in seven dimensions is not dense enough to form a cluster of its own, so
+HDBSCAN discards exactly the classes that are hardest to find, and the silhouette, which skips noise,
+rewards it.

@@ -2,7 +2,7 @@
 
 % Rubric: "target challenging datasets". Say why each dataset is hard for at least one method.
 
-% Sources: experiments/01 (D6), 03 (D1), 05 (D5), 06 and 13 (D3, D4), 07 (D2), 10 and 11 (D8).
+% Sources: experiments/01 (D1), 02 (D2), 03 (D3), 04 (D4), 05 (D5), 06 (D6), 07 (D8).
 \begin{table}[h]\centering\footnotesize
 \caption{Datasets and why each was chosen.}
 \label{tab:data}
@@ -11,25 +11,25 @@
 \textbf{ID} & \textbf{Dataset} & \textbf{$n$} & \textbf{$d$} & \textbf{Labels} & \textbf{Preparation} & \textbf{Why chosen} \\
 \midrule
 D1 & make\_moons~\cite{pedregosa2011} & 1{,}000 & 2 & 2 classes & noise 0.07; standardised & Non-convex moons: shows where density and spectral methods beat K-means. \\
-D2 & Earthquakes 2023, M$\geq$4.5~\cite{usgs2017} & 7{,}643 & 2 & none & 8 eruptions dropped; epicentre only & Long belts of uneven density: exposes K-means (compact clusters) and DBSCAN (one radius). \\
+D2 & Earthquakes 2023, M$\geq$4.5~\cite{usgs2017} & 7{,}643 & 3 & none & 8 eruptions dropped; epicentre as unit vector & Long belts of uneven density: exposes K-means (compact clusters) and DBSCAN (one radius). \\
 D3 & Uber NYC, Apr 2014~\cite{fivethirtyeight2014} & 15{,}000 & 2 & none & sampled from 558{,}019 in NYC box; km & Dense city with no gaps: shows density methods collapse into one cluster. \\
 D4 & Ecoli~\cite{horton1996} & 336 & 7 & 8 sites & standardised & Seven dimensions, tiny classes: favours K-means; density methods lose rare classes. \\
 D5 & Fashion-MNIST~\cite{xiao2017} & 3{,}000 & 50 & 10 classes & stratified; PCA 784$\to$50 (86.5\% var.) & 50 dimensions, overlapping classes: exposes density methods in high dimensions. \\
 D6 & Wine~\cite{aeberhard1991} & 178 & 13 & 3 cultivars & standardised & Compact classes, no gaps: favours K-means; shows the silhouette misleads. \\
-D8 & HDB resale 2017--2026~\cite{hdb2026} & 20{,}000\textsuperscript{a} & 4 & flat type (7) & price index-adjusted & No gaps, stepped values, 234k sales: exposes density methods (ties, runtime) and K-means without scaling. \\
+D8 & HDB resale 2017--2026~\cite{hdb2026} & 20{,}000\textsuperscript{a} & 4 & none & price index-adjusted; ties jittered; standardised & No gaps between groups: exposes density methods, which need sparse space to cut along. \\
 \bottomrule
 \end{tabularx}
-\par\raggedright\footnotesize\textsuperscript{a}\,Sample of 234{,}294 sales; all used for runtime (Section~\ref{sec:runtime}).
+\par\raggedright\footnotesize\textsuperscript{a}\,Random sample (seed 0) of the 242{,}634 sales from January 2017 in the download of 13 Oct 2026.
 \end{table}
 
 \subsection{Preprocessing}\label{sec:prep}
-% Sources: experiments/07_usgs_earthquakes_2023_eda.ipynb, section 12;
-% experiments/10_data_gov_hdb_resale_eda.ipynb, section 9; src/sc4020/datasets/preprocess_dataset.py (jitter_ties).
+% Source: src/sc4020/datasets/load_dataset.py, preprocess_dataset.py (to_unit_vectors, project_km, jitter_ties).
 \begin{itemize}\setlength{\itemsep}{0pt}
-\item \textbf{Latitude, longitude (D2)} $\to$ haversine distance for density methods, 3D unit-sphere
-points for K-means.
+\item \textbf{Latitude, longitude (D2)} $\to$ 3D points on the unit sphere, so straight-line distance
+follows the Earth's surface and the $180^\circ$ meridian is no border.
 \item \textbf{Latitude, longitude (D3)} $\to$ kilometres, projected about the mean latitude.
 \item \textbf{Features in raw units (D1, D4, D6, D8)} $\to$ mean 0, standard deviation 1.
-\item \textbf{Stepped values (D8, density methods only)} $\to$ uniform jitter of up to half a step:
-$\pm1.5$ storeys, $\pm0.5$\,m$^2$ floor area, $\pm\frac{1}{24}$ year of lease.
+\item \textbf{Images (D5)} $\to$ pixels scaled to $[0,1]$, then 50 principal components.
+\item \textbf{Stepped values (D8)} $\to$ uniform jitter of up to half a step, so tied values do not form
+artificial dense spots: $\pm1.5$ storeys, $\pm0.5$\,m$^2$ floor area, $\pm\frac{1}{24}$ year of lease.
 \end{itemize}

@@ -1,7 +1,7 @@
 # SC4020 Project 1: Clustering technical review (source code)
 
 Code for the experiments in `group_XX_report.pdf`: K-Means / K-Means++, DBSCAN, HDBSCAN and
-GMM, compared on 10 datasets. Datasets and model outputs are not included. Each loader downloads
+GMM, with Spectral as a reference, compared on 7 datasets. Datasets and model outputs are not included. Each loader downloads
 its public dataset into `data/` on first use (`data/README.md` lists every source).
 
 ## Setup
@@ -20,28 +20,29 @@ All code is one package, `sc4020`, organised by what it does:
 | Module                          | Contents                                                                                                                                                    |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sc4020.datasets`               | every dataset by name, like `sklearn.datasets`: `load_dataset.py` (`load_dataset("wine")`, `load_dataset("hdb_resale")`, ...), `download_dataset.py`, `preprocess_dataset.py` |
-| `sc4020.methods`                | the clustering methods (K-Means, DBSCAN, HDBSCAN, GMM, Spectral, Agglomerative, Affinity Propagation) and a timed runner                                    |
+| `sc4020.methods`                | the clustering methods (K-Means, DBSCAN, HDBSCAN, GMM, Spectral) and a timed runner                                                                          |
 | `sc4020.tuning`                 | the shared selection rule: k-distance knee, K by the gap over fake data, GMM / DBSCAN / HDBSCAN selection, fake data                                        |
-| `sc4020.metrics`                | internal and external validity scores, DBCV, distances on the sphere                                                                                        |
-| `sc4020.clusters`               | cluster renumbering and centres on the sphere                                                                                                               |
+| `sc4020.metrics`                | internal and external validity scores, DBCV                                                                                                                  |
 | `sc4020.generate_figures`       | every figure and output table                                                                                                                               |
-| `sc4020.run`                    | per-dataset helpers: select, fit and score one method at a time                                                                                             |
+| `sc4020.run`                    | per-dataset helpers: select, fit and score one method at a time, with fake-data columns                                                                      |
 
-`experiments/` holds every experiment as a notebook numbered in run order, `results/<topic>/` the CSVs and figures cited in the
-report (comparison, datasets, hotspot, earthquakes_2023, hdb_resale), `tests/` the unit tests, and
+`experiments/` holds one clustering notebook per dataset, all on the same template; running them writes
+`results/datasets/` (the CSVs and figures cited in the report), `tests/` holds the unit tests, and
 `data/README.md` every dataset with its source and download command.
 
 ## Reproduce
 
 Run every command from this folder. Missing datasets download into `data/` on first use.
 
-| Report part | Notebook (in `experiments/`) |
+| Report dataset | Notebook (in `experiments/`) |
 | --- | --- |
-| Wine (D6), shared table | `01_scikit_learn_wine_clustering.ipynb` |
-| make_moons (D1), Fashion-MNIST (D5), Uber (D3) per-dataset runs | `03`, `05`, `06` |
-| Earthquakes 2023 (D2): EDA, clustering, ablations | `07` to `09` |
-| HDB resale (D8): EDA, clustering, ablations, scalability | `10` to `12` (12 reads 09's cross-dataset table) |
-| Uber, Ecoli (D3, D4): k sweep, k-distance, ablations, shared rule, case statistics, figures | `13_multi_source_hotspot_clustering.ipynb` |
+| make_moons (D1) | `01_scikit_learn_make_moons_clustering.ipynb` |
+| Earthquakes 2023 (D2) | `02_usgs_earthquakes_2023_clustering.ipynb` |
+| Uber NYC pickups (D3) | `03_kaggle_uber_pickups_clustering.ipynb` |
+| Ecoli (D4) | `04_uci_ecoli_clustering.ipynb` |
+| Fashion-MNIST (D5) | `05_kaggle_fashion_mnist_clustering.ipynb` |
+| Wine (D6) | `06_scikit_learn_wine_clustering.ipynb` |
+| HDB resale (D8) | `07_data_gov_hdb_resale_clustering.ipynb` |
 
 Run one with `jupyter nbconvert --to notebook --execute --inplace experiments/<notebook>.ipynb`, or open it in Jupyter.
 

@@ -1,228 +1,212 @@
 \subsection{Comparison by data property}\label{sec:comparison}
 
 % Rubric: "compare the performance", "strengths and weaknesses", "insightful comparisons".
-% Every number must come from a results CSV in the repo. Put the path in a % comment.
+% Every number comes from results/datasets/<dataset>_results.csv (written by experiments/0N_*.ipynb).
+% Settings in brackets: K for K-means and Spectral; eps and minPts for DBSCAN; min_cluster_size (and
+% min_samples when not the default) for HDBSCAN; components and covariance type for GMM.
 
-% [Hoang Anh]: D6 rows are in Table tab:d6 (Section sec:silhouette), in these columns except time.
-\todo{All}{One results table per property (rows: dataset $\times$ method; columns: \#clusters,
-noise, S, DB, ARI, NMI, time, fake-data gap). Bold the best per dataset.}
-
-% [Wei Yew]: Table tab:cmp_d2d8 uses the shared columns; merge its rows into the per-property tables
-% once the other datasets are in the same format.
-% Sources: results/earthquakes_2023/method_comparison.csv; results/hdb_resale/comparison.csv.
 \begin{table}[h]\centering\small
-\caption{D2 and D8 at the settings chosen in Section~\ref{sec:protocol}. S: silhouette; DB:
-Davies--Bouldin; null S: silhouette of the same setting on fake data (D2: shuffled coordinates for K-means,
-uniform points for density methods; D8: shuffled columns). ``none'': no clusters formed on the fake data.
-D2 has no labels.}
-\label{tab:cmp_d2d8}
+\caption{Labelled datasets at the settings chosen without labels (Section~\ref{sec:protocol}). S: silhouette;
+DB: Davies--Bouldin, both on clustered points only; null S: silhouette of the same setting on fake data
+(every column shuffled; ``none'': no clusters formed). Bold: best S and best ARI per dataset.}
+\label{tab:cmp_labelled}
 \resizebox{\textwidth}{!}{\begin{tabular}{llrrrrrrrrr}
 \toprule
-\textbf{Data} & \textbf{Method} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
+\textbf{Data} & \textbf{Method (setting)} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
 & \textbf{ARI} & \textbf{NMI} & \textbf{Time (s)} & \textbf{Null S} \\
 \midrule
-D2 & K-Means ($K=6$)      & 6  & 0\%    & 44.3\% & 0.525 & 0.800 & -- & -- & 0.004 & 0.389 \\
-D2 & K-Means++ ($K=6$)    & 6  & 0\%    & 31.0\% & 0.528 & 0.738 & -- & -- & 0.005 & 0.391 \\
-D2 & DBSCAN (101.8\,km, 20) & 41 & 40.4\% & 11.8\% & 0.703 & 0.351 & -- & -- & 0.051 & none \\
-D2 & HDBSCAN (50)         & 28 & 30.7\% & 7.5\%  & 0.757 & 0.329 & -- & -- & 1.081 & 0.320 \\
+D1 & K-Means ($K=2$) & 2 & 0.0\% & 50.5\% & 0.495 & 0.812 & 0.481 & 0.383 & 0.006 & 0.353 \\
+D1 & K-Means++ ($K=2$) & 2 & 0.0\% & 50.5\% & 0.495 & 0.812 & 0.481 & 0.383 & 0.007 & 0.353 \\
+D1 & DBSCAN (0.0486, 4) & 72 & 47.1\% & 1.8\% & 0.523 & 0.565 & 0.009 & 0.205 & 0.003 & 0.822 \\
+D1 & HDBSCAN (100) & 2 & 15.6\% & 42.4\% & \textbf{0.529} & 0.735 & 0.709 & 0.676 & 0.018 & none \\
+D1 & GMM (2, tied) & 2 & 0.0\% & 50.0\% & 0.495 & 0.812 & 0.501 & 0.400 & 0.008 & 0.353 \\
+D1 & Spectral ($K=2$, 10-NN) & 2 & 0.0\% & 50.0\% & 0.387 & 1.023 & \textbf{1.000} & 1.000 & 0.014 & 0.319 \\
 \midrule
-D8 & K-Means ($K=4$)      & 4  & 0\%    & 36.2\% & 0.317 & 1.116 & 0.220 & 0.299 & 0.011 & 0.195 \\
-D8 & K-Means++ ($K=4$)    & 4  & 0\%    & 35.1\% & 0.317 & 1.116 & 0.213 & 0.293 & 0.010 & 0.218 \\
-D8 & DBSCAN (0.567, 10)   & 3  & 1.4\%  & 97.1\% & 0.239 & 0.732 & 0.030 & 0.091 & 0.428 & 0.330 \\
-D8 & HDBSCAN (200)        & 2  & 28.5\% & 68.6\% & 0.160 & 1.133 & 0.072 & 0.101 & 2.022 & 0.593 \\
+D4 & K-Means ($K=8$) & 8 & 0.0\% & 20.8\% & 0.236 & 1.135 & 0.379 & 0.585 & 0.009 & 0.192 \\
+D4 & K-Means++ ($K=8$) & 8 & 0.0\% & 23.8\% & 0.260 & 1.091 & 0.508 & 0.641 & 0.012 & 0.187 \\
+D4 & DBSCAN (0.809, 7) & 2 & 31.5\% & 46.1\% & 0.471 & 0.833 & 0.395 & 0.415 & 0.002 & 0.365 \\
+D4 & HDBSCAN (5) & 2 & 0.3\% & 97.0\% & \textbf{0.559} & 0.637 & 0.038 & 0.118 & 0.003 & 0.553 \\
+D4 & GMM (8, full) & 8 & 0.0\% & 38.4\% & 0.157 & 2.024 & \textbf{0.618} & 0.597 & 0.039 & 0.149 \\
+D4 & Spectral ($K=8$, 10-NN) & 8 & 0.0\% & 18.5\% & 0.231 & 1.305 & 0.392 & 0.591 & 0.019 & 0.156 \\
+\midrule
+D5 & K-Means ($K=10$) & 10 & 0.0\% & 16.0\% & 0.202 & 1.470 & 0.344 & 0.512 & 0.050 & 0.081 \\
+D5 & K-Means++ ($K=10$) & 10 & 0.0\% & 16.0\% & \textbf{0.202} & 1.470 & 0.343 & 0.512 & 0.066 & 0.083 \\
+D5 & DBSCAN (4.42, 40) & 2 & 22.7\% & 75.7\% & 0.138 & 1.211 & 0.028 & 0.103 & 0.011 & none \\
+D5 & HDBSCAN (15, 5) & 2 & 32.9\% & 66.3\% & 0.039 & 1.754 & 0.023 & 0.064 & 0.330 & 0.229 \\
+D5 & GMM (10, full) & 10 & 0.0\% & 18.3\% & 0.129 & 2.497 & 0.389 & 0.572 & 14.715 & 0.049 \\
+D5 & Spectral ($K=10$, 10-NN) & 10 & 0.0\% & 20.0\% & 0.194 & 1.568 & \textbf{0.398} & 0.586 & 0.136 & 0.074 \\
+\midrule
+D6 & K-Means ($K=3$) & 3 & 0.0\% & 36.5\% & 0.285 & 1.389 & 0.897 & 0.876 & 0.005 & 0.066 \\
+D6 & K-Means++ ($K=3$) & 3 & 0.0\% & 36.5\% & 0.285 & 1.389 & 0.897 & 0.876 & 0.006 & 0.066 \\
+D6 & DBSCAN (3.09, 40) & 2 & 23.6\% & 53.4\% & \textbf{0.365} & 1.080 & 0.431 & 0.536 & 0.001 & none \\
+D6 & HDBSCAN (5, 10) & 2 & 42.1\% & 42.1\% & 0.363 & 1.046 & 0.260 & 0.354 & 0.002 & none \\
+D6 & GMM (3, diagonal) & 3 & 0.0\% & 39.3\% & 0.280 & 1.412 & \textbf{0.915} & 0.892 & 0.007 & 0.054 \\
+D6 & Spectral ($K=3$, RBF) & 3 & 0.0\% & 68.0\% & 0.249 & 1.271 & 0.445 & 0.572 & 0.009 & 0.011 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-% [Ky] Source: results/hotspot/shared_rule.csv (columns as in Table tab:cmp_d2d8; null S on shuffled
-% columns for K-means and D4, uniform points in the bounding box for density methods on D3).
 \begin{table}[h]\centering\small
-\caption{D3 and D4, same columns as Table~\ref{tab:cmp_d2d8}. Top: settings chosen without labels
-(Section~\ref{sec:protocol}). Bottom: D4 settings with the best ARI, which need the labels. ``none'':
-fewer than 2 clusters formed on the fake data. D3 has no labels.}
-\label{tab:cmp_d3d4}
-\resizebox{\textwidth}{!}{\begin{tabular}{llrrrrrrrrr}
+\caption{Unlabelled datasets, same columns as Table~\ref{tab:cmp_labelled} without ARI and NMI. D2
+DBSCAN radius converted from unit-vector distance to km on the Earth's surface.}
+\label{tab:cmp_unlabelled}
+\resizebox{\textwidth}{!}{\begin{tabular}{llrrrrrrr}
 \toprule
-\textbf{Data} & \textbf{Method} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
-& \textbf{ARI} & \textbf{NMI} & \textbf{Time (s)} & \textbf{Null S} \\
+\textbf{Data} & \textbf{Method (setting)} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
+& \textbf{Time (s)} & \textbf{Null S} \\
 \midrule
-D3 & K-Means ($K=5$)          & 5 & 0\%   & 44.5\% & 0.475 & 0.699 & -- & -- & 0.064 & 0.361 \\
-D3 & K-Means++ ($K=5$)        & 5 & 0\%   & 44.5\% & 0.475 & 0.699 & -- & -- & 0.036 & 0.362 \\
-D3 & DBSCAN (1.58\,km, 32)    & 2 & 1.9\% & 96.1\% & \textbf{0.779} & 0.172 & -- & -- & 0.521 & none \\
-D3 & HDBSCAN (250)            & 3 & 4.8\% & 91.2\% & 0.641 & 0.266 & -- & -- & 1.111 & 0.395 \\
+D2 & K-Means ($K=6$) & 6 & 0.0\% & 31.3\% & 0.512 & 0.728 & 0.023 & 0.320 \\
+D2 & K-Means++ ($K=6$) & 6 & 0.0\% & 31.0\% & 0.516 & 0.740 & 0.026 & 0.319 \\
+D2 & DBSCAN (250\,km, 12) & 42 & 11.3\% & 35.7\% & 0.420 & 0.374 & 0.034 & 0.599 \\
+D2 & HDBSCAN (50) & 28 & 30.7\% & 7.5\% & \textbf{0.756} & 0.329 & 0.232 & 0.317 \\
+D2 & GMM (50, full) & 50 & 0.0\% & 7.3\% & 0.554 & 0.631 & 1.934 & -0.135 \\
+D2 & Spectral ($K=6$, 10-NN) & 6 & 0.0\% & 31.6\% & 0.334 & 0.914 & 0.118 & 0.295 \\
 \midrule
-D4 & K-Means ($K=5$)          & 5 & 0\%   & 44.6\% & 0.408 & 0.743 & 0.684 & 0.652 & 0.022 & 0.191 \\
-D4 & K-Means++ ($K=5$)        & 5 & 0\%   & 44.0\% & 0.405 & 0.747 & \textbf{0.697} & 0.666 & 0.015 & 0.185 \\
-D4 & DBSCAN (2.09, 5)         & 2 & 1.8\% & 96.7\% & \textbf{0.560} & 0.504 & 0.039 & 0.135 & 0.002 & 0.548 \\
-D4 & HDBSCAN (5)              & 2 & 0.3\% & 97.0\% & 0.559 & 0.637 & 0.038 & 0.118 & 0.002 & 0.551 \\
+D3 & K-Means ($K=5$) & 5 & 0.0\% & 44.5\% & 0.481 & 0.699 & 0.025 & 0.396 \\
+D3 & K-Means++ ($K=5$) & 5 & 0.0\% & 44.5\% & 0.481 & 0.699 & 0.893 & 0.338 \\
+D3 & DBSCAN (2.81\,km, 16) & 2 & 0.2\% & 97.7\% & \textbf{0.757} & 0.186 & 0.903 & none \\
+D3 & HDBSCAN (200) & 3 & 4.6\% & 91.5\% & 0.638 & 0.267 & 0.975 & 0.660 \\
+D3 & GMM (9, full) & 9 & 0.0\% & 25.6\% & 0.359 & 1.624 & 0.804 & 0.331 \\
+D3 & Spectral ($K=5$, 10-NN) & 5 & 0.0\% & 35.3\% & 0.157 & 1.389 & 1.070 & 0.308 \\
 \midrule
-D4 & K-Means++ ($K=7$), best ARI  & 7 & 0\%    & 43.5\% & 0.354 & 0.861 & \textbf{0.731} & 0.679 & 0.017 & 0.195 \\
-D4 & DBSCAN (0.97, 8), best ARI   & 2 & 21.1\% & 53.6\% & 0.434 & 0.908 & 0.489 & 0.488 & 0.001 & 0.278 \\
-D4 & HDBSCAN (12), best ARI       & 2 & 37.2\% & 44.3\% & 0.483 & 0.789 & 0.339 & 0.376 & 0.002 & none \\
+D8 & K-Means ($K=4$) & 4 & 0.0\% & 35.4\% & 0.317 & 1.125 & 0.050 & 0.216 \\
+D8 & K-Means++ ($K=4$) & 4 & 0.0\% & 35.6\% & 0.318 & 1.125 & 0.898 & 0.216 \\
+D8 & DBSCAN (0.614, 4) & 3 & 0.2\% & 99.7\% & 0.438 & 0.436 & 0.567 & 0.189 \\
+D8 & HDBSCAN (5) & 2 & 0.3\% & 99.7\% & \textbf{0.496} & 0.406 & 1.596 & 0.136 \\
+D8 & GMM (10, full) & 10 & 0.0\% & 15.8\% & 0.176 & 1.537 & 1.456 & 0.088 \\
+D8 & Spectral ($K=4$, 10-NN) & 4 & 0.0\% & 67.1\% & 0.205 & 1.227 & 2.413 & 0.167 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\subsubsection{Curved and elongated clusters}\label{sec:shape}
-% Lam: results/datasets/make_moons_results.csv
-On D1 the centroid methods fail and the graph and density methods succeed. K-Means++ (ARI 0.481) and
-GMM (0.489) both draw a straight boundary that cuts each moon in two, giving the tip of one moon to
-the other cluster (Figure~\ref{fig:lam-d1}). Spectral clustering with a 10-nearest-neighbour graph
-recovers both moons exactly (ARI 1.000), DBSCAN nearly so (0.982, 0.9\% noise) and HDBSCAN slightly
-less (0.947, 2.7\% noise, mostly the sparse moon tips). Silhouette ranks the methods the other way
-round: K-Means++ and GMM score 0.495 against 0.387 for Spectral, because silhouette rewards compact,
-convex groups, which is exactly the wrong assumption here.
-
-% Source: experiments/09_usgs_earthquakes_2023_ablation.ipynb, section 5 (K-means belt case, printed
-% centre distances); figure from the same cell.
-K-means assumes compact clusters, and D2 breaks that assumption at planetary scale. Earthquakes follow
-plate boundaries, so a cluster is a long,
-narrow belt rather than a ball around a centre. K-Means++ with $K=6$ must cover the whole globe with six
-roughly round regions, so each region takes in several unrelated belts
-(Figure~\ref{fig:kmeans_belts}). One cluster of 905 earthquakes joins Turkey, the Reykjanes Ridge and
-Iceland, Afghanistan and Tajikistan, Somalia and Eritrea, and the Mid-Indian Ridge. HDBSCAN finds each of
-these as its own cluster, and their centres are 2{,}932 to 11{,}449\,km apart. K-means also has no noise
-label, so every isolated earthquake in the oceans is assigned to some region. Its silhouette is still
-0.528, well above the 0.391 of shuffled coordinates: the score confirms that the data are not random, not
-that the clusters are meaningful.
+\subsubsection{Curved clusters}\label{sec:shape}
+% Sources: results/datasets/make_moons_results.csv; make_moons_tuning.csv (best-ARI DBSCAN setting).
+On D1 the methods that assume convex clusters fail and the graph method succeeds
+(Figure~\ref{fig:d1}). K-Means++ (ARI 0.481) and GMM (0.501) draw a nearly straight boundary that cuts
+each moon in two. Spectral clustering on a 10-nearest-neighbour graph recovers both moons exactly (ARI
+1.000), because each moon is a chain of close neighbours with a gap wider than any link between the
+moons. HDBSCAN finds both moons too but calls 15.6\% of points noise, mostly the sparse moon tips, so its
+ARI is 0.709. DBSCAN fails, and not because of its assumptions: its grid contains a setting that recovers
+the moons exactly ($\varepsilon=0.229$, \texttt{minPts}~3, ARI 1.000), but the selection rule prefers
+$\varepsilon=0.049$, which breaks the moons into 72 fragments with 47.1\% noise (ARI 0.009), because the
+fragments score a higher silhouette (0.523 against 0.387).
 
 \begin{figure}[h]\centering
-\includegraphics[width=0.9\textwidth]{eq_case_kmeans_merges_belts}
-\caption{D2, failure of K-Means++ ($K=6$). All points shown in colour or dark grey belong to one K-means
-cluster; colours are the HDBSCAN clusters inside it, crosses their centres. Cause: cluster shape. Belts
-thousands of kilometres apart are joined because K-means can only draw compact regions.}
-\label{fig:kmeans_belts}
+\includegraphics[width=0.9\textwidth]{make_moons_clusters}
+\caption{D1 make\_moons at the chosen settings. K-means and GMM cut both moons with a straight boundary;
+Spectral follows the curves (ARI 1.000); HDBSCAN loses the tips to noise; DBSCAN at the radius the
+silhouette prefers breaks the moons into 72 fragments. Grey crosses: noise.}
+\label{fig:d1}
 \end{figure}
 
-\subsubsection{Uneven density}\label{sec:density}
-% Sources: results/earthquakes_2023/case_density_regions.csv, method_comparison.csv;
-% k-distance spread from experiments/07_usgs_earthquakes_2023_eda.ipynb, section 12.
-On D2 the distance to the nearest earthquake runs from 1.2\,km to 100.5\,km (5th to 95th percentile), and
-the k-distance curve rises smoothly with no knee. Any single $\varepsilon$ is therefore too small for some
-belts and too large for others. At the chosen $\varepsilon=101.8$\,km, DBSCAN clusters 90\% of the
-earthquakes in the dense south-west Pacific but only 20\% in the sparser Americas
-(Figure~\ref{fig:density}). HDBSCAN, which picks a density level per cluster, clusters 62\% of the
-Americas and keeps the Mexico to Panama belt and the Chile and Argentina belt as long clusters. The price is paid in the dense
-region, where it clusters 78\% instead of 90\%. Overall HDBSCAN keeps more earthquakes (69.3\% against
-59.6\%) with a higher silhouette (0.757 against 0.703, Table~\ref{tab:cmp_d2d8}).
+\subsubsection{Long belts of uneven density}\label{sec:density}
+% Sources: results/datasets/earthquakes_2023_results.csv; figure earthquakes_2023_clusters.png.
+On D2 clusters should follow plate boundaries: long, narrow belts whose density varies along and
+between belts. HDBSCAN, which sets a density level per cluster, returns 28 clusters that follow the belts
+(largest 7.5\% of earthquakes) and calls 30.7\% noise; its silhouette is the highest on D2 (0.756, against
+0.317 on fake data). DBSCAN with one radius ($\approx$250\,km) must trade the sparse belts against the
+dense ones: it keeps more earthquakes (11.3\% noise) but chains the dense western Pacific into one
+cluster holding 35.7\% of all earthquakes. K-Means++ and Spectral ($K=6$) cover the globe with six
+regions, each joining several unrelated belts (Figure~\ref{fig:d2}); their silhouettes (0.516 and 0.334)
+still beat fake data (0.319 and 0.295), so the score confirms that the data are not random, not that the
+clusters are meaningful. GMM, chosen by BIC, uses all 50 components the grid allows: BIC keeps rewarding
+smaller ellipses along the belts, so it gives no natural number of clusters.
 
 \begin{figure}[h]\centering
-\includegraphics[width=0.85\textwidth]{eq_case_density_dbscan_vs_hdbscan}
-\caption{D2, DBSCAN ($\varepsilon=101.8$\,km) against HDBSCAN in a sparse region (top, the Americas)
-and a dense one (bottom, the south-west Pacific); grey points are noise. Success of HDBSCAN on the sparse
-belts, at the cost of trimming the dense ones. Cause: density varies along and between belts.}
-\label{fig:density}
+\includegraphics[width=\textwidth]{earthquakes_2023_clusters}
+\caption{D2 at the chosen settings (grey: noise). HDBSCAN follows the plate belts; DBSCAN joins the
+dense western Pacific into one cluster; K-means and Spectral draw six regions that each span several
+belts; GMM splits the belts into 50 pieces.}
+\label{fig:d2}
 \end{figure}
-% [Ky] Sources: results/hotspot/case_stats.csv (cluster shares and centres), sweep.csv (knee setting),
-% shared_rule.csv (chosen settings). Hoang Anh: please check against your D3 run.
-On D3 density varies as much, but inside one connected mass. Lower and midtown Manhattan, the rest of
-Manhattan, Brooklyn and western Queens meet without a gap, so the density methods keep them together.
-DBSCAN at the knee of the k-distance curve ($\varepsilon=0.525$\,km) returns 13 clusters, yet 91.6\% of
-pickups sit in the first; the others are the two airports and small spots in Jersey City, Astoria, Harlem
-and Brooklyn, and the silhouette is 0.04. The rule prefers $\varepsilon=1.58$\,km: two clusters, the city
-(96.1\%) and JFK, with a silhouette of 0.779 (Table~\ref{tab:cmp_d3d4}). HDBSCAN finds the city, JFK and
-LaGuardia (91.2\%, 2.0\% and 1.9\%; 4.8\% noise). The airports are the only parts of D3 with a gap around
-them, and both density methods find them. K-means ($K=5$) does divide the core, into southern Manhattan
-(44.5\%), northern Manhattan with the Bronx (39.9\%) and Brooklyn (9.3\%), plus the two airport areas, but
-those borders follow the K-means objective, not gaps in the data. Its silhouette is 0.475 against 0.362
-on shuffled coordinates, so the split is not random, but nothing in the data marks where it should fall.
+
+\subsubsection{A dense city with no gaps}\label{sec:city}
+% Sources: results/datasets/uber_pickups_results.csv; figure uber_pickups_clusters.png.
+D3 has density contrast but no gaps (Figure~\ref{fig:d3}): Manhattan, Brooklyn and Queens meet without empty space, and only
+the airports stand apart. Both density methods therefore keep the city together. DBSCAN returns the city
+(97.7\% of pickups) and JFK; HDBSCAN returns the city (91.5\%), JFK and LaGuardia with 4.6\% noise. DBSCAN
+has the top silhouette on D3 (0.757) because two well-separated groups score well whatever their sizes.
+HDBSCAN scores below its setting on fake data (0.638 against 0.660), and so does Spectral (0.157 against
+0.308). The $k$-based methods divide the core: K-Means++ into five regions (silhouette 0.481 against
+0.338 on fake data) and GMM into nine. Their borders follow their objectives, not gaps in the data.
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{uber_pickups_clusters}
+\caption{D3 at the chosen settings (grey: noise). DBSCAN and HDBSCAN keep the city as one cluster and
+separate only the airports; K-means, GMM and Spectral divide the core along borders of their own making.
+Cause: no gaps inside the city.}
+\label{fig:d3}
+\end{figure}
+
+\subsubsection{Rare classes in seven dimensions}\label{sec:rare}
+% Sources: results/datasets/ecoli_results.csv; ecoli_tuning.csv (best-ARI settings).
+D4 has eight localisation sites, three of them with 2 to 5 proteins, in seven dimensions with no density
+gaps between classes. The methods that model compact groups do best: GMM reaches ARI 0.618, K-Means++
+0.508 and Spectral 0.392 at $K=8$. DBSCAN reaches 0.395 only by calling 31.5\% of proteins noise. HDBSCAN
+puts 97.0\% of proteins in one cluster (ARI 0.038), yet has the highest silhouette on D4 (0.559), no
+better than the same setting on fake data (0.553). With the labels the gap narrows only for the
+$k$-based methods: GMM reaches 0.741 (7 spherical components) and K-Means++ 0.731 ($K=7$), against 0.398
+for HDBSCAN (29.8\% noise) and 0.395 for DBSCAN.
 
 \subsubsection{High dimensions}\label{sec:dims}
-% [Ky] Sources: results/hotspot/ablation.csv (dimensionality), shared_rule.csv.
-D4 has only seven dimensions, but it already shows the effect. Given its best $\varepsilon$ in each case,
-DBSCAN beats K-Means++ on the first two and three principal components (ARI 0.575 and 0.618 against 0.468
-and 0.466) and loses from four components on, by 0.276 on all seven (0.455 against 0.731).
-Without labels the density methods do far worse. On all seven features the rule picks settings where one
-cluster holds 97\% of proteins, with ARI 0.04 (Table~\ref{tab:cmp_d3d4}), and their silhouettes (0.560
-and 0.559) are barely above the same settings on shuffled columns (0.548 and 0.551). The fake-data check
-flags both. K-means at the $K=5$ the silhouette picks reaches ARI 0.684 to 0.697.
-% Lam: results/datasets/fashion_mnist_results.csv
-On D5 ($d=50$) the ranking reverses from D1. The $k$-based methods do best: Spectral (ARI 0.398),
-GMM (0.391) and K-Means++ (0.343), all well short of the labels because shirts, T-shirts, pullovers
-and coats overlap. DBSCAN finds two clusters and 33\% noise (ARI 0.033): one cluster absorbs almost
-every class (Figure~\ref{fig:lam-d5}). HDBSCAN finds 28 small clusters but labels 71\% of points
-noise (ARI 0.050). No setting in the HDBSCAN grid met the 50\% noise limit, because in 50 dimensions
-the k-distances of all points are similar and there is no density gap between the overlapping
-classes for one threshold to find.
+% Sources: results/datasets/fashion_mnist_results.csv; fashion_mnist_tuning.csv (best-ARI settings).
+On D5 ($d=50$) the $k$-based methods do best: Spectral (ARI 0.398), GMM (0.389) and K-Means++ (0.343), all
+well short of the labels because shirts, T-shirts, pullovers and coats overlap. Both density methods
+collapse to two clusters: DBSCAN puts 75.7\% of images in one and 22.7\% in noise (ARI 0.028), HDBSCAN
+66.3\% in one and 32.9\% in noise (ARI 0.023). This is not a bad choice of setting: the best density
+settings in the grid reach only 0.034 and 0.066. In 50 dimensions the distances to the $k$-th neighbour
+are similar for every point, so no single density threshold separates the overlapping classes.
+HDBSCAN's silhouette (0.039) is below its setting on fake data (0.229).
 
 \subsubsection{No gaps between groups}\label{sec:nogaps}
-% Sources: results/hdb_resale/comparison.csv, kmeans_k_sweep.csv.
-D8 is one continuous mass: flats come in every combination of size, lease, storey and price, with no empty
-space between groups. Table~\ref{tab:cmp_d2d8} shows what each method does with it. K-means still finds a
-weak partition, four market segments (newer mid-size, older small, large older, newer high-floor), with a
-silhouette of 0.317 against 0.218 on shuffled columns. That ratio of 1.45 is modest, but it is the only
-result on D8 that beats its fake data. Density methods have no sparse region to cut along. The DBSCAN
-setting chosen by the rule puts 97.1\% of sales in one cluster, and HDBSCAN finds one core holding 68.6\%
-of sales plus a compact block of new 3-room flats, and calls 28.5\% noise. Both score below the same
-setting on shuffled columns (0.239 against 0.330, and 0.160 against 0.593). On shuffled columns HDBSCAN calls
-94.0\% of sales noise and keeps two small, well-separated clusters, which the silhouette rewards. On data
-with no gaps, a density method has nothing to find, and the selection rule
-cannot tell.
+% Sources: results/datasets/hdb_resale_results.csv; figure hdb_resale_clusters.png.
+D8 is one continuous mass: flats come in every combination of size, lease, storey and price.
+Table~\ref{tab:cmp_unlabelled} shows what each method does with it (Figure~\ref{fig:d8}). The density
+methods have no sparse region to cut along: DBSCAN and HDBSCAN put 99.7\% of sales in one cluster and
+leave fewer than 100 outlying sales outside it. Their silhouettes (0.438 and 0.496) are the highest on D8 and
+well above fake data (0.189 and 0.136), because a giant cluster plus a tiny distant one scores well.
+K-means finds four segments with a silhouette of 0.318 against 0.216 on fake data, a weak but real
+partition; Spectral leaves 67.1\% of sales in one of its four clusters, and GMM spreads ten components
+over the mass. On data with no gaps a density method has nothing to find, and neither the silhouette nor
+the fake-data check says so; only the share of the largest cluster does.
 
 \begin{figure}[h]\centering
-\includegraphics[width=0.95\textwidth]{hdb_comparison}
-% Three of the six panels of results/hdb_resale/figures/comparison.png (recorded data), cropped side by side.
-\caption{D8 at the chosen settings on recorded data, drawn on the first two principal components
-(6{,}000 sales; grey: noise). K-means cuts the mass into four segments; DBSCAN and HDBSCAN return one dominant cluster. Cause:
+\includegraphics[width=0.95\textwidth]{hdb_resale_clusters}
+\caption{D8 at the chosen settings, drawn on the first two principal components (grey: noise). K-means
+cuts the mass into four segments; DBSCAN and HDBSCAN return one cluster holding 99.7\% of sales. Cause:
 no gaps between groups.}
-\label{fig:hdb_cmp}
+\label{fig:d8}
 \end{figure}
 
 \subsubsection{Silhouette versus ground truth}\label{sec:silhouette}
-% Lam: results/datasets/wine_results.csv, results/datasets/fashion_mnist_results.csv
-On D6, DBSCAN has the best silhouette (0.42 against 0.28 for K-Means++) but a far worse ARI (0.31
-against 0.90): it scores only the 35\% of points it keeps and drops the other 65\% as noise. On D5,
-HDBSCAN also has the top silhouette (0.228), computed on the 29\% of points it does not call noise,
-and an ARI of only 0.050. In both cases silhouette excludes noise, so a method can raise it by
-discarding the hard points.
-\todo{All}{One paragraph, one line per dataset:
-D4 under the rule DBSCAN has the top silhouette (0.560) but ARI 0.039, against 0.731 for K-Means++; Spearman $-0.80$ (Ky);
-D6 DBSCAN silhouette 0.42 vs K-Means++ 0.28, ARI 0.31 vs 0.90 (Lam);
-D8 unscaled K-means silhouette 0.540 from price bands, against 0.317 standardised (Wei Yew); D2 K-means silhouette flat at 0.516 to 0.532 for every $K$ from 4 to 12, so it cannot choose
-$K$ (Wei Yew, \nolinkurl{results/earthquakes_2023/kmeans_k_selection.csv});
-D5 HDBSCAN top silhouette with 71\% noise (Lam).}
+% Sources: results/datasets/{make_moons,ecoli,fashion_mnist,wine}_results.csv. Spearman over the five
+% methods (K-Means++, DBSCAN, HDBSCAN, GMM, Spectral).
+On every labelled dataset the method with the highest silhouette is not the one that matches the labels
+best (Table~\ref{tab:cmp_labelled}): on D1 HDBSCAN (0.529, ARI 0.709) against Spectral (ARI 1.000); on D4
+HDBSCAN (0.559, ARI 0.038) against GMM (0.618); on D5 K-Means++ (0.202, ARI 0.343) against Spectral
+(0.398); on D6 DBSCAN (0.365, ARI 0.431) against GMM (0.915). Over the five methods the rank correlation
+between silhouette and ARI is $-0.30$ on D1, $-0.70$ on D4, $-0.60$ on D6 and $0.50$ on D5, the only
+dataset with no density method in the lead. Two mechanisms recur. The silhouette ignores noise, so a
+density method can raise it by discarding hard points (D6 DBSCAN, 23.6\% noise). It also rewards one
+giant cluster plus a small distant one (D4 HDBSCAN, 97.0\% in one cluster).
 
 \habegin
 \paragraph{D6 Wine and the fake-data check.} \hatag{}
-% [Hoang Anh]: from my run; Lam's run of D6 gives the same picture with other density settings.
-% Source: results/comparison/report_d6.csv.
-On D6, DBSCAN and HDBSCAN pass the noise cap with about a third of the
-wines as noise, take the two highest silhouettes (0.356 and 0.352) and the two lowest ARI (0.296 and
-0.342), while GMM and K-means reach 0.915 and 0.897 with silhouettes near 0.28. The fake-data check does
-not separate good from bad here either. Every method that assigns all points scores far above its
-shuffled-column silhouette (0.285 against 0.066 for K-means; Table~\ref{tab:d6}), and the density methods form no cluster at all on shuffled data. So each result passes the
-check, including the density results that match the labels worst: what they find, a dense core of one
-class, is real structure, but it is not the class structure. The check shows that a result is not an
-artefact of the marginals. It does not show which of several real structures a method has found.
+% Source: results/datasets/wine_results.csv.
+On D6, DBSCAN and HDBSCAN pass the noise cap with 23.6\% and 42.1\% of the wines as noise, take the two
+highest silhouettes (0.365 and 0.363) and the two lowest ARI (0.431 and 0.260), while GMM and K-means
+reach 0.915 and 0.897 with silhouettes near 0.28. The fake-data check does not separate good from bad
+here either. Every method that assigns all points scores far above its shuffled-column silhouette (0.285
+against 0.066 for K-means), and the density methods form no cluster at all on shuffled data. So each
+result passes the check, including the density results that match the labels worst: what they find, a
+dense core of one or two cultivars, is real structure, but it is not the class structure. The check
+shows that a result is not an artefact of the marginals. It does not show which of several real
+structures a method has found.
 \haend
 
-\begin{table}[h]\centering\small
-% Source: results/comparison/report_d6.csv (experiments/01_scikit_learn_wine_clustering.ipynb, section 8).
-\caption{\hatag D6 in the shared columns. S: silhouette; DB: Davies--Bouldin, both on clustered points
-only; null S: silhouette of the same setting on shuffled columns (``none'': no clusters formed). Every
-fit takes under 0.3\,s. Bold: best S and best ARI.}
-\label{tab:d6}
-\resizebox{\textwidth}{!}{\begin{tabular}{llrrrrrrrr}
-\toprule
-\textbf{Data} & \textbf{Method} & \textbf{Clusters} & \textbf{Noise} & \textbf{Largest} & \textbf{S} & \textbf{DB}
-& \textbf{ARI} & \textbf{NMI} & \textbf{Null S} \\
-\midrule
-D6 & K-Means ($k=3$)             & 3 & 0\%    & 36.5\% & 0.285 & 1.389 & 0.897 & 0.876 & 0.066 \\
-D6 & Agglomerative (Ward, $k=3$) & 3 & 0\%    & 36.0\% & 0.277 & 1.419 & 0.790 & 0.786 & 0.045 \\
-D6 & Spectral ($k=3$)            & 3 & 0\%    & 36.0\% & 0.283 & 1.391 & 0.880 & 0.861 & 0.038 \\
-D6 & GMM (3, diagonal)           & 3 & 0\%    & 39.3\% & 0.280 & 1.412 & \textbf{0.915} & 0.892 & 0.054 \\
-D6 & DBSCAN (2.33, 10)           & 2 & 33.7\% & 49.4\% & \textbf{0.356} & 1.062 & 0.296 & 0.391 & none \\
-D6 & HDBSCAN (5)                 & 2 & 32.6\% & 48.3\% & 0.352 & 1.093 & 0.342 & 0.430 & none \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\begin{figure}[h]\centering
-\includegraphics[width=0.72\textwidth]{f8_metric_disagreement}
-% [Ky] Source: results/hotspot/main.csv (Ecoli rows, best-ARI settings); src/sc4020/generate_figures.py.
-\caption{D4, silhouette against ARI for the four methods at each method's best-ARI setting. Left: the
-two scores. Right: their ranks; points on the dashed line would mean the two agree. The silhouette ranks
-the methods almost in reverse (Spearman $\rho=-0.80$); the same holds at the settings chosen without
-labels (Table~\ref{tab:cmp_d3d4}). Cause: the silhouette ignores noise and favours compact clusters.}
-\label{fig:silhouette}
-\end{figure}
+\paragraph{What the fake-data check catches.} Across the seven datasets a setting scores no better than
+on fake data in six cases: DBSCAN on D1 (0.523 against 0.822) and D2 (0.420 against 0.599), HDBSCAN on D3,
+D4 and D5, and Spectral on D3. The three on labelled data are the clear failures by ARI (D1 DBSCAN, D4
+and D5 HDBSCAN), so the check catches results with no real structure. The check misses the D8 density results, which beat fake data while holding
+99.7\% of sales in one cluster, and the K-means regions on D2, which beat fake data while joining
+unrelated belts.

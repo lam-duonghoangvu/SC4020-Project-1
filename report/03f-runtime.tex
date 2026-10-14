@@ -1,14 +1,14 @@
 \subsection{Runtime and scalability}\label{sec:runtime}
 
 % Sources: one fit at the rule's setting, tuning excluded; results/datasets/{make_moons,wine}_results.csv
-% (fit_seconds, ari). No method reaches ARI > 0.7 at the rule's setting on D4 (results/hotspot/shared_rule.csv),
-% D5 (results/datasets/fashion_mnist_results.csv) or D8 (results/hdb_resale/comparison.csv); D2 and D3 have no labels.
+% (fit_seconds, ari). No method reaches ARI > 0.7 at the rule's setting on D4 (results/datasets/ecoli_results.csv)
+% or D5 (results/datasets/fashion_mnist_results.csv); D2, D3 and D8 have no labels.
 % ms per 1,000 points = fit seconds / n x 10^6.
 Runtime is compared only where a method reaches ARI $>0.7$, which happens on D1 and D6 only; it is one
 fit's time per 1{,}000 points at the rule's setting (Table~\ref{tab:runtime}).
-In the case where ARI $>0.9$, only one method qualifies on each dataset: Spectral on D1 (244\,ms) and GMM
-on D6 (37\,ms). In the case where ARI $>0.7$, the ranking from fastest is HDBSCAN (36\,ms), then Spectral
-(244\,ms) on D1, and K-Means++ (34\,ms), then GMM (37\,ms), then Agglomerative (79\,ms) on D6.
+In the case where ARI $>0.9$, only one method qualifies on each dataset: Spectral on D1 (14\,ms) and GMM
+on D6 (39\,ms). In the case where ARI $>0.7$, the ranking from fastest is Spectral (14\,ms), then HDBSCAN
+(18\,ms) on D1, and K-Means (26\,ms), then K-Means++ (33\,ms), then GMM (39\,ms) on D6.
 
 \begin{table}[h]\centering\small
 \caption{Methods reaching each ARI level, ranked by fit time (ms per 1{,}000 points), fastest first.}
@@ -17,13 +17,18 @@ on D6 (37\,ms). In the case where ARI $>0.7$, the ranking from fastest is HDBSCA
 \toprule
 \textbf{Data} & \textbf{ARI $>0.9$} & \textbf{ARI $>0.7$} \\
 \midrule
-D1 ($n=1{,}000$) & Spectral (244) & HDBSCAN (36), Spectral (244) \\
-D6 ($n=178$)     & GMM (37)       & K-Means++ (34), GMM (37), Agglomerative (79) \\
+D1 ($n=1{,}000$) & Spectral (14) & Spectral (14), HDBSCAN (18) \\
+D6 ($n=178$)     & GMM (39)       & K-Means (26), K-Means++ (33), GMM (39) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% Source: results/hdb_resale/scalability_summary.csv; experiments/12_data_gov_hdb_resale_ablation.ipynb, section 6.
-On small data a fixed start-up cost dominates, so these times say little about scaling. On all 234{,}294
-D8 sales K-means takes under 0.06\,s and HDBSCAN 212\,s; DBSCAN did not run, as its neighbour lists
-would need about 6\,GB. Spectral and Agglomerative were skipped above 10{,}000 points.
+% Sources: results/datasets/{fashion_mnist,hdb_resale,uber_pickups}_results.csv (fit_seconds, tuning_seconds).
+On small data a fixed start-up cost dominates, so these times say little about scaling. The largest
+costs come from model size, not from $n$: GMM with full covariances in 50 dimensions takes 14.7\,s on the
+3{,}000 images of D5, against at most 0.33\,s for every other method there. On the 20{,}000 sales of D8
+one fit takes 2.4\,s for Spectral on a nearest-neighbour graph, 1.6\,s for HDBSCAN, 1.5\,s for GMM and
+0.6\,s for DBSCAN. Choosing the setting costs far more than fitting it: selecting $K$ for K-means, which
+fits every $K$ with 10 seeds and on 3 fake copies, takes 126\,s on D3 and 130\,s on D8. A dense RBF
+affinity for Spectral would need memory quadratic in $n$, so it is used only on D6; the
+nearest-neighbour graph is sparse and ran on every dataset.

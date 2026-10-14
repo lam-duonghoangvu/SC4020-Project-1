@@ -12,7 +12,6 @@ from sc4020.datasets.preprocess_dataset import (
     price_index_series,
     project_km,
     real_prices,
-    region_from_place,
     remaining_lease_years,
     sale_quarter,
     standardize,
@@ -173,28 +172,6 @@ def test_project_km_one_degree_of_latitude():
 
     assert xy[1, 1] - xy[0, 1] == pytest.approx(np.radians(1) * EARTH_RADIUS_KM)
     assert xy[0, 0] == pytest.approx(xy[1, 0])
-
-
-def test_region_strips_distance_and_direction_but_keeps_names_with_of():
-    places = pd.Series(
-        [
-            "82 km WNW of Hihifo, Tonga",
-            "south of the Fiji Islands",
-            "southeast of the Loyalty Islands",
-            "Pazarcik earthquake, Kahramanmaras earthquake sequence",
-            "Gulf of Alaska",
-            "7.5 km S of Town, Japan region",
-        ]
-    )
-
-    assert list(region_from_place(places)) == [
-        "Tonga",
-        "the Fiji Islands",
-        "the Loyalty Islands",
-        "Kahramanmaras earthquake sequence",
-        "Gulf of Alaska",
-        "Japan region",
-    ]
 
 
 # --- earthquakes, Uber, synthetic -----------------------------------------------------------------

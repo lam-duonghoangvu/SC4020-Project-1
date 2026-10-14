@@ -1,7 +1,7 @@
 """The clustering methods under comparison: unfitted scikit-learn estimators and a timed runner.
 
 Method names are the ones used in every results table: K-Means (random init), K-Means, DBSCAN,
-HDBSCAN, GMM, Spectral, Agglomerative, Affinity Propagation.
+HDBSCAN, GMM, Spectral.
 """
 
 import time
@@ -12,8 +12,6 @@ import numpy as np
 from sklearn.cluster import (
     DBSCAN,
     HDBSCAN,
-    AffinityPropagation,
-    AgglomerativeClustering,
     KMeans,
     SpectralClustering,
 )
@@ -73,16 +71,6 @@ def spectral(n_clusters, affinity="rbf", random_state=SEED):
     )
 
 
-def agglomerative(n_clusters, linkage="ward"):
-    return AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
-
-
-def affinity_propagation(damping=0.5, preference=None, random_state=SEED):
-    return AffinityPropagation(
-        damping=damping, preference=preference, random_state=random_state
-    )
-
-
 FACTORIES = {
     "K-Means (random init)": kmeans_random_init,
     "K-Means": kmeans,
@@ -90,8 +78,6 @@ FACTORIES = {
     "HDBSCAN": hdbscan,
     "GMM": gmm,
     "Spectral": spectral,
-    "Agglomerative": agglomerative,
-    "Affinity Propagation": affinity_propagation,
 }
 FOUR_METHODS = ["K-Means", "DBSCAN", "HDBSCAN", "GMM"]
 
